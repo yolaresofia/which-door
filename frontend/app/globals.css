@@ -28,8 +28,28 @@
   --color-gray-900: #1b1d27;
   --color-gray-950: #13141b;
 
-  --font-display: 'Inter', 'sans-serif';
-  --font-sans: 'Inter', 'sans-serif';
+  --font-display: 'Neue', 'sans-serif';
+  --font-sans: 'Neue', 'sans-serif';
 
   --default-transition-duration: 250ms;
+}
+
+@font-face {
+  font-family: "Neue";
+  src: url("/fonts/PPNeueMontreal-Medium.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
+html,
+body {
+  overscroll-behavior: none;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

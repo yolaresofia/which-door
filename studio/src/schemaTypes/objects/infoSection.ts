@@ -22,6 +22,14 @@ export const infoSection = defineType({
       title: 'Content',
       type: 'blockContent',
     }),
+    defineField({
+      name: 'image',
+      title: 'Image',
+      type: 'image',
+      options: {
+        hotspot: true,
+      },
+    }),
   ],
   preview: {
     select: {
