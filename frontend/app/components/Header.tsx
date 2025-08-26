@@ -40,7 +40,7 @@ export default function Header() {
           <nav className="justify-self-center">
             <ul
               role="list"
-              className="flex items-center gap-8 text-white text-xs sm:text-base font-medium tracking-wide uppercase"
+              className="flex items-center gap-8 text-white text-sm font-medium tracking-wide uppercase"
             >
               {navItems.map(({ href, label }) => {
                 const isActive = pathname === href
