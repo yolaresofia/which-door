@@ -1,23 +1,23 @@
-"use client";
+'use client'
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { directors } from "../components/constants";
-import BackgroundMedia from "../components/BackgroundMedia";
+import {useEffect, useState} from 'react'
+import Link from 'next/link'
+import {directors} from '../components/constants'
+import BackgroundMedia from '../components/BackgroundMedia'
 
-export default function DirectorsPage() {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const activeIndex = hoveredIndex ?? 3;
-  const active = directors[activeIndex] ?? directors[0];
+export default function DirectorsIndexPage() {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  const activeIndex = hoveredIndex ?? 3
+  const active = directors[activeIndex] ?? directors[0]
 
   useEffect(() => {
     directors.forEach((d) => {
       if (d.bgVideo && /\.gif($|\?)/i.test(d.bgVideo)) {
-        const img = new Image();
-        img.src = d.bgVideo;
+        const img = new Image()
+        img.src = d.bgVideo
       }
-    });
-  }, []);
+    })
+  }, [])
 
   return (
     <main className="relative min-h-dvh w-full overflow-hidden text-white">
@@ -26,11 +26,11 @@ export default function DirectorsPage() {
       <section className="relative min-h-dvh w-full pt-32">
         <ul className="pl-12 max-w-none space-y-2">
           {directors.map((d, i) => {
-            const isActive = i === activeIndex;
+            const isActive = i === activeIndex
             return (
               <li
                 key={d.slug}
-                className={`transition-opacity duration-200 ${isActive ? "opacity-100" : "opacity-70"}`}
+                className={`transition-opacity duration-200 ${isActive ? 'opacity-100' : 'opacity-70'}`}
               >
                 <Link
                   href={`/directors/${d.slug}`}
@@ -39,24 +39,24 @@ export default function DirectorsPage() {
                   onFocus={() => setHoveredIndex(i)}
                   onBlur={() => setHoveredIndex(null)}
                   onTouchStart={() => setHoveredIndex(i)}
-                  aria-current={isActive ? "page" : undefined}
+                  aria-current={isActive ? 'page' : undefined}
                   className="block outline-none"
                 >
                   <span
                     className={[
-                      "block leading-[1.05] tracking-tight transition-all duration-200",
-                      "text-6xl",
-                      isActive ? "text-white" : "text-white/80",
-                    ].join(" ")}
+                      'block leading-[1.05] tracking-tight transition-all duration-200',
+                      'text-6xl',
+                      isActive ? 'text-white' : 'text-white/80',
+                    ].join(' ')}
                   >
                     {d.name}
                   </span>
                 </Link>
               </li>
-            );
+            )
           })}
         </ul>
       </section>
     </main>
-  );
+  )
 }

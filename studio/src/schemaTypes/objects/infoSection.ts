@@ -26,9 +26,13 @@ export const infoSection = defineType({
       name: 'image',
       title: 'Image',
       type: 'image',
-      options: {
-        hotspot: true,
-      },
+      options: { hotspot: true },
+    }),
+    defineField({
+      name: 'video',
+      title: 'Video',
+      type: 'file',
+      options: { accept: 'video/*' },
     }),
   ],
   preview: {
