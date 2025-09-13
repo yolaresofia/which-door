@@ -15,8 +15,8 @@ export default function Header() {
   ]
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 h-20">
-      <div className="h-full px-4 sm:px-6">
+    <header className="fixed inset-x-0 top-0 z-50 h-28">
+      <div className="h-full px-12">
         <div className="grid h-full grid-cols-3 items-center">
           <div className="justify-self-start">
             <Link href="/" className="flex items-center group h-[46px]">
