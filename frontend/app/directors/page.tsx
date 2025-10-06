@@ -24,7 +24,7 @@ export default function DirectorsIndexPage() {
       <BackgroundMedia imageSrc={active.bgImage} videoSrc={active.bgVideo} />
 
       <section className="relative min-h-dvh w-full pt-32">
-        <ul className="pl-12 max-w-none space-y-2">
+        <ul className="md:pl-12 max-w-none md:space-y-2 space-y-6 px-6">
           {directors.map((d, i) => {
             const isActive = i === activeIndex
             return (
@@ -45,7 +45,7 @@ export default function DirectorsIndexPage() {
                   <span
                     className={[
                       'block leading-[1.05] tracking-tight transition-all duration-200',
-                      'text-6xl',
+                      'md:text-6xl text-3xl',
                       isActive ? 'text-white' : 'text-white/80',
                     ].join(' ')}
                   >

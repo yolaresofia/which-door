@@ -34,6 +34,7 @@ export default function BackgroundMedia({
   subtitle,
   onShare,
 }: BackgroundMediaProps) {
+  const containerEl = useRef<HTMLDivElement | null>(null);
   const videoEl = useRef<HTMLVideoElement | null>(null);
 
   // Priority: bgColor > video > image/GIF
@@ -46,6 +47,7 @@ export default function BackgroundMedia({
   const [current, setCurrent] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(!controls);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => setMuted(!controls), [controls]);
 
@@ -79,6 +81,31 @@ export default function BackgroundMedia({
     v.muted = muted;
   }, [muted]);
 
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const fullscreenEl =
+        document.fullscreenElement ??
+        (document as any).webkitFullscreenElement ??
+        (document as any).mozFullScreenElement ??
+        (document as any).msFullscreenElement;
+      setIsFullscreen(fullscreenEl === containerEl.current);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange" as any, handleFullscreenChange);
+    document.addEventListener("mozfullscreenchange" as any, handleFullscreenChange);
+    document.addEventListener("MSFullscreenChange" as any, handleFullscreenChange);
+
+    handleFullscreenChange();
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange" as any, handleFullscreenChange);
+      document.removeEventListener("mozfullscreenchange" as any, handleFullscreenChange);
+      document.removeEventListener("MSFullscreenChange" as any, handleFullscreenChange);
+    };
+  }, []);
+
   const remaining = useMemo(() => Math.max(duration - current, 0), [duration, current]);
   const progressPct = useMemo(() => (duration ? (current / duration) * 100 : 0), [duration, current]);
 
@@ -104,19 +131,39 @@ export default function BackgroundMedia({
     seekTo(ratio);
   };
 
-  const enterFullscreen = () => {
-    const v = videoEl.current;
-    if (!v) return;
-    const anyV: any = v as any;
-    if (v.requestFullscreen) v.requestFullscreen();
-    else if (anyV.webkitEnterFullscreen) anyV.webkitEnterFullscreen();
+  const toggleFullscreen = () => {
+    const container = containerEl.current;
+    const video = videoEl.current;
+    if (!container || !video) return;
+
+    const doc = document as any;
+
+    if (isFullscreen) {
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (doc.webkitExitFullscreen) doc.webkitExitFullscreen();
+      else if (doc.mozCancelFullScreen) doc.mozCancelFullScreen();
+      else if (doc.msExitFullscreen) doc.msExitFullscreen();
+      return;
+    }
+
+    if (container.requestFullscreen) {
+      Promise.resolve(container.requestFullscreen()).catch(() => {
+        if ((video as any).webkitEnterFullscreen) (video as any).webkitEnterFullscreen();
+      });
+      return;
+    }
+
+    if ((container as any).webkitRequestFullscreen) (container as any).webkitRequestFullscreen();
+    else if ((container as any).mozRequestFullScreen) (container as any).mozRequestFullScreen();
+    else if ((container as any).msRequestFullscreen) (container as any).msRequestFullscreen();
+    else if ((video as any).webkitEnterFullscreen) (video as any).webkitEnterFullscreen();
   };
 
   // When controls are off, autoplay muted+loop like a classic background.
   const shouldAutoplay = !controls;
 
   return (
-    <div className={`absolute inset-0 ${controls ? "" : "-z-10"} ${className}`}>
+    <div ref={containerEl} className={`absolute inset-0 ${controls ? "" : "-z-10"} ${className}`}>
       {/* Background layer: color > video > image/GIF */}
       {useColor ? (
         <div className="h-full w-full" style={{ backgroundColor: bgColor }} />
@@ -154,8 +201,6 @@ export default function BackgroundMedia({
                 </div>
               )}
             </div>
-
-            {/* RIGHT: Controls cluster */}
             <div className="ml-auto flex items-center gap-6 min-w-0">
               <button
                 onClick={togglePlay}
@@ -206,10 +251,10 @@ export default function BackgroundMedia({
               </button>
 
               <button
-                onClick={enterFullscreen}
+                onClick={toggleFullscreen}
                 className="text-sm hover:underline decoration-white/60 underline-offset-4 shrink-0"
               >
-                Fullscreen
+                {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
               </button>
             </div>
           </div>

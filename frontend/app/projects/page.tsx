@@ -26,15 +26,13 @@ export default function ProjectsPage() {
 
   return (
     <main className="relative min-h-screen w-full overflow-hidden">
-      {/* Re-mount video when active changes */}
       <BackgroundMedia
         key={active.slug ?? title}
         imageSrc={getBgImage(active)}
         videoSrc={getVideo(active)}
-        // don’t pass bgColor here; we want video on the listing background
       />
 
-      <section className="relative z-10 min-h-screen w-full flex px-12 items-center justify-center">
+      <section className="relative z-10 min-h-screen w-full flex md:px-12 px-4 items-center justify-center">
         <ul className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-12 gap-y-10">
           {projects.map((p, i) => {
             const isActive = activeIndex === i
