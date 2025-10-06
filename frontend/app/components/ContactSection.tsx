@@ -47,12 +47,12 @@ export default function ContactSection({
 
         <footer className="w-full px-6 pb-8">
           <div className="mx-auto grid gap-8 md:grid-cols-3 text-sm md:text-base">
-            <p className="leading-relaxed">
+            <p className="leading-tight">
               We exist on 5 continents, with bases in Stockholm, Barcelona, Baltimore/DC, Beirut,
               Berlin, Buenos Aires, NYC, Nairobi and Iceland.
             </p>
 
-            <div className="leading-relaxed">
+            <div className="leading-tight">
               <p>
                 For Inquiries &amp; Commissions{' '}
                 <a href="mailto:info@whichdoor.com">info@whichdoor.com</a>

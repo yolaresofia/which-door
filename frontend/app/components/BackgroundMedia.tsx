@@ -131,6 +131,12 @@ export default function BackgroundMedia({
     seekTo(ratio);
   };
 
+  const handleVideoClick: React.MouseEventHandler<HTMLVideoElement> = (e) => {
+    if (!controls) return;
+    e.preventDefault();
+    togglePlay();
+  };
+
   const toggleFullscreen = () => {
     const container = containerEl.current;
     const video = videoEl.current;
@@ -168,15 +174,18 @@ export default function BackgroundMedia({
       {useColor ? (
         <div className="h-full w-full" style={{ backgroundColor: bgColor }} />
       ) : showVideo ? (
-        <video
-          ref={videoEl}
-          className="h-full w-full object-cover"
-          src={videoSrc}
-          autoPlay={shouldAutoplay}
-          muted={muted}
-          loop
-          playsInline
-        />
+        <div className="flex h-full w-full items-center justify-center bg-black">
+          <video
+            ref={videoEl}
+            className="max-h-full max-w-full object-contain md:h-full md:w-full md:object-cover"
+            src={videoSrc}
+            autoPlay={shouldAutoplay}
+            muted={muted}
+            loop
+            playsInline
+            onClick={handleVideoClick}
+          />
+        </div>
       ) : (
         <div
           className="h-full w-full bg-cover bg-center"
@@ -186,79 +195,122 @@ export default function BackgroundMedia({
 
       {/* Controls row: centered vertically (Y), spread left↔right horizontally */}
       {showVideo && controls && (
-        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 z-10 p-4 sm:p-6">
-          <div className="flex items-center justify-between gap-4 text-white flex-wrap">
-            {/* LEFT: Title + Subtitle */}
-            <div className="min-w-0 mr-4">
-              {title && (
-                <div className="text-base sm:text-lg font-semibold leading-tight truncate">
-                  {title}
-                </div>
-              )}
-              {subtitle && (
-                <div className="text-xs sm:text-sm text-white/85 truncate">
-                  {subtitle}
-                </div>
-              )}
-            </div>
-            <div className="ml-auto flex items-center gap-6 min-w-0">
-              <button
-                onClick={togglePlay}
-                aria-label={playing ? "Pause" : "Play"}
-                className="shrink-0 grid place-items-center w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 transition"
-              >
-                {playing ? (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <rect x="6" y="5" width="4" height="14" rx="1" />
-                    <rect x="14" y="5" width="4" height="14" rx="1" />
-                  </svg>
-                ) : (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
+        <>
+          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 z-10 hidden p-4 text-white sm:p-6 md:block">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              {/* LEFT: Title + Subtitle */}
+              <div className="mr-4 min-w-0">
+                {title && (
+                  <div className="text-base font-semibold leading-tight truncate sm:text-lg">
+                    {title}
+                  </div>
                 )}
-              </button>
-
-              <div className="tabular-nums text-sm shrink-0">{fmt(current)}</div>
-
-              <div
-                className="relative h-[2px] w-32 sm:w-56 md:w-80 lg:w-[32rem] bg-white/30 cursor-pointer"
-                onClick={handleBarClick}
-                role="progressbar"
-                aria-valuemin={0}
-                aria-valuemax={duration || 0}
-                aria-valuenow={current}
-              >
-                <div className="absolute inset-y-0 left-0" style={{ width: `${progressPct}%` }}>
-                  <div className="h-full w-full bg-white/80" />
-                </div>
+                {subtitle && (
+                  <div className="text-xs text-white/85 truncate sm:text-sm">
+                    {subtitle}
+                  </div>
+                )}
               </div>
+              <div className="ml-auto flex min-w-0 items-center gap-6">
+                <button
+                  onClick={togglePlay}
+                  aria-label={playing ? "Pause" : "Play"}
+                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/10 transition hover:bg-white/20"
+                >
+                  {playing ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <rect x="6" y="5" width="4" height="14" rx="1" />
+                      <rect x="14" y="5" width="4" height="14" rx="1" />
+                    </svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  )}
+                </button>
 
-              <div className="tabular-nums text-sm shrink-0">{fmt(remaining)}</div>
+                <div className="tabular-nums shrink-0 text-sm">{fmt(current)}</div>
 
-              <button
-                onClick={toggleMute}
-                className="text-sm hover:underline decoration-white/60 underline-offset-4 shrink-0"
-              >
-                {muted ? "Sound OFF" : "Sound ON"}
-              </button>
+                <div
+                  className="relative h-[2px] w-32 cursor-pointer bg-white/30 sm:w-56 md:w-80 lg:w-[32rem]"
+                  onClick={handleBarClick}
+                  role="progressbar"
+                  aria-valuemin={0}
+                  aria-valuemax={duration || 0}
+                  aria-valuenow={current}
+                >
+                  <div className="absolute inset-y-0 left-0" style={{ width: `${progressPct}%` }}>
+                    <div className="h-full w-full bg-white/80" />
+                  </div>
+                </div>
 
-              <button
-                onClick={() => (onShare ? onShare() : console.log("share clicked"))}
-                className="text-sm hover:underline decoration-white/60 underline-offset-4 shrink-0"
-              >
-                Share
-              </button>
+                <div className="tabular-nums shrink-0 text-sm">{fmt(remaining)}</div>
 
-              <button
-                onClick={toggleFullscreen}
-                className="text-sm hover:underline decoration-white/60 underline-offset-4 shrink-0"
-              >
-                {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-              </button>
+                <button
+                  onClick={toggleMute}
+                  className="shrink-0 text-sm underline-offset-4 decoration-white/60 hover:underline"
+                >
+                  {muted ? "Sound OFF" : "Sound ON"}
+                </button>
+
+                <button
+                  onClick={() => (onShare ? onShare() : console.log("share clicked"))}
+                  className="shrink-0 text-sm underline-offset-4 decoration-white/60 hover:underline"
+                >
+                  Share
+                </button>
+
+                <button
+                  onClick={toggleFullscreen}
+                  className="shrink-0 text-sm underline-offset-4 decoration-white/60 hover:underline"
+                >
+                  {isFullscreen ? "Close" : "Fullscreen"}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+
+          <div className="absolute inset-x-0 bottom-0 z-10 space-y-4 px-6 pb-6 text-white md:hidden">
+            <div className="flex items-start justify-between gap-4">
+              {(title || subtitle) && (
+                <div className="flex-1 text-left">
+                  {title && (
+                    <div className="text-xl font-semibold leading-snug break-words">{title}</div>
+                  )}
+                  {subtitle && (
+                    <div className="text-sm text-white/80 break-words">{subtitle}</div>
+                  )}
+                </div>
+              )}
+              <div className="flex flex-none items-center gap-4 text-sm whitespace-nowrap">
+                <button
+                  onClick={toggleMute}
+                  className="underline-offset-4 decoration-white/60 hover:underline"
+                >
+                  {muted ? "Sound OFF" : "Sound ON"}
+                </button>
+                <button
+                  onClick={toggleFullscreen}
+                  className="underline-offset-4 decoration-white/60 hover:underline"
+                >
+                  {isFullscreen ? "Close" : "Fullscreen"}
+                </button>
+              </div>
+            </div>
+            <div
+              className="relative h-[2px] w-full cursor-pointer bg-white/40"
+              onClick={handleBarClick}
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={duration || 0}
+              aria-valuenow={current}
+            >
+              <div className="absolute inset-y-0 left-0" style={{ width: `${progressPct}%` }}>
+                <div className="h-full w-full bg-white" />
+              </div>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
