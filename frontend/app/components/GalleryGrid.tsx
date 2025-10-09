@@ -6,7 +6,7 @@ type GalleryGridProps = {
 
 export default function GalleryGrid({ images, onImageClick }: GalleryGridProps) {
   return (
-    <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 bg-[#477AA1]">
+    <ul className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 bg-[#477AA1]">
       {images.map((src, i) => (
         <li key={`img-${i}`} className="relative">
           <button

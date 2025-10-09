@@ -29,10 +29,10 @@ export default function ContactSection({
       />
 
       <div className="relative min-h-screen flex flex-col pt-20">
-        <div className="flex-1 grid place-items-center px-6">
+        <div className="flex-1 grid items-center justify-items-start px-6 md:justify-items-center">
           <a
             href="mailto:info@whichdoor.com"
-            className="group text-center leading-tight text-7xl whitespace-nowrap inline-grid place-items-center"
+            className="group text-left md:text-center leading-tight md:text-7xl text-3xl whitespace-nowrap inline-grid place-items-start md:place-items-center"
             aria-label="Get in touch via email"
             title="Get in touch"
           >

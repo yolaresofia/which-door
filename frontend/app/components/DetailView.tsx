@@ -74,23 +74,23 @@ export default function DetailView({
         />
       )}
 
-      <section className="relative z-10 pt-28 pb-16 px-12 max-w-6xl">
+      <section className="relative z-10 pt-32 pb-16 md:px-12 px-6 max-w-6xl">
         <header className="mb-8">
-          <h1 className="text-6xl leading-[1.05] tracking-tight">{item.name}</h1>
+          <h1 className="md:text-6xl text-2xl leading-[1.05] tracking-tight">{item.name}</h1>
           {item.specialization ? (
             <p className="mt-2 text-2xl text-white/85">{item.specialization}</p>
           ) : null}
         </header>
 
         {item.description ? (
-          <article className="max-w-3xl text-2xl text-white/90">
+          <article className="max-w-3xl md:text-2xl text-[18px] text-justify md:text-left text-white/90 leading-tight">
             <p>{item.description}</p>
           </article>
         ) : null}
 
         {item.relatedProjects?.length ? (
           <div className="mt-24">
-            <h2 className="text-2xl mb-4">Projects</h2>
+            <h2 className="md:text-[18px] text-base mb-4">Related projects</h2>
             <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {item.relatedProjects.map((proj) => (
                 <li key={`${proj.title}-${proj.brand}`}>
