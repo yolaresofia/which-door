@@ -4,12 +4,12 @@
 import {use, useMemo, useState} from 'react'
 import {notFound} from 'next/navigation'
 import {projects, galleryImages} from '@/app/components/constants'
-import BackgroundMedia from '@/app/components/BackgroundMedia'
 import DetailView from '@/app/components/DetailView'
 import GalleryGrid from '@/app/components/GalleryGrid'
 import ImageLightbox from '@/app/components/ImageLightbox'
 import ContactPage from '@/app/contact/page'
 import ContactSection from '@/app/components/ContactSection'
+import BackgroundMedia from '@/app/components/BackgroundMedia/BackgroundMedia'
 
 export default function ProjectPage({params}: {params: Promise<{slug: string}>}) {
   // Unwrap params (Next 15)
@@ -23,14 +23,13 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
   const project = useMemo(() => projects.find((p) => p.slug === slug), [slug])
   if (!project) return notFound()
 
-  const videoSrc = (project as any).bgVideo ?? (project as any).videoURL
+  const videoSrc = (project as any).vimeoUrl ?? (project as any).videoURL
 
   return (
     <main className="text-white">
       <section className="relative h-dvh w-screen overflow-hidden isolate">
         <BackgroundMedia
-          imageSrc={(project as any).bgImage ?? ''}
-          videoSrc={videoSrc}
+          vimeoUrl={videoSrc}
           controls
           title={(project as any).name}
           subtitle={(project as any).director}

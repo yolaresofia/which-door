@@ -8,7 +8,7 @@ export type Director = {
   name: string
   slug: string
   bgImage: string
-  bgVideo?: string
+  vimeoUrl?: string
   specialization: string
   bio: string
   relatedProjects: RelatedProject[]

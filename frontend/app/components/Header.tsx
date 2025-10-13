@@ -11,7 +11,7 @@ export default function Header() {
   const [open, setOpen] = useState(false)
 
   const navItems = [
-    { href: '/projects', label: 'Projects' },
+    { href: '/', label: 'Projects' },
     { href: '/directors', label: 'Directors' },
     { href: '/about', label: 'About' },
     { href: '/contact', label: 'Contact' },

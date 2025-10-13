@@ -1,33 +1,46 @@
 // app/components/ContactSection.tsx
-import BackgroundMedia from '@/app/components/BackgroundMedia'
+"use client";
+
+import BackgroundMedia from "./BackgroundMedia/BackgroundMedia";
 
 type ContactSectionProps = {
   /** Optional solid background color (wins over video if both are provided) */
-  bgColor?: string
-  /** Optional background video url */
-  bgVideo?: string
-  /** Optional fallback image (also used if bgVideo is a GIF) */
-  imageSrc?: string
+  bgColor?: string;
+  /** Optional background video url (Vimeo full URL or ID) */
+  vimeoPreviewUrl?: string;
   /** Overlays for readability (optional) */
-  showScrim?: boolean
-  showLeftGradient?: boolean
-}
+  showScrim?: boolean;
+  showLeftGradient?: boolean;
+  previewPoster?: string; // optional poster for video preview mode
+};
 
 export default function ContactSection({
   bgColor,
-  bgVideo,
-  imageSrc = '',
+  vimeoPreviewUrl,
+  showScrim = false,
+  showLeftGradient = false,
+  previewPoster,
 }: ContactSectionProps) {
+  const useColorOnly = !!bgColor; // color takes priority
+
   return (
     <main className="relative min-h-screen w-full overflow-hidden text-white">
-      {/* Background: color > video > image */}
-      <BackgroundMedia
-        imageSrc={imageSrc}
-        videoSrc={bgVideo}
-        bgColor={bgColor}
-        className="-z-10"
-      />
+      {/* BACKGROUND LAYER */}
+      <div className="absolute inset-0 -z-10">
+        {useColorOnly ? (
+          <div className="h-full w-full" style={{ backgroundColor: bgColor }} />
+        ) : (
+          <BackgroundMedia vimeoPreviewUrl={vimeoPreviewUrl} previewPoster={previewPoster} className="absolute inset-0" />
+        )}
 
+        {/* Optional overlays above background for legibility */}
+        {showScrim && <div className="absolute inset-0 bg-black/30" />}
+        {showLeftGradient && (
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-black/40 to-transparent" />
+        )}
+      </div>
+
+      {/* FOREGROUND CONTENT */}
       <div className="relative min-h-screen flex flex-col pt-20">
         <div className="flex-1 grid items-center justify-items-start px-6 md:justify-items-center">
           <a
@@ -45,7 +58,7 @@ export default function ContactSection({
           </a>
         </div>
 
-        <footer className="w-full px-6 pb-8">
+        <footer className="w-full px-6 md:px-12 pb-8">
           <div className="mx-auto grid gap-8 md:grid-cols-3 text-sm md:text-base">
             <p className="leading-tight">
               We exist on 5 continents, with bases in Stockholm, Barcelona, Baltimore/DC, Beirut,
@@ -54,11 +67,11 @@ export default function ContactSection({
 
             <div className="leading-tight">
               <p>
-                For Inquiries &amp; Commissions{' '}
+                For Inquiries &amp; Commissions{" "}
                 <a href="mailto:info@whichdoor.com">info@whichdoor.com</a>
               </p>
               <p>
-                For Job Applications &amp; Internships{' '}
+                For Job Applications &amp; Internships{" "}
                 <a href="mailto:apply@whichdoor.com">apply@whichdoor.com</a>
               </p>
             </div>
@@ -66,13 +79,19 @@ export default function ContactSection({
             <nav className="leading-relaxed">
               <ul className="flex gap-4 md:justify-end">
                 <li>
-                  <a href="https://vimeo.com/" target="_blank" rel="noopener noreferrer">Vimeo</a>
+                  <a href="https://vimeo.com/" target="_blank" rel="noopener noreferrer">
+                    Vimeo
+                  </a>
                 </li>
                 <li>
-                  <a href="https://youtube.com/" target="_blank" rel="noopener noreferrer">YouTube</a>
+                  <a href="https://youtube.com/" target="_blank" rel="noopener noreferrer">
+                    YouTube
+                  </a>
                 </li>
                 <li>
-                  <a href="https://instagram.com/" target="_blank" rel="noopener noreferrer">Instagram</a>
+                  <a href="https://instagram.com/" target="_blank" rel="noopener noreferrer">
+                    Instagram
+                  </a>
                 </li>
               </ul>
             </nav>
@@ -80,5 +99,5 @@ export default function ContactSection({
         </footer>
       </div>
     </main>
-  )
+  );
 }
