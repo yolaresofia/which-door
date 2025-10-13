@@ -62,7 +62,7 @@ export default function DetailView({
 
   return (
     <main className="relative min-h-dvh w-full overflow-hidden text-white bg-[#477AA1]">
-      {bgProps && <BackgroundMedia videoSrc={bgProps.videoSrc} />}
+      {bgProps && <BackgroundMedia vimeoUrl={bgProps.videoSrc} />}
 
       <section className="relative z-10 pt-32 pb-16 md:px-12 px-6 max-w-6xl">
         <header className="mb-8">
