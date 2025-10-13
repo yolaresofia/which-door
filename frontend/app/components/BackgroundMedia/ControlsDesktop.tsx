@@ -29,7 +29,10 @@ export default function ControlsDesktop(props: Props) {
   };
 
   return (
-    <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 z-10 hidden p-4 text-white sm:p-6 md:block">
+    <div
+      className="absolute inset-x-0 top-1/2 -translate-y-1/2 z-10 hidden p-4 text-white sm:p-6 md:block"
+      data-touch-toggle-ignore
+    >
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="mr-4 min-w-0">
           {title && <div className="text-base font-semibold leading-tight truncate sm:text-lg">{title}</div>}

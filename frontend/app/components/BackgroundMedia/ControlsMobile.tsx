@@ -25,7 +25,10 @@ export default function ControlsMobile(props: Props) {
   };
 
   return (
-    <div className="absolute inset-x-0 bottom-0 z-10 space-y-4 px-6 pb-6 text-white md:hidden">
+    <div
+      className="absolute inset-x-0 bottom-0 z-10 space-y-4 px-6 pb-6 text-white md:hidden"
+      data-touch-toggle-ignore
+    >
       <div className="flex items-start justify-between gap-4">
         {(title || subtitle) && (
           <div className="flex-1 text-left">

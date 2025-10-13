@@ -19,6 +19,12 @@ export function useTouchPlayToggle({ containerRef, enabled, togglePlay }: Option
     let lastTouchTime = 0;
 
     const handleTouchEnd = (event: TouchEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target && target.closest("[data-touch-toggle-ignore]")) {
+        lastTouchTime = Date.now();
+        return;
+      }
+
       const now = Date.now();
       if (now - lastTouchTime < 250) {
         lastTouchTime = now;
