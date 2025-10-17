@@ -7,8 +7,8 @@ export const projects = [
     director: 'Nessim Stevenson',
     vimeoUrl:
       'https://player.vimeo.com/video/1126626295?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
-    vimeoPreviewUrl:
-      'https://player.vimeo.com/video/1126625562?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
+    previewUrl:
+      'https://cdn.sanity.io/files/xerhtqd5/production/5068305fa81bd755e7c0dd4f119c8e2b995a8813.mp4',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/99945ce01a04899a2742da8865740039d7513b57-3024x1964.png',
     bgColor: '#477AA1',
@@ -27,8 +27,8 @@ export const projects = [
     director: 'Akyssa Tran',
     vimeoUrl:
       'https://player.vimeo.com/video/1126626295?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
-    vimeoPreviewUrl:
-      'https://player.vimeo.com/video/1126625573?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
+    previewUrl:
+      'https://cdn.sanity.io/files/xerhtqd5/production/a95d3a4360b6de25735a4a21302e1fce9405ef6f.mp4',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/edddac63afd9bbfe0cf8e1d7d013fc0a97d1051d-3024x1964.png',
     relatedProjects: [
@@ -46,8 +46,8 @@ export const projects = [
     director: 'Jamal Roberts',
     vimeoUrl:
       'https://player.vimeo.com/video/1126626295?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
-    vimeoPreviewUrl:
-      'https://player.vimeo.com/video/1126625598?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
+    previewUrl:
+      'https://cdn.sanity.io/files/xerhtqd5/production/530325e24bae5b2ebc9b5008751797b24e7c6352.mp4',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/b2fa2e14a35d8fdbd46f65c6f9ff2a1609f3ef6b-3024x1964.png',
     relatedProjects: [
@@ -65,8 +65,8 @@ export const projects = [
     director: 'Clara Yu',
     vimeoUrl:
       'https://player.vimeo.com/video/1126626295?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
-    vimeoPreviewUrl:
-      'https://player.vimeo.com/video/1126625605?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
+    previewUrl:
+      'https://cdn.sanity.io/files/xerhtqd5/production/e723f5af4ae111bb4df2ed754b9a55d8d9758c30.mp4',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/8f694e9509da50146838bfb0954e25f73a91afe0-3024x1964.png',
     relatedProjects: [
@@ -84,8 +84,8 @@ export const projects = [
     director: 'Jamal Roberts',
     vimeoUrl:
       'https://player.vimeo.com/video/1126626295?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
-    vimeoPreviewUrl:
-      'https://player.vimeo.com/video/1126625562?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
+    previewUrl:
+      'https://cdn.sanity.io/files/xerhtqd5/production/5068305fa81bd755e7c0dd4f119c8e2b995a8813.mp4',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/99945ce01a04899a2742da8865740039d7513b57-3024x1964.png',
     relatedProjects: [
@@ -103,7 +103,7 @@ export const directors = [
     bgImage: '/images/directors/chris.jpg',
     vimeoUrl:
       'https://player.vimeo.com/video/1126626295?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
-    vimeoPreviewUrl:
+    previewUrl:
       'https://player.vimeo.com/video/1126625562?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/bb0046f12a3b6f7ab12eca1bdb390e5965071c02-3024x1964.png',
@@ -122,7 +122,7 @@ export const directors = [
     bgImage: '/images/directors/riham.jpg',
     vimeoUrl:
       'https://player.vimeo.com/video/1126626295?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
-    vimeoPreviewUrl:
+    previewUrl:
       'https://player.vimeo.com/video/1126625598?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/bb0046f12a3b6f7ab12eca1bdb390e5965071c02-3024x1964.png',
@@ -141,7 +141,7 @@ export const directors = [
     bgImage: '/images/directors/jamal.jpg',
     vimeoUrl:
       'https://player.vimeo.com/video/1126626295?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
-    vimeoPreviewUrl:
+    previewUrl:
       'https://player.vimeo.com/video/1126625562?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/bb0046f12a3b6f7ab12eca1bdb390e5965071c02-3024x1964.png',
@@ -160,7 +160,7 @@ export const directors = [
     bgImage: '/images/directors/clara.jpg',
     vimeoUrl:
       'https://player.vimeo.com/video/1126626295?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
-    vimeoPreviewUrl:
+    previewUrl:
       'https://player.vimeo.com/video/1126625573?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/bb0046f12a3b6f7ab12eca1bdb390e5965071c02-3024x1964.png',
@@ -179,7 +179,7 @@ export const directors = [
     bgImage: '/images/directors/marcus.jpg',
     vimeoUrl:
       'https://player.vimeo.com/video/1126626295?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
-    vimeoPreviewUrl:
+    previewUrl:
       'https://player.vimeo.com/video/1126625562?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/bb0046f12a3b6f7ab12eca1bdb390e5965071c02-3024x1964.png',

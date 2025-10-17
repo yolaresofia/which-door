@@ -10,7 +10,9 @@ const DEFAULT_INDEX = 3
 
 const getMedia = (d: any, i: number) => ({
   id: d?.slug ?? i,
-  videoSrc: d?.vimeoPreviewUrl ?? d?.vimeoUrl ?? '',
+  videoSrc: d?.previewUrl ?? d?.vimeoUrl ?? '',
+  previewUrl: d?.previewUrl ?? '',
+  vimeoUrl: d?.vimeoUrl ?? '',
   previewPoster: d?.previewPoster ?? '',
   bgColor: d?.bgColor ?? '#477AA1',
 })
@@ -52,7 +54,8 @@ export default function DirectorsIndexPage() {
           {slotMedia[0] && (
             <BackgroundMedia
               variant="preview"
-              vimeoUrl={slotMedia[0].videoSrc}
+              previewUrl={slotMedia[0].previewUrl ?? slotMedia[0].videoSrc}
+              vimeoUrl={slotMedia[0].vimeoUrl ?? slotMedia[0].videoSrc}
               previewPoster={slotMedia[0].previewPoster}
               bgColor={slotMedia[0].bgColor}
             />
@@ -66,7 +69,8 @@ export default function DirectorsIndexPage() {
           {slotMedia[1] && (
             <BackgroundMedia
               variant="preview"
-              vimeoUrl={slotMedia[1].videoSrc}
+              previewUrl={slotMedia[1].previewUrl ?? slotMedia[1].videoSrc}
+              vimeoUrl={slotMedia[1].vimeoUrl ?? slotMedia[1].videoSrc}
               previewPoster={slotMedia[1].previewPoster}
               bgColor={slotMedia[1].bgColor}
             />

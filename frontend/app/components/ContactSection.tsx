@@ -1,27 +1,97 @@
 // app/components/ContactSection.tsx
 "use client";
 
+import { useLayoutEffect, useRef } from "react";
+import gsap from "gsap";
 import BackgroundMedia from "./BackgroundMedia/BackgroundMedia";
 
 type ContactSectionProps = {
-  /** Optional solid background color (wins over video if both are provided) */
   bgColor?: string;
-  /** Optional background video url (Vimeo full URL or ID) */
-  vimeoPreviewUrl?: string;
-  /** Overlays for readability (optional) */
+  previewUrl?: string;
   showScrim?: boolean;
   showLeftGradient?: boolean;
-  previewPoster?: string; // optional poster for video preview mode
+  previewPoster?: string;
 };
 
 export default function ContactSection({
   bgColor,
-  vimeoPreviewUrl,
+  previewUrl,
   showScrim = false,
   showLeftGradient = false,
   previewPoster,
 }: ContactSectionProps) {
   const useColorOnly = !!bgColor; // color takes priority
+  const desktopLinkRef = useRef<HTMLAnchorElement | null>(null);
+  const tlRef = useRef<gsap.core.Timeline | null>(null);
+
+  useLayoutEffect(() => {
+    const el = desktopLinkRef.current;
+    if (!el) return;
+
+    // Respect reduced motion
+    const prefersReduced =
+      typeof window !== "undefined" &&
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const ctx = gsap.context(() => {
+      const idea = el.querySelector(".line-idea");
+      const touch = el.querySelector(".line-touch");
+      if (!idea || !touch) return;
+
+      // ensure no CSS transitions fight the timeline
+      gsap.set([idea, touch], { clearProps: "transition" });
+
+      // initial states
+      gsap.set(idea, {
+        autoAlpha: 1,
+        yPercent: 0,
+        filter: "blur(0px)",
+        willChange: "transform, opacity, filter",
+        backfaceVisibility: "hidden",
+      });
+      gsap.set(touch, {
+        autoAlpha: 0,
+        yPercent: 12,
+        filter: "blur(6px)",
+        willChange: "transform, opacity, filter",
+        backfaceVisibility: "hidden",
+      });
+
+      // timeline
+      tlRef.current = gsap
+        .timeline({
+          paused: true,
+          defaults: { duration: prefersReduced ? 0.001 : 0.45, ease: "power3.inOut" },
+        })
+        .to(
+          idea,
+          {
+            autoAlpha: 0,
+            yPercent: -12,
+            filter: "blur(6px)",
+          },
+          0
+        )
+        .to(
+          touch,
+          {
+            autoAlpha: 1,
+            yPercent: 0,
+            filter: "blur(0px)",
+          },
+          0
+        );
+    }, desktopLinkRef);
+
+    return () => {
+      ctx.revert();
+      tlRef.current = null;
+    };
+  }, []);
+
+  const playSwap = () => tlRef.current?.play();
+  const reverseSwap = () => tlRef.current?.reverse();
 
   return (
     <main className="relative min-h-screen w-full overflow-hidden text-white">
@@ -30,10 +100,13 @@ export default function ContactSection({
         {useColorOnly ? (
           <div className="h-full w-full" style={{ backgroundColor: bgColor }} />
         ) : (
-          <BackgroundMedia vimeoPreviewUrl={vimeoPreviewUrl} previewPoster={previewPoster} className="absolute inset-0" />
+          <BackgroundMedia
+            previewUrl={previewUrl}
+            previewPoster={previewPoster}
+            className="absolute inset-0"
+          />
         )}
 
-        {/* Optional overlays above background for legibility */}
         {showScrim && <div className="absolute inset-0 bg-black/30" />}
         {showLeftGradient && (
           <div className="pointer-events-none absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-black/40 to-transparent" />
@@ -43,16 +116,35 @@ export default function ContactSection({
       {/* FOREGROUND CONTENT */}
       <div className="relative min-h-screen flex flex-col pt-20">
         <div className="flex-1 grid items-center justify-items-start px-6 md:justify-items-center">
+          {/* Tablet & smaller: show BOTH lines stacked, no hover */}
           <a
             href="mailto:info@whichdoor.com"
-            className="group text-left md:text-center leading-tight md:text-7xl text-3xl whitespace-nowrap inline-grid place-items-start md:place-items-center"
+            className="block lg:hidden text-left leading-tight text-3xl md:text-6xl md:text-center"
             aria-label="Get in touch via email"
             title="Get in touch"
           >
-            <span className="col-start-1 row-start-1 transition-all duration-300 ease-in-out group-hover:opacity-0 group-hover:translate-y-1">
+            <span className="block">Have an idea?</span>
+            <span className="block mt-1 md:mt-2 opacity-90">Get in touch.</span>
+          </a>
+
+          {/* Desktop (lg+): GSAP morph/crossfade swap */}
+          <a
+            ref={desktopLinkRef}
+            href="mailto:info@whichdoor.com"
+            className="hidden lg:inline-grid text-left lg:text-center leading-tight text-3xl lg:text-7xl whitespace-nowrap place-items-start lg:place-items-center"
+            aria-label="Get in touch via email"
+            title="Get in touch"
+            // trigger the timeline
+            onMouseEnter={playSwap}
+            onMouseLeave={reverseSwap}
+            onFocus={playSwap}
+            onBlur={reverseSwap}
+          >
+            {/* NOTE: removed transition classes to avoid fighting GSAP */}
+            <span className="line-idea col-start-1 row-start-1">
               Have an idea?
             </span>
-            <span className="col-start-1 row-start-1 opacity-0 translate-y-1 transition-all duration-300 ease-in-out group-hover:opacity-100 group-hover:translate-y-0 pointer-events-none select-none">
+            <span className="line-touch col-start-1 row-start-1 pointer-events-none select-none">
               Get in touch.
             </span>
           </a>

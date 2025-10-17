@@ -10,7 +10,7 @@ const previewPoster =
 export default function AboutPage() {
   return (
     <main className="relative min-h-screen w-full overflow-hidden text-white flex items-center justify-center md:block">
-      <BackgroundMedia vimeoPreviewUrl={bg} previewPoster={previewPoster} />
+      <BackgroundMedia previewUrl={bg} previewPoster={previewPoster} />
       <div className="absolute inset-0 bg-black/30" aria-hidden="true" />
 
       <section className="relative z-10 mx-auto w-full px-6 md:px-12 pt-0 md:pt-32">

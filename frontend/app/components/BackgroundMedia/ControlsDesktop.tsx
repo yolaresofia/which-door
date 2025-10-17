@@ -30,7 +30,7 @@ export default function ControlsDesktop(props: Props) {
 
   return (
     <div
-      className="absolute inset-x-0 top-1/2 -translate-y-1/2 z-10 hidden p-4 text-white sm:p-6 md:block"
+      className="absolute inset-x-0 top-1/2 -translate-y-1/2 z-10 hidden px-6 md:px-12 text-white sm:p-6 md:block"
       data-touch-toggle-ignore
     >
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -38,7 +38,6 @@ export default function ControlsDesktop(props: Props) {
           {title && <div className="text-base font-semibold leading-tight truncate sm:text-lg">{title}</div>}
           {subtitle && <div className="text-xs text-white/85 truncate sm:text-sm">{subtitle}</div>}
         </div>
-
         <div className="ml-auto flex min-w-0 items-center gap-6">
           <button
             onClick={onTogglePlay}
@@ -56,9 +55,7 @@ export default function ControlsDesktop(props: Props) {
               </svg>
             )}
           </button>
-
           <div className="tabular-nums shrink-0 text-sm">{fmt(current)}</div>
-
           <div
             className="relative h-[2px] w-32 cursor-pointer bg-white/30 sm:w-56 md:w-80 lg:w-[32rem]"
             onClick={handleBarClick}
@@ -69,17 +66,13 @@ export default function ControlsDesktop(props: Props) {
               <div className="h-full w-full bg-white/80" />
             </div>
           </div>
-
           <div className="tabular-nums shrink-0 text-sm">{fmt(remaining)}</div>
-
           <button onClick={onToggleMute} className="shrink-0 text-sm underline-offset-4 decoration-white/60 hover:underline">
             {muted ? "Sound OFF" : "Sound ON"}
           </button>
-
           <button onClick={() => (onShare ? onShare() : console.log("share clicked"))} className="shrink-0 text-sm underline-offset-4 decoration-white/60 hover:underline">
             Share
           </button>
-
           <button onClick={onToggleFullscreen} className="shrink-0 text-sm underline-offset-4 decoration-white/60 hover:underline">
             {isFullscreen ? "Close" : "Fullscreen"}
           </button>

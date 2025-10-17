@@ -4,9 +4,7 @@ import Player from "@vimeo/player";
 import { normalizeUrl } from "../utils";
 
 type Options = {
-  /** FULL Vimeo URL you render into the iframe (keep query like h=... intact). */
-  vimeoSrc?: string;
-  /** When false: autoplay muted loop (background). When true: show custom controls. */
+  vimeoSrc?: string; // full URL
   controls: boolean;
 };
 
@@ -20,47 +18,57 @@ export function useVimeoController({ vimeoSrc, controls }: Options) {
   const [muted, setMuted] = useState(!controls);
   const [ready, setReady] = useState(false);
 
-  // Normalize so changes like &amp;→& trigger a re-init (without ever passing it to Player()).
   const normalizedSrc = useMemo(() => normalizeUrl(vimeoSrc) ?? undefined, [vimeoSrc]);
   const autoplay = !controls;
 
-  // Set up / tear down Player bound to our iframe element.
   useEffect(() => {
     const iframe = iframeRef.current;
     if (!iframe) return;
 
-    // Clean previous instance if any
     if (playerRef.current) {
       playerRef.current.unload().catch(() => {});
       playerRef.current = null;
     }
 
-    // Create player WITHOUT url/id -> TS constraint avoided
     const player = new Player(iframe, {
-      // Intentionally no `url`/`id` here. The iframe already has the full URL.
       dnt: true,
+      // playsinline here is accepted by PlayerOptions; but if your types complain, it’s harmless to keep:
+      // @ts-ignore
       playsinline: true,
     });
 
     playerRef.current = player;
     setReady(false);
 
-    // Events
+    console.debug("[useVimeoController] init", { vimeoSrc, normalizedSrc, controls, autoplay });
+
     player.on("loaded", async () => {
       try {
-        const d = await player.getDuration();
+        const [d, vw, vh, vol, loop] = await Promise.all([
+          player.getDuration(),
+          player.getVideoWidth().catch(() => undefined),
+          player.getVideoHeight().catch(() => undefined),
+          player.getVolume().catch(() => undefined),
+          player.getLoop().catch(() => undefined),
+        ]);
         setDuration(d || 0);
         setReady(true);
+        console.debug("[useVimeoController] loaded", {
+          duration: d,
+          intrinsic: { width: vw, height: vh, ar: vw && vh ? vw / vh : undefined },
+          volume: vol,
+          loop,
+        });
 
-        // Ensure loop + volume states; autoplay is already in iframe URL, but we can try once
         await player.setLoop(true);
         await player.setVolume(muted ? 0 : 1);
         if (autoplay) {
-          // Autoplay may still be blocked by policy; ignore rejection
-          await player.play().catch(() => {});
+          await player.play().catch((err) => {
+            console.warn("[useVimeoController] autoplay blocked", err?.name || err);
+          });
         }
-      } catch {
-        // noop
+      } catch (e) {
+        console.warn("[useVimeoController] loaded handler error", e);
       }
     });
 
@@ -68,23 +76,31 @@ export function useVimeoController({ vimeoSrc, controls }: Options) {
       if (typeof data?.seconds === "number") setCurrent(data.seconds);
     });
 
-    player.on("play", () => setPlaying(true));
-    player.on("pause", () => setPlaying(false));
+    player.on("play", () => {
+      setPlaying(true);
+      console.debug("[useVimeoController] play");
+    });
+    player.on("pause", () => {
+      setPlaying(false);
+      console.debug("[useVimeoController] pause");
+    });
+
+    player.on("error", (e: any) => console.error("[useVimeoController] player error", e));
 
     return () => {
       player.unload().catch(() => {});
       playerRef.current = null;
+      console.debug("[useVimeoController] teardown");
     };
-    // Recreate the Player when iframe URL meaningfully changes
-  }, [normalizedSrc]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [normalizedSrc]); // re-init when URL meaningfully changes
 
-  // Keep volume in sync when toggling mute
   useEffect(() => {
     const p = playerRef.current;
     if (!p) return;
     (async () => {
       try {
         await p.setVolume(muted ? 0 : 1);
+        console.debug("[useVimeoController] setVolume", { muted });
       } catch {}
     })();
   }, [muted]);
@@ -96,7 +112,7 @@ export function useVimeoController({ vimeoSrc, controls }: Options) {
     const p = playerRef.current;
     if (!p) return;
     if (playing) p.pause();
-    else p.play().catch(() => {});
+    else p.play().catch((err) => console.warn("[useVimeoController] play reject", err));
   };
 
   const toggleMute = () => setMuted((m) => !m);
@@ -106,11 +122,10 @@ export function useVimeoController({ vimeoSrc, controls }: Options) {
     const clamped = Math.min(1, Math.max(0, ratio));
     const target = clamped * duration;
     const p = playerRef.current;
-    if (p) p.setCurrentTime(target).catch(() => {});
+    if (p) p.setCurrentTime(target).catch((err) => console.warn("[useVimeoController] seek reject", err));
   };
 
   return {
-    // state
     duration,
     current,
     remaining,
@@ -118,11 +133,9 @@ export function useVimeoController({ vimeoSrc, controls }: Options) {
     playing,
     muted,
     ready,
-    // api
     togglePlay,
     toggleMute,
     seekToRatio,
-    // bind this to your <iframe ref={iframeRef} />
     iframeRef,
   };
 }

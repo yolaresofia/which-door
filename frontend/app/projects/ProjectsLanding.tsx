@@ -8,7 +8,8 @@ import { useCrossfadeMedia } from '../utils/useCrossfadeMedia'
 import { useSequencedReveal } from '../utils/useSequencedReveal'
 
 const getTitle = (p: any) => p?.name ?? p?.title ?? 'Untitled'
-const getVimeoPreview = (p: any) => p?.vimeoPreviewUrl ?? p?.vimeoUrl ?? ''
+const getPreview = (p: any) => p?.previewUrl ?? ''
+const getVimeo = (p: any) => p?.vimeoUrl ?? ''
 const getPoster = (p: any) => p?.previewPoster ?? ''
 const getBgColor = (p: any) => p?.bgColor ?? '#000'
 
@@ -16,7 +17,9 @@ export default function ProjectsLanding() {
   const first = projects[0]
   const initial = {
     id: first?.slug ?? 0,
-    videoSrc: getVimeoPreview(first),
+    videoSrc: getPreview(first) || getVimeo(first),
+    previewUrl: getPreview(first),
+    vimeoUrl: getVimeo(first),
     previewPoster: getPoster(first),
     bgColor: getBgColor(first),
   }
@@ -30,7 +33,9 @@ export default function ProjectsLanding() {
     const project = projects[i]
     crossfadeTo({
       id: project?.slug ?? i,
-      videoSrc: getVimeoPreview(project),
+      videoSrc: getPreview(project) || getVimeo(project),
+      previewUrl: getPreview(project),
+      vimeoUrl: getVimeo(project),
       previewPoster: getPoster(project),
       bgColor: getBgColor(project),
     })
@@ -80,7 +85,8 @@ export default function ProjectsLanding() {
           {slotMedia[0] && (
             <BackgroundMedia
               variant="preview"
-              vimeoUrl={slotMedia[0].videoSrc}
+              previewUrl={slotMedia[0].previewUrl ?? slotMedia[0].videoSrc}
+              vimeoUrl={slotMedia[0].vimeoUrl ?? slotMedia[0].videoSrc}
               previewPoster={slotMedia[0].previewPoster}
               bgColor={slotMedia[0].bgColor}
             />
@@ -96,7 +102,8 @@ export default function ProjectsLanding() {
           {slotMedia[1] && (
             <BackgroundMedia
               variant="preview"
-              vimeoUrl={slotMedia[1].videoSrc}
+              previewUrl={slotMedia[1].previewUrl ?? slotMedia[1].videoSrc}
+              vimeoUrl={slotMedia[1].vimeoUrl ?? slotMedia[1].videoSrc}
               previewPoster={slotMedia[1].previewPoster}
               bgColor={slotMedia[1].bgColor}
             />

@@ -1,19 +1,19 @@
+// components/BackgroundMedia.tsx
 "use client";
 
-import React, { useRef, useMemo, useEffect, useState, useCallback } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useFullscreen } from "./hooks/useFullscreen";
 import { useVimeoController } from "./hooks/useVimeoController";
 import MediaSurface from "./MediaSurface";
 import ControlsDesktop from "./ControlsDesktop";
 import ControlsMobile from "./ControlsMobile";
-import { useTouchPlayToggle } from "./hooks/useTouchPlayToggle";
 
 const POSTER_FADE_MS = 700;
 const CONTROLS_IDLE_HIDE_MS = 2500;
 
 export type BackgroundMediaProps = {
   vimeoUrl?: string;
-  vimeoPreviewUrl?: string;
+  previewUrl?: string;
   previewPoster?: string;
   variant?: "full" | "preview";
   bgColor?: string;
@@ -26,7 +26,7 @@ export type BackgroundMediaProps = {
 
 export default function BackgroundMedia({
   vimeoUrl,
-  vimeoPreviewUrl,
+  previewUrl,
   previewPoster,
   variant = "full",
   bgColor,
@@ -37,19 +37,18 @@ export default function BackgroundMedia({
   onShare,
 }: BackgroundMediaProps) {
   const containerEl = useRef<HTMLDivElement | null>(null);
-
-  // pick the right URL based on variant
-  const selectedUrl = useMemo(
-    () => (variant === "preview" ? (vimeoPreviewUrl || vimeoUrl) : vimeoUrl),
-    [variant, vimeoPreviewUrl, vimeoUrl]
-  );
-
-  // previews never show custom controls (autoPlay + muted + loop)
-  const effectiveControls = variant === "preview" ? false : controls;
+  const hasPreview = Boolean(previewUrl);
+  const hasVimeo = Boolean(vimeoUrl);
+  const usingNativeVideo = hasPreview && (!controls || !hasVimeo);
+  const baseControls = variant === "preview" ? false : controls;
+  const effectiveControls = baseControls && !usingNativeVideo;
+  const activeVimeoSrc = usingNativeVideo ? undefined : vimeoUrl || previewUrl;
+  const activePreviewSrc = usingNativeVideo ? previewUrl : undefined;
+  const activeSourceKey = usingNativeVideo ? activePreviewSrc : activeVimeoSrc;
+  const shouldUsePoster = Boolean(previewPoster) && effectiveControls && !usingNativeVideo;
 
   const {
     iframeRef,
-    duration,
     current,
     remaining,
     progressPct,
@@ -59,16 +58,41 @@ export default function BackgroundMedia({
     toggleMute,
     seekToRatio,
     ready,
-  } = useVimeoController({ vimeoSrc: selectedUrl, controls: effectiveControls });
+  } = useVimeoController({ vimeoSrc: activeVimeoSrc, controls: effectiveControls });
 
   const { isFullscreen, toggleFullscreen } = useFullscreen(containerEl);
 
   const [posterPhase, setPosterPhase] = useState<"shown" | "fading" | "hidden">(
-    previewPoster ? "shown" : "hidden"
+    shouldUsePoster ? "shown" : "hidden"
   );
   const [videoHasStarted, setVideoHasStarted] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(true);
   const controlsHideTimerRef = useRef<number | null>(null);
+  const handleNativePlaybackStart = useCallback(() => {
+    setVideoHasStarted(true);
+  }, []);
+
+  useEffect(() => {
+    console.debug("[BackgroundMedia] props", {
+      variant,
+      usingNativeVideo,
+      vimeoSrc: activeVimeoSrc,
+      previewSrc: activePreviewSrc,
+      effectiveControls,
+      hasPoster: !!previewPoster,
+      bgColor,
+      shouldUsePoster,
+    });
+  }, [
+    activePreviewSrc,
+    activeVimeoSrc,
+    bgColor,
+    effectiveControls,
+    previewPoster,
+    shouldUsePoster,
+    usingNativeVideo,
+    variant,
+  ]);
 
   const clearControlsHideTimer = useCallback(() => {
     if (controlsHideTimerRef.current != null) {
@@ -92,12 +116,11 @@ export default function BackgroundMedia({
 
   useEffect(() => {
     setVideoHasStarted(false);
-    setPosterPhase(previewPoster ? "shown" : "hidden");
-  }, [previewPoster, selectedUrl, variant]);
+  }, [activeSourceKey]);
 
   useEffect(() => {
+    if (usingNativeVideo) return;
     if (videoHasStarted) return;
-
     const progressed = current > 0.05;
     if (variant === "preview") {
       if ((ready && progressed) || playing) {
@@ -105,22 +128,22 @@ export default function BackgroundMedia({
       }
       return;
     }
-
-    if (playing) setVideoHasStarted(true);
-  }, [variant, ready, playing, current, videoHasStarted]);
+    if (playing) {
+      setVideoHasStarted(true);
+    }
+  }, [usingNativeVideo, variant, ready, playing, current, videoHasStarted]);
 
   useEffect(() => {
     setPosterPhase((phase) => {
-      if (!previewPoster) return "hidden";
+      if (!shouldUsePoster) return "hidden";
       if (!videoHasStarted) return "shown";
       if (phase === "shown") return "fading";
       return phase;
     });
-  }, [previewPoster, videoHasStarted]);
+  }, [shouldUsePoster, videoHasStarted]);
 
   useEffect(() => {
     if (posterPhase !== "fading") return;
-
     const timeout = window.setTimeout(() => setPosterPhase("hidden"), POSTER_FADE_MS);
     return () => window.clearTimeout(timeout);
   }, [posterPhase]);
@@ -137,13 +160,11 @@ export default function BackgroundMedia({
     revealControls();
 
     const opts: AddEventListenerOptions = { passive: true };
-
     window.addEventListener("mousemove", revealControls, opts);
     window.addEventListener("mousedown", revealControls, opts);
     window.addEventListener("touchstart", revealControls, opts);
     window.addEventListener("touchmove", revealControls, opts);
     window.addEventListener("keydown", revealControls, false);
-
     return () => {
       clearControlsHideTimer();
       window.removeEventListener("mousemove", revealControls, opts);
@@ -154,37 +175,47 @@ export default function BackgroundMedia({
     };
   }, [effectiveControls, isFullscreen, revealControls, clearControlsHideTimer]);
 
-  const posterVisible = Boolean(previewPoster) && posterPhase !== "hidden";
+  const posterVisible = shouldUsePoster && posterPhase !== "hidden";
   const posterOpacity = posterPhase === "shown" ? 1 : 0;
-  const videoVisible = !previewPoster || videoHasStarted;
-  const touchToggleEnabled = effectiveControls;
+  const videoVisible = !shouldUsePoster || videoHasStarted;
 
-  useTouchPlayToggle({
-    containerRef: containerEl,
-    enabled: touchToggleEnabled,
-    togglePlay,
-  });
+  // Quick container size log
+  useEffect(() => {
+    const el = containerEl.current;
+    if (!el) return;
+    const log = (ctx: string) => {
+      const r = el.getBoundingClientRect();
+      console.debug("[BackgroundMedia] container size", ctx, { w: r.width, h: r.height });
+    };
+    log("mount");
+    const ro = new ResizeObserver(() => log("ResizeObserver"));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   return (
     <div
       ref={containerEl}
       className={`absolute inset-0 ${effectiveControls ? "" : "-z-10"} ${className}`}
       style={bgColor ? { backgroundColor: bgColor } : undefined}
+      data-variant={variant}
+      data-has-poster={!!previewPoster}
+      data-visible={videoVisible}
     >
-      {/* video layer */}
       <div
         className="absolute inset-0 transition-opacity ease-in-out"
         style={{ opacity: videoVisible ? 1 : 0, transitionDuration: `${POSTER_FADE_MS}ms` }}
       >
         <MediaSurface
-          vimeoSrc={selectedUrl}
+          vimeoSrc={activeVimeoSrc}
+          previewSrc={activePreviewSrc}
           controls={effectiveControls}
           iframeRef={iframeRef}
           variant={variant}
+          onNativePlaybackStart={handleNativePlaybackStart}
         />
       </div>
 
-      {/* blurred poster overlay */}
       {posterVisible && (
         <div
           className="pointer-events-none absolute inset-0 z-10 overflow-hidden transition-opacity ease-in-out"
@@ -194,28 +225,10 @@ export default function BackgroundMedia({
             src={previewPoster}
             alt=""
             className="h-full w-full object-cover transform"
-            style={{
-              filter: "blur(10px)",
-              transform: "scale(1.05)", // hide blur edges
-            }}
+            style={{ filter: "blur(10px)", transform: "scale(1.05)" }}
           />
-          {/* optional gradient for legibility */}
           <div className="absolute inset-0 bg-black/10" />
         </div>
-      )}
-
-      {/* pointer capture layer to ensure cursor movement over the iframe restores controls */}
-      {effectiveControls && (
-        <div
-          className="absolute inset-0 z-20"
-          style={{
-            pointerEvents: effectiveControls && isFullscreen && !controlsVisible ? "auto" : "none",
-          }}
-          onPointerMove={revealControls}
-          onPointerDown={revealControls}
-          onPointerUp={revealControls}
-          aria-hidden="true"
-        />
       )}
 
       {/* controls only for full variant */}

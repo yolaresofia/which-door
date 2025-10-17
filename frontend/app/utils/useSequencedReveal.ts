@@ -12,7 +12,6 @@ type SeqOpts = {
   from?: gsap.TweenVars
   to?: gsap.TweenVars
   autoStart?: boolean
-  /** Optional: pass a custom stagger to avoid many concurrent tweens */
   stagger?: number | gsap.StaggerVars
 }
 

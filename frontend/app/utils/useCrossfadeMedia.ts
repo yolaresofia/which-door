@@ -7,6 +7,8 @@ export type Media = {
   id: string | number;
   imageSrc?: string;
   videoSrc?: string;
+  previewUrl?: string;
+  vimeoUrl?: string;
   bgColor?: string;
   previewPoster?: string;
 };
