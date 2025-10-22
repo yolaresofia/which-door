@@ -27,6 +27,8 @@ export default function ProjectsLanding() {
   const { setSlotRef, slotMedia, crossfadeTo } = useCrossfadeMedia(initial, { duration: 0.45 })
 
   const [selectedIndex, setSelectedIndex] = useState(0)
+  const [fontLoaded, setFontLoaded] = useState(false)
+  
   const select = (i: number) => {
     if (i === selectedIndex) return
     setSelectedIndex(i)
@@ -43,40 +45,70 @@ export default function ProjectsLanding() {
 
   const listRef = useRef<HTMLUListElement | null>(null)
   
-  // IMPROVED: Smoother animation like doity.de
   const { start } = useSequencedReveal(listRef, {
     target: '[data-reveal]',
-    duration: 0.8, // Longer, smoother
-    ease: 'power2.out', // Softer easing
-    from: { opacity: 0, y: 20, scale: 0.98 }, // More subtle movement
+    duration: 0.8,
+    ease: 'power2.out',
+    from: { opacity: 0, y: 20, scale: 0.98 },
     to: { opacity: 1, y: 0, scale: 1 },
     autoStart: false,
     stagger: { 
-      each: 0.08, // Faster cascade for smoother effect
+      each: 0.08,
       from: 'start',
       ease: 'power2.inOut'
     },
   })
 
+  // CRITICAL FIX: Improved font loading detection
   useEffect(() => {
     let cancelled = false
-    const go = () => {
+    let timeoutId: NodeJS.Timeout
+
+    const triggerAnimation = () => {
       if (cancelled) return
-      const raf = requestAnimationFrame(() => start())
-      ;(go as any)._raf = raf
+      setFontLoaded(true)
+      // Use RAF to ensure font is painted before animation
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          start()
+        })
+      })
     }
 
+    // Method 1: Font Loading API (best)
     if ('fonts' in document && (document as any).fonts?.ready) {
-      ;(document as any).fonts.ready.then(go)
+      ;(document as any).fonts.ready.then(() => {
+        // Double-check the specific font is loaded
+        ;(document as any).fonts.load('normal 1em Neue').then(
+          () => {
+            if (!cancelled) triggerAnimation()
+          },
+          () => {
+            // Fallback if font load fails
+            if (!cancelled) triggerAnimation()
+          }
+        )
+      })
     } else {
-      go()
+      // Method 2: Fallback for older browsers
+      // Wait a bit longer to ensure font is loaded
+      timeoutId = setTimeout(triggerAnimation, 100)
     }
+
+    // Method 3: Safety timeout (if font takes too long, show content anyway)
+    const safetyTimeout = setTimeout(() => {
+      if (!cancelled && !fontLoaded) {
+        console.warn('Font loading timeout - showing content anyway')
+        triggerAnimation()
+      }
+    }, 3000) // 3 second max wait
 
     return () => {
       cancelled = true
-      if ((go as any)._raf) cancelAnimationFrame((go as any)._raf)
+      clearTimeout(timeoutId)
+      clearTimeout(safetyTimeout)
     }
-  }, [start])
+  }, [start, fontLoaded])
 
   return (
     <main className="relative min-h-screen w-full overflow-hidden">
@@ -125,8 +157,6 @@ export default function ProjectsLanding() {
           {projects.map((project, index) => {
             const title = getTitle(project)
             const isHighlighted = selectedIndex === index
-            
-            // IMPROVED: Smoother opacity transitions
             const dimOthers = !isHighlighted
 
             return (
@@ -137,7 +167,6 @@ export default function ProjectsLanding() {
                 }`}
                 style={{ 
                   contain: 'layout paint style',
-                  // Ensure transform doesn't interfere
                   willChange: 'opacity'
                 }}
               >
@@ -152,7 +181,6 @@ export default function ProjectsLanding() {
                     }`}
                     style={{ 
                       backfaceVisibility: 'hidden',
-                      // Remove willChange from here as it's handled by the reveal
                     }}
                     onMouseEnter={() => select(index)}
                     onFocus={() => select(index)}

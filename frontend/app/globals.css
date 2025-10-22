@@ -34,12 +34,24 @@
   --default-transition-duration: 250ms;
 }
 
+/* CRITICAL FIX: Change font-display from 'swap' to 'block' */
+/* This prevents the flash of unstyled text (FOUT) */
 @font-face {
   font-family: "Neue";
   src: url("/fonts/PPNeueMontreal-Medium.woff2") format("woff2");
   font-weight: normal;
   font-style: normal;
-  font-display: swap;
+  font-display: block; /* Changed from 'swap' - blocks text until font loads */
+  /* Alternative: font-display: optional; - only use font if already cached */
+}
+
+/* OPTIONAL: Add a loading state to prevent layout shift */
+.font-loading {
+  visibility: hidden;
+}
+
+.font-loaded {
+  visibility: visible;
 }
 
 html::-webkit-scrollbar,

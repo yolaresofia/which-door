@@ -53,7 +53,17 @@ export default async function RootLayout({children}: {children: React.ReactNode}
   const {isEnabled: isDraftMode} = await draftMode()
 
   return (
-    <html lang="en" className=" bg-white text-black font-neue">
+    <html lang="en" className="bg-white text-black font-neue">
+      <head>
+        {/* CRITICAL FIX: Preload font to prevent FOUT */}
+        <link
+          rel="preload"
+          href="/fonts/PPNeueMontreal-Medium.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body>
         <section className="min-h-screen">
           {/* The <Toaster> component is responsible for rendering toast notifications used in /app/client-utils.ts and /app/components/DraftModeToast.tsx */}
