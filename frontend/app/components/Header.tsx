@@ -1,5 +1,4 @@
 'use client'
-
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
@@ -9,7 +8,7 @@ import MobileMenu from './MobileMenu'
 export default function Header() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
-
+  
   const navItems = [
     { href: '/', label: 'Projects' },
     { href: '/directors', label: 'Directors' },
@@ -17,12 +16,30 @@ export default function Header() {
     { href: '/contact', label: 'Contact' },
   ]
 
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, url: string) => {
+    const isProjectsPage = pathname === '/projects' || pathname === '/'
+    
+    if (isProjectsPage && typeof window !== 'undefined') {
+      const fadeOut = (window as any).__projectsFadeOut
+      if (fadeOut && window.innerWidth >= 1024) {
+        e.preventDefault()
+        fadeOut(url)
+        return
+      }
+    }
+  }
+
   return (
     <header className="fixed inset-x-0 top-0 z-50 h-28">
       <div className="h-full px-6 md:px-12">
         <div className="h-full flex items-center justify-between lg:grid lg:grid-cols-3">
+          {/* Logo */}
           <div className="lg:justify-self-start">
-            <Link href="/" className="flex items-center group h-[46px]">
+            <Link 
+              href="/" 
+              className="flex items-center group h-[46px]"
+              onClick={(e) => handleClick(e, '/')}
+            >
               <Image
                 src="https://cdn.sanity.io/images/xerhtqd5/production/0d40f22651c19648b1b763c39c3be9cf3df8e469-39x46.svg"
                 alt="Which Door logo"
@@ -40,6 +57,8 @@ export default function Header() {
               />
             </Link>
           </div>
+
+          {/* Desktop Navigation */}
           <nav className="hidden lg:block lg:justify-self-center">
             <ul
               role="list"
@@ -51,6 +70,7 @@ export default function Header() {
                   <li key={href}>
                     <Link
                       href={href}
+                      onClick={(e) => handleClick(e, href)}
                       className={`transition-opacity duration-200 ${
                         isActive ? 'text-white opacity-100' : 'text-white opacity-70 hover:opacity-100'
                       }`}
@@ -62,6 +82,8 @@ export default function Header() {
               })}
             </ul>
           </nav>
+
+          {/* Mobile Menu Button */}
           <div className="lg:justify-self-end">
             <button
               type="button"
@@ -76,6 +98,8 @@ export default function Header() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Menu */}
       <MobileMenu
         id="mobile-menu"
         open={open}

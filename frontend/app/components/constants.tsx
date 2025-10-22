@@ -13,9 +13,9 @@ export const projects = [
       'https://cdn.sanity.io/images/xerhtqd5/production/99945ce01a04899a2742da8865740039d7513b57-3024x1964.png',
     bgColor: '#477AA1',
     relatedProjects: [
-      {title: 'Shimmer SS25', directors: ['Chris Kousouros'], brand: 'Aelia Beauty'},
-      {title: 'Night Shift', directors: ['Chris Kousouros'], brand: 'Nocturne'},
-      {title: 'Runway Lights', directors: ['Chris Kousouros'], brand: 'Arcade Studio'},
+      {title: 'Shimmer SS25', directors: ['Chris Kousouros'], brand: 'Aelia Beauty', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/530325e24bae5b2ebc9b5008751797b24e7c6352.mp4'},
+      {title: 'Night Shift', directors: ['Chris Kousouros'], brand: 'Nocturne', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/e723f5af4ae111bb4df2ed754b9a55d8d9758c30.mp4'},
+      {title: 'Runway Lights', directors: ['Chris Kousouros'], brand: 'Arcade Studio', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/5068305fa81bd755e7c0dd4f119c8e2b995a8813.mp4'},
     ],
   },
   {
@@ -32,9 +32,9 @@ export const projects = [
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/edddac63afd9bbfe0cf8e1d7d013fc0a97d1051d-3024x1964.png',
     relatedProjects: [
-      {title: 'Shimmer SS25', directors: ['Chris Kousouros'], brand: 'Aelia Beauty'},
-      {title: 'Night Shift', directors: ['Chris Kousouros'], brand: 'Nocturne'},
-      {title: 'Runway Lights', directors: ['Chris Kousouros'], brand: 'Arcade Studio'},
+      {title: 'Shimmer SS25', directors: ['Chris Kousouros'], brand: 'Aelia Beauty', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/530325e24bae5b2ebc9b5008751797b24e7c6352.mp4'},
+      {title: 'Night Shift', directors: ['Chris Kousouros'], brand: 'Nocturne', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/e723f5af4ae111bb4df2ed754b9a55d8d9758c30.mp4'},
+      {title: 'Runway Lights', directors: ['Chris Kousouros'], brand: 'Arcade Studio', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/5068305fa81bd755e7c0dd4f119c8e2b995a8813.mp4'},
     ],
   },
   {
@@ -51,9 +51,9 @@ export const projects = [
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/b2fa2e14a35d8fdbd46f65c6f9ff2a1609f3ef6b-3024x1964.png',
     relatedProjects: [
-      {title: 'Shimmer SS25', directors: ['Chris Kousouros'], brand: 'Aelia Beauty'},
-      {title: 'Night Shift', directors: ['Chris Kousouros'], brand: 'Nocturne'},
-      {title: 'Runway Lights', directors: ['Chris Kousouros'], brand: 'Arcade Studio'},
+      {title: 'Shimmer SS25', directors: ['Chris Kousouros'], brand: 'Aelia Beauty', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/530325e24bae5b2ebc9b5008751797b24e7c6352.mp4'},
+      {title: 'Night Shift', directors: ['Chris Kousouros'], brand: 'Nocturne', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/e723f5af4ae111bb4df2ed754b9a55d8d9758c30.mp4'},
+      {title: 'Runway Lights', directors: ['Chris Kousouros'], brand: 'Arcade Studio', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/5068305fa81bd755e7c0dd4f119c8e2b995a8813.mp4'},
     ],
   },
   {
@@ -70,9 +70,9 @@ export const projects = [
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/8f694e9509da50146838bfb0954e25f73a91afe0-3024x1964.png',
     relatedProjects: [
-      {title: 'Shimmer SS25', directors: ['Chris Kousouros'], brand: 'Aelia Beauty'},
-      {title: 'Night Shift', directors: ['Chris Kousouros'], brand: 'Nocturne'},
-      {title: 'Runway Lights', directors: ['Chris Kousouros'], brand: 'Arcade Studio'},
+      {title: 'Shimmer SS25', directors: ['Chris Kousouros'], brand: 'Aelia Beauty', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/530325e24bae5b2ebc9b5008751797b24e7c6352.mp4'},
+      {title: 'Night Shift', directors: ['Chris Kousouros'], brand: 'Nocturne', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/e723f5af4ae111bb4df2ed754b9a55d8d9758c30.mp4'},
+      {title: 'Runway Lights', directors: ['Chris Kousouros'], brand: 'Arcade Studio', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/5068305fa81bd755e7c0dd4f119c8e2b995a8813.mp4'},
     ],
   },
   {
@@ -88,10 +88,10 @@ export const projects = [
       'https://cdn.sanity.io/files/xerhtqd5/production/5068305fa81bd755e7c0dd4f119c8e2b995a8813.mp4',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/99945ce01a04899a2742da8865740039d7513b57-3024x1964.png',
-    relatedProjects: [
-      {title: 'Shimmer SS25', directors: ['Chris Kousouros'], brand: 'Aelia Beauty'},
-      {title: 'Night Shift', directors: ['Chris Kousouros'], brand: 'Nocturne'},
-      {title: 'Runway Lights', directors: ['Chris Kousouros'], brand: 'Arcade Studio'},
+   relatedProjects: [
+      {title: 'Shimmer SS25', directors: ['Chris Kousouros'], brand: 'Aelia Beauty', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/530325e24bae5b2ebc9b5008751797b24e7c6352.mp4'},
+      {title: 'Night Shift', directors: ['Chris Kousouros'], brand: 'Nocturne', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/e723f5af4ae111bb4df2ed754b9a55d8d9758c30.mp4'},
+      {title: 'Runway Lights', directors: ['Chris Kousouros'], brand: 'Arcade Studio', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/5068305fa81bd755e7c0dd4f119c8e2b995a8813.mp4'},
     ],
   },
 ]

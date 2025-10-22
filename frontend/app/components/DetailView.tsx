@@ -1,5 +1,5 @@
 'use client'
-import {useEffect, useState} from 'react'
+import {useEffect, useMemo, useState} from 'react'
 import BackgroundMedia from './BackgroundMedia/BackgroundMedia'
 
 type RelatedItem = {title: string; directors: string[]; brand: string; previewUrl?: string}
@@ -26,12 +26,19 @@ export default function DetailView({
   backgroundStrategy?: BackgroundStrategy
 }) {
   const [hoveredProjectUrl, setHoveredProjectUrl] = useState<string | null>(null)
-  
-  // Use hovered project video if available, otherwise fall back to item's previewUrl
-  const activePreviewSrc = hoveredProjectUrl ?? item.previewUrl
-  
+
+  // Use hovered project video if allowed, otherwise fall back to the item's preview
+  const initialPreview = useMemo(() => item.previewUrl ?? null, [item.previewUrl])
+  const allowPreview =
+    backgroundStrategy !== 'color' && backgroundStrategy !== 'image' && backgroundStrategy !== 'none'
+  const activePreviewSrc = allowPreview ? hoveredProjectUrl ?? initialPreview ?? undefined : undefined
+  useEffect(() => {
+    if (!allowPreview) {
+      setHoveredProjectUrl(null)
+    }
+  }, [allowPreview])
+
   const color = item.bgColor ?? item.backgroundColor
-  const imageSrc = item.bgImage ?? ''
 
   useEffect(() => {
     if (activePreviewSrc && /\.gif($|\?)/i.test(activePreviewSrc)) {
@@ -40,48 +47,12 @@ export default function DetailView({
     }
   }, [activePreviewSrc])
 
-  let bgProps:
-    | {
-        imageSrc: string
-        previewUrl?: string
-        bgColor?: string
-      }
-    | undefined = undefined
-
-  switch (backgroundStrategy) {
-    case 'color':
-      bgProps = {imageSrc, bgColor: color}
-      break
-    case 'video':
-      if (activePreviewSrc) {
-        bgProps = {imageSrc, previewUrl: activePreviewSrc, bgColor: color}
-      } else if (color) {
-        bgProps = {imageSrc, bgColor: color}
-      } else {
-        bgProps = {imageSrc}
-      }
-      break
-    case 'image':
-      bgProps = {imageSrc}
-      break
-    case 'none':
-      bgProps = undefined
-      break
-    case 'auto':
-    default:
-      if (activePreviewSrc) bgProps = {imageSrc, previewUrl: activePreviewSrc, bgColor: color}
-      else if (color) bgProps = {imageSrc, bgColor: color}
-      else bgProps = {imageSrc}
-  }
+  const mainStyle = color ? {backgroundColor: color} : undefined
+  const showBackgroundMedia = Boolean(activePreviewSrc)
 
   return (
-    <main className="relative min-h-dvh w-full overflow-hidden text-white">
-      {bgProps && (
-        <BackgroundMedia
-          previewUrl={bgProps.previewUrl}
-          bgColor={bgProps.bgColor}
-        />
-      )}
+    <main className="relative min-h-dvh w-full overflow-hidden text-white" style={mainStyle}>
+      {showBackgroundMedia && <BackgroundMedia previewUrl={activePreviewSrc} bgColor={color} />}
       <section className="relative z-10 pt-32 pb-16 md:px-12 px-6 max-w-6xl">
         <header className="mb-8">
           <h1 className="md:text-6xl text-2xl leading-[1.05] tracking-tight">{item.name}</h1>
@@ -99,10 +70,14 @@ export default function DetailView({
             <h2 className="md:text-[18px] text-base mb-4">Related projects</h2>
             <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {item.relatedProjects.map((proj) => (
-                <li 
+                <li
                   key={`${proj.title}-${proj.brand}`}
-                  onMouseEnter={() => proj.previewUrl && setHoveredProjectUrl(proj.previewUrl)}
-                  onMouseLeave={() => setHoveredProjectUrl(null)}
+                  onMouseEnter={() =>
+                    allowPreview && proj.previewUrl && setHoveredProjectUrl(proj.previewUrl)
+                  }
+                  onMouseLeave={() => allowPreview && setHoveredProjectUrl(null)}
+                  onFocus={() => allowPreview && proj.previewUrl && setHoveredProjectUrl(proj.previewUrl)}
+                  onBlur={() => allowPreview && setHoveredProjectUrl(null)}
                   className="cursor-pointer transition-opacity hover:opacity-100 opacity-90"
                 >
                   <div className="rounded-2xl h-full">
