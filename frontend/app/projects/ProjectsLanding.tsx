@@ -42,14 +42,20 @@ export default function ProjectsLanding() {
   }
 
   const listRef = useRef<HTMLUListElement | null>(null)
+  
+  // IMPROVED: Smoother animation like doity.de
   const { start } = useSequencedReveal(listRef, {
     target: '[data-reveal]',
-    duration: 0.22,
-    ease: 'power4.out',
-    from: { opacity: 0, y: 18 },
-    to: { autoAlpha: 1, y: 0 },
+    duration: 0.8, // Longer, smoother
+    ease: 'power2.out', // Softer easing
+    from: { opacity: 0, y: 20, scale: 0.98 }, // More subtle movement
+    to: { opacity: 1, y: 0, scale: 1 },
     autoStart: false,
-    stagger: { amount: 0.3, from: 0 },
+    stagger: { 
+      each: 0.08, // Faster cascade for smoother effect
+      from: 'start',
+      ease: 'power2.inOut'
+    },
   })
 
   useEffect(() => {
@@ -119,20 +125,35 @@ export default function ProjectsLanding() {
           {projects.map((project, index) => {
             const title = getTitle(project)
             const isHighlighted = selectedIndex === index
+            
+            // IMPROVED: Smoother opacity transitions
             const dimOthers = !isHighlighted
 
             return (
               <li
                 key={project?.slug ?? `${title}-${index}`}
-                className={`transition-opacity duration-200 ${dimOthers ? 'opacity-30' : 'opacity-100'}`}
-                style={{ contain: 'layout paint style' }}
+                className={`transition-opacity duration-300 ease-out ${
+                  dimOthers ? 'opacity-40' : 'opacity-100'
+                }`}
+                style={{ 
+                  contain: 'layout paint style',
+                  // Ensure transform doesn't interfere
+                  willChange: 'opacity'
+                }}
               >
-                <Link href={`/projects/${project?.slug}`} className="block text-left group outline-none" data-reveal>
+                <Link 
+                  href={`/projects/${project?.slug}`} 
+                  className="block text-left group outline-none" 
+                  data-reveal
+                >
                   <h3
-                    className={`max-w-[20ch] leading-tight font-semibold text-2xl transition-colors duration-200 will-change-transform ${
+                    className={`max-w-[20ch] leading-tight font-semibold text-2xl transition-all duration-300 ease-out ${
                       isHighlighted ? 'text-white' : 'text-white/90'
                     }`}
-                    style={{ backfaceVisibility: 'hidden' }}
+                    style={{ 
+                      backfaceVisibility: 'hidden',
+                      // Remove willChange from here as it's handled by the reveal
+                    }}
                     onMouseEnter={() => select(index)}
                     onFocus={() => select(index)}
                   >
@@ -140,7 +161,7 @@ export default function ProjectsLanding() {
                   </h3>
                   {project?.director && (
                     <p
-                      className={`text-base transition-colors duration-200 ${
+                      className={`text-base transition-all duration-300 ease-out ${
                         isHighlighted ? 'text-white/90' : 'text-white/70'
                       }`}
                     >
