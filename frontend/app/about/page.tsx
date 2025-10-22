@@ -3,7 +3,7 @@
 import BackgroundMedia from '../components/BackgroundMedia/BackgroundMedia'
 
 const bg =
-  'https://player.vimeo.com/video/1126625562?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479'
+  'https://cdn.sanity.io/files/xerhtqd5/production/5068305fa81bd755e7c0dd4f119c8e2b995a8813.mp4'
 const previewPoster =
   'https://cdn.sanity.io/images/xerhtqd5/production/99945ce01a04899a2742da8865740039d7513b57-3024x1964.png'
 

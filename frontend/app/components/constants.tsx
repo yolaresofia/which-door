@@ -104,16 +104,16 @@ export const directors = [
     vimeoUrl:
       'https://player.vimeo.com/video/1126626295?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewUrl:
-      'https://player.vimeo.com/video/1126625562?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
+      'https://cdn.sanity.io/files/xerhtqd5/production/5068305fa81bd755e7c0dd4f119c8e2b995a8813.mp4',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/bb0046f12a3b6f7ab12eca1bdb390e5965071c02-3024x1964.png',
     specialization: 'Director | Cinematographer | Scriptwriter',
     description:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
     relatedProjects: [
-      {title: 'Shimmer SS25', directors: ['Chris Kousouros'], brand: 'Aelia Beauty'},
-      {title: 'Night Shift', directors: ['Chris Kousouros'], brand: 'Nocturne'},
-      {title: 'Runway Lights', directors: ['Chris Kousouros'], brand: 'Arcade Studio'},
+      {title: 'Shimmer SS25', directors: ['Chris Kousouros'], brand: 'Aelia Beauty', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/530325e24bae5b2ebc9b5008751797b24e7c6352.mp4'},
+      {title: 'Night Shift', directors: ['Chris Kousouros'], brand: 'Nocturne', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/e723f5af4ae111bb4df2ed754b9a55d8d9758c30.mp4'},
+      {title: 'Runway Lights', directors: ['Chris Kousouros'], brand: 'Arcade Studio', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/5068305fa81bd755e7c0dd4f119c8e2b995a8813.mp4'},
     ],
   },
   {
@@ -123,16 +123,16 @@ export const directors = [
     vimeoUrl:
       'https://player.vimeo.com/video/1126626295?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewUrl:
-      'https://player.vimeo.com/video/1126625598?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
+      'https://cdn.sanity.io/files/xerhtqd5/production/e723f5af4ae111bb4df2ed754b9a55d8d9758c30.mp4',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/bb0046f12a3b6f7ab12eca1bdb390e5965071c02-3024x1964.png',
     specialization: 'Documentary | Director | Social Impact',
     description:
       "Riham's intimate, observational style centers real people and quiet details. She builds trust-first sets and films with a documentarian’s patience.",
     relatedProjects: [
-      {title: 'Neighbors', directors: ['Riham Ezzaldeen'], brand: 'Civic Lab'},
-      {title: 'Hands of the City', directors: ['Riham Ezzaldeen'], brand: 'UrbanWorks'},
-      {title: 'After the Rain', directors: ['Riham Ezzaldeen'], brand: 'Kindred'},
+      {title: 'Neighbors', directors: ['Riham Ezzaldeen'], brand: 'Civic Lab', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/530325e24bae5b2ebc9b5008751797b24e7c6352.mp4'},
+      {title: 'Hands of the City', directors: ['Riham Ezzaldeen'], brand: 'UrbanWorks', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/e723f5af4ae111bb4df2ed754b9a55d8d9758c30.mp4'},
+      {title: 'After the Rain', directors: ['Riham Ezzaldeen'], brand: 'Kindred', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/5068305fa81bd755e7c0dd4f119c8e2b995a8813.mp4'},
     ],
   },
   {
@@ -142,16 +142,16 @@ export const directors = [
     vimeoUrl:
       'https://player.vimeo.com/video/1126626295?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewUrl:
-      'https://player.vimeo.com/video/1126625562?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
+      'https://cdn.sanity.io/files/xerhtqd5/production/530325e24bae5b2ebc9b5008751797b24e7c6352.mp4',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/bb0046f12a3b6f7ab12eca1bdb390e5965071c02-3024x1964.png',
     specialization: 'Music Videos | Sport | Lifestyle',
     description:
       'Jamal fuses rhythmic camera moves with graphic color to shape punchy, performance-led films for sport and music clients.',
     relatedProjects: [
-      {title: 'Baseline', directors: ['Jamal Roberts'], brand: 'CourtOne'},
-      {title: 'Static & Gold', directors: ['Jamal Roberts'], brand: 'Nova Records'},
-      {title: 'Pulse', directors: ['Jamal Roberts'], brand: 'TrackClub'},
+      {title: 'Baseline', directors: ['Jamal Roberts'], brand: 'CourtOne', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/530325e24bae5b2ebc9b5008751797b24e7c6352.mp4'},
+      {title: 'Static & Gold', directors: ['Jamal Roberts'], brand: 'Nova Records', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/e723f5af4ae111bb4df2ed754b9a55d8d9758c30.mp4'},
+      {title: 'Pulse', directors: ['Jamal Roberts'], brand: 'TrackClub', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/5068305fa81bd755e7c0dd4f119c8e2b995a8813.mp4'},
     ],
   },
   {
@@ -160,17 +160,17 @@ export const directors = [
     bgImage: '/images/directors/clara.jpg',
     vimeoUrl:
       'https://player.vimeo.com/video/1126626295?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
-    previewUrl:
-      'https://player.vimeo.com/video/1126625573?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
+   previewUrl:
+      'https://cdn.sanity.io/files/xerhtqd5/production/a95d3a4360b6de25735a4a21302e1fce9405ef6f.mp4',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/bb0046f12a3b6f7ab12eca1bdb390e5965071c02-3024x1964.png',
     specialization: 'Art Direction | Experimental Film',
     description:
       'Clara explores texture and space with a tactile visual language—sculptural light, negative space, and meticulous color stories.',
     relatedProjects: [
-      {title: 'Porcelain', directors: ['Clara Yu'], brand: 'Maison K.'},
-      {title: 'Echo Room', directors: ['Clara Yu'], brand: 'Studio Nine'},
-      {title: 'Paper Skies', directors: ['Clara Yu'], brand: 'Atelier V'},
+      {title: 'Porcelain', directors: ['Clara Yu'], brand: 'Maison K.', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/530325e24bae5b2ebc9b5008751797b24e7c6352.mp4'},
+      {title: 'Echo Room', directors: ['Clara Yu'], brand: 'Studio Nine', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/e723f5af4ae111bb4df2ed754b9a55d8d9758c30.mp4'},
+      {title: 'Paper Skies', directors: ['Clara Yu'], brand: 'Atelier V', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/5068305fa81bd755e7c0dd4f119c8e2b995a8813.mp4'},
     ],
   },
   {
@@ -180,16 +180,16 @@ export const directors = [
     vimeoUrl:
       'https://player.vimeo.com/video/1126626295?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewUrl:
-      'https://player.vimeo.com/video/1126625562?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
+      'https://cdn.sanity.io/files/xerhtqd5/production/5068305fa81bd755e7c0dd4f119c8e2b995a8813.mp4',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/bb0046f12a3b6f7ab12eca1bdb390e5965071c02-3024x1964.png',
     specialization: 'Automotive | Tech | Performance',
     description:
       'Marcus pairs precision-engineered camera work with sleek CG accents to highlight craft, speed, and innovation.',
     relatedProjects: [
-      {title: 'Edge Dynamics', directors: ['Marcus Chen'], brand: 'Volt Motors'},
-      {title: 'Glass Circuit', directors: ['Marcus Chen'], brand: 'OmniTech'},
-      {title: 'Apex', directors: ['Marcus Chen'], brand: 'Kestrel'},
+      {title: 'Edge Dynamics', directors: ['Marcus Chen'], brand: 'Volt Motors', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/530325e24bae5b2ebc9b5008751797b24e7c6352.mp4'},
+      {title: 'Glass Circuit', directors: ['Marcus Chen'], brand: 'OmniTech', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/e723f5af4ae111bb4df2ed754b9a55d8d9758c30.mp4'},
+      {title: 'Apex', directors: ['Marcus Chen'], brand: 'Kestrel', previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/5068305fa81bd755e7c0dd4f119c8e2b995a8813.mp4'},
     ],
   },
 ]

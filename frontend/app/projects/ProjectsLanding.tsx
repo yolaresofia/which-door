@@ -46,7 +46,7 @@ export default function ProjectsLanding() {
     target: '[data-reveal]',
     duration: 0.22,
     ease: 'power4.out',
-    from: { autoAlpha: 0, y: 18 },
+    from: { opacity: 0, y: 18 },
     to: { autoAlpha: 1, y: 0 },
     autoStart: false,
     stagger: { amount: 0.3, from: 0 },
