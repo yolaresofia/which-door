@@ -286,7 +286,6 @@ export default function ProjectsLanding() {
                     dimOthers ? 'opacity-40' : 'opacity-100'
                   }`}
                   style={{ 
-                    // REMOVED contain to prevent clipping
                     willChange: 'opacity, transform',
                     overflow: 'visible' // Allow content to animate outside bounds
                   }}
@@ -417,7 +416,7 @@ export default function ProjectsLanding() {
                     href={`/projects/${project?.slug}`}
                     className="block w-full text-left outline-none"
                   >
-                    <h3 className="text-4xl sm:text-5xl md:text-6xl leading-[1.05] font-semibold text-white mb-3">
+                    <h3 className="text-3xl leading-[1.05] font-semibold text-white mb-3">
                       {title}
                     </h3>
                     {project?.director && (

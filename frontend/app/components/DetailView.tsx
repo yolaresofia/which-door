@@ -61,7 +61,7 @@ export default function DetailView({
           ) : null}
         </header>
         {item.description ? (
-          <article className="max-w-3xl md:text-2xl text-[18px] text-justify md:text-left text-white/90 leading-tight">
+          <article className="max-w-3xl md:text-2xl text-[18px] md:text-left text-white/90 leading-tight">
             <p>{item.description}</p>
           </article>
         ) : null}

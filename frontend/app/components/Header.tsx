@@ -68,7 +68,7 @@ export default function Header() {
           <div className="lg:justify-self-start">
             <Link 
               href="/" 
-              className="flex items-center group h-[46px]"
+              className="flex items-center group lg:h-[46px] h-[30px]"
               onClick={(e) => handleClick(e, '/')}
             >
               <Image
@@ -84,7 +84,7 @@ export default function Header() {
                 alt="Which Door wordmark"
                 width={131}
                 height={44}
-                className="h-full w-auto ml-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                className="h-full w-auto ml-2 opacity-100 transition-opacity duration-300 lg:opacity-0 lg:group-hover:opacity-100"
               />
             </Link>
           </div>

@@ -166,7 +166,7 @@ export default function AboutPage() {
       className="relative min-h-screen w-full overflow-hidden text-white flex items-center justify-center md:block"
     >
       {/* Background Video */}
-      <BackgroundMedia previewUrl={bg} previewPoster={previewPoster} />
+      <BackgroundMedia variant="preview" previewUrl={bg} previewPoster={previewPoster} />
       
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/30" aria-hidden="true" />
@@ -184,7 +184,7 @@ export default function AboutPage() {
           }}
         >
           <p 
-            className="text-lg md:text-2xl leading-5 md:leading-7 text-justify md:text-left"
+            className="text-lg md:text-2xl leading-5 md:leading-7 md:text-left"
             style={{
               overflow: 'visible', // Allow text to animate freely
               backfaceVisibility: 'hidden'

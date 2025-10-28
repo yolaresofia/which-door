@@ -52,7 +52,7 @@ export default function ContactSection({
       });
       gsap.set(touch, {
         autoAlpha: 0,
-        yPercent: 12,
+        yPercent: 0,
         filter: "blur(6px)",
         willChange: "transform, opacity, filter",
         backfaceVisibility: "hidden",
@@ -68,7 +68,7 @@ export default function ContactSection({
           idea,
           {
             autoAlpha: 0,
-            yPercent: -12,
+            yPercent: -6,
             filter: "blur(6px)",
           },
           0
@@ -101,6 +101,7 @@ export default function ContactSection({
           <div className="h-full w-full" style={{ backgroundColor: bgColor }} />
         ) : (
           <BackgroundMedia
+          variant="preview"
             previewUrl={previewUrl}
             previewPoster={previewPoster}
             className="absolute inset-0"

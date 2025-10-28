@@ -43,15 +43,28 @@ export default function MobileMenu({
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="absolute inset-0 flex flex-col">
         <div className="flex items-center justify-between px-6 md:px-12 h-28">
-          <Link href="/" onClick={onClose} className="flex items-center h-[46px]">
-            <Image
-              src="https://cdn.sanity.io/images/xerhtqd5/production/0d40f22651c19648b1b763c39c3be9cf3df8e469-39x46.svg"
-              alt="Which Door logo"
-              width={39}
-              height={46}
-              className="h-full w-auto"
-            />
-          </Link>
+          <div className="lg:justify-self-start">
+            <Link 
+              href="/" 
+              className="flex items-center group lg:h-[46px] h-[30px]"
+            >
+              <Image
+                src="https://cdn.sanity.io/images/xerhtqd5/production/0d40f22651c19648b1b763c39c3be9cf3df8e469-39x46.svg"
+                alt="Which Door logo"
+                width={39}
+                height={46}
+                priority
+                className="h-full w-auto"
+              />
+              <Image
+                src="https://cdn.sanity.io/images/xerhtqd5/production/fb73dc9852c0a288232ff5cf63a37c29f64e477e-131x44.svg"
+                alt="Which Door wordmark"
+                width={131}
+                height={44}
+                className="h-full w-auto ml-2 opacity-100 transition-opacity duration-300 lg:opacity-0 lg:group-hover:opacity-100"
+              />
+            </Link>
+          </div>
           <button
             type="button"
             onClick={onClose}
@@ -62,7 +75,7 @@ export default function MobileMenu({
           </button>
         </div>
         <nav className="px-6 md:px-12 pt-6">
-          <ul className="space-y-6">
+          <ul className="space-y-4">
             {navItems.map(({href, label}) => {
               const isActive = currentPath === href
               return (

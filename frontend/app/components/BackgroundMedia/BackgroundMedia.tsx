@@ -9,7 +9,7 @@ import ControlsDesktop from "./ControlsDesktop";
 import ControlsMobile from "./ControlsMobile";
 
 const POSTER_FADE_MS = 700;
-const CONTROLS_IDLE_HIDE_MS = 2500;
+const CONTROLS_IDLE_HIDE_MS = 900;
 
 export type BackgroundMediaProps = {
   vimeoUrl?: string;
@@ -159,25 +159,32 @@ export default function BackgroundMedia({
 
     revealControls();
 
-    const opts: AddEventListenerOptions = { passive: true };
-    window.addEventListener("mousemove", revealControls, opts);
-    window.addEventListener("mousedown", revealControls, opts);
-    window.addEventListener("touchstart", revealControls, opts);
-    window.addEventListener("touchmove", revealControls, opts);
-    window.addEventListener("keydown", revealControls, false);
+    const passiveOpts: AddEventListenerOptions = { passive: true };
+    const passiveTargets: EventTarget[] = [window, document];
+    const passiveEvents = ["pointermove", "mousemove", "mousedown", "touchstart", "touchmove"] as const;
+
+    passiveTargets.forEach((target) => {
+      passiveEvents.forEach((eventName) => {
+        target.addEventListener(eventName, revealControls, passiveOpts);
+      });
+    });
+
+    document.addEventListener("keydown", revealControls);
     return () => {
       clearControlsHideTimer();
-      window.removeEventListener("mousemove", revealControls, opts);
-      window.removeEventListener("mousedown", revealControls, opts);
-      window.removeEventListener("touchstart", revealControls, opts);
-      window.removeEventListener("touchmove", revealControls, opts);
-      window.removeEventListener("keydown", revealControls, false);
+      passiveTargets.forEach((target) => {
+        passiveEvents.forEach((eventName) => {
+          target.removeEventListener(eventName, revealControls, passiveOpts);
+        });
+      });
+      document.removeEventListener("keydown", revealControls);
     };
   }, [effectiveControls, isFullscreen, revealControls, clearControlsHideTimer]);
 
   const posterVisible = shouldUsePoster && posterPhase !== "hidden";
   const posterOpacity = posterPhase === "shown" ? 1 : 0;
   const videoVisible = !shouldUsePoster || videoHasStarted;
+  const pointerTrapActive = effectiveControls && isFullscreen && !controlsVisible;
 
   // Quick container size log
   useEffect(() => {
@@ -234,6 +241,13 @@ export default function BackgroundMedia({
       {/* controls only for full variant */}
       {effectiveControls && (
         <>
+          <div
+            className="absolute inset-0 z-20"
+            style={{ pointerEvents: pointerTrapActive ? "auto" : "none" }}
+            onPointerMove={revealControls}
+            onPointerDown={revealControls}
+            onTouchStart={revealControls}
+          />
           <div
             className={`transition-opacity duration-300 ease-out ${
               controlsVisible ? "opacity-100" : "opacity-0 pointer-events-none"
