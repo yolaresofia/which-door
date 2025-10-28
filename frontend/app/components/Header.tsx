@@ -17,16 +17,47 @@ export default function Header() {
   ]
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, url: string) => {
-    const isProjectsPage = pathname === '/projects' || pathname === '/'
-    
-    if (isProjectsPage && typeof window !== 'undefined') {
-      const fadeOut = (window as any).__projectsFadeOut
-      if (fadeOut && window.innerWidth >= 1024) {
+    // Don't fade-out if we're already on that page
+    if (pathname === url) return
+
+    if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+      // Check if we're on projects page
+      const isProjectsPage = pathname === '/projects' || pathname === '/'
+      const fadeOutProjects = (window as any).__projectsFadeOut
+      
+      if (isProjectsPage && fadeOutProjects) {
         e.preventDefault()
-        fadeOut(url)
+        fadeOutProjects(url)
         return
       }
+
+      // Check if we're on about page
+      const isAboutPage = pathname === '/about'
+      const fadeOutAbout = (window as any).__aboutFadeOut
+      
+      if (isAboutPage && fadeOutAbout) {
+        e.preventDefault()
+        fadeOutAbout(url)
+        return
+      }
+
+      // Check if we're on directors page
+      const isDirectorsPage = pathname === '/directors'
+      const fadeOutDirectors = (window as any).__directorsFadeOut
+      
+      if (isDirectorsPage && fadeOutDirectors) {
+        e.preventDefault()
+        fadeOutDirectors(url)
+        return
+      }
+
+      // Add more pages here as needed:
+      // const isContactPage = pathname === '/contact'
+      // const fadeOutContact = (window as any).__contactFadeOut
+      // if (isContactPage && fadeOutContact) { ... }
     }
+    
+    // Otherwise: normal Next.js navigation
   }
 
   return (
