@@ -6,9 +6,10 @@ import { normalizeUrl } from "../utils";
 type Options = {
   vimeoSrc?: string; // full URL
   controls: boolean;
+  autoplay: boolean;
 };
 
-export function useVimeoController({ vimeoSrc, controls }: Options) {
+export function useVimeoController({ vimeoSrc, controls, autoplay }: Options) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const playerRef = useRef<Player | null>(null);
 
@@ -39,7 +40,6 @@ export function useVimeoController({ vimeoSrc, controls }: Options) {
     playerRef.current = player;
     setReady(false);
 
-    const autoplay = !controls;
     console.debug("[useVimeoController] init", { vimeoSrc, normalizedSrc, controls, autoplay });
 
     player.on("loaded", async () => {
@@ -61,7 +61,7 @@ export function useVimeoController({ vimeoSrc, controls }: Options) {
         });
 
         await player.setLoop(true);
-        await player.setVolume(controls ? 1 : 0);
+        await player.setVolume(!controls ? 0 : 1);
         if (autoplay) {
           await player.play().catch((err) => {
             console.warn("[useVimeoController] autoplay blocked", err?.name || err);
@@ -92,7 +92,7 @@ export function useVimeoController({ vimeoSrc, controls }: Options) {
       playerRef.current = null;
       console.debug("[useVimeoController] teardown");
     };
-  }, [normalizedSrc, controls, vimeoSrc]); // re-init when URL or control mode changes
+  }, [normalizedSrc, controls, vimeoSrc, autoplay]); // re-init when URL or settings change
 
   useEffect(() => {
     const p = playerRef.current;

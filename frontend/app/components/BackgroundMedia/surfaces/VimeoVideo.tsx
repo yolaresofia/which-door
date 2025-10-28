@@ -60,7 +60,7 @@ export default function VimeoVideo({
       }}
       className={finalClass}
       src={src}
-      allow="autoplay; fullscreen; picture-in-picture"
+      allow="autoplay; fullscreen; picture-in-picture;"
       allowFullScreen
       data-fill-mode={fillMode}
     />

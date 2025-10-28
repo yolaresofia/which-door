@@ -20,6 +20,7 @@ export type BackgroundMediaProps = {
   bgColor?: string;
   className?: string;
   controls?: boolean;
+  autoPlay?: boolean;
   title?: string;
   subtitle?: string;
   onShare?: () => void;
@@ -33,6 +34,7 @@ export default function BackgroundMedia({
   bgColor,
   className = "",
   controls = false,
+  autoPlay: autoPlayProp,
   title,
   subtitle,
   onShare,
@@ -47,6 +49,8 @@ export default function BackgroundMedia({
   const activePreviewSrc = usingNativeVideo ? previewUrl : undefined;
   const activeSourceKey = usingNativeVideo ? activePreviewSrc : activeVimeoSrc;
   const shouldUsePoster = Boolean(previewPoster) && effectiveControls && !usingNativeVideo;
+  const resolvedAutoPlay =
+    typeof autoPlayProp === "boolean" ? autoPlayProp : !effectiveControls;
 
   const {
     iframeRef,
@@ -59,7 +63,7 @@ export default function BackgroundMedia({
     toggleMute,
     seekToRatio,
     ready,
-  } = useVimeoController({ vimeoSrc: activeVimeoSrc, controls: effectiveControls });
+  } = useVimeoController({ vimeoSrc: activeVimeoSrc, controls: effectiveControls, autoplay: resolvedAutoPlay });
 
   const { isFullscreen, toggleFullscreen } = useFullscreen(containerEl);
 
@@ -218,6 +222,7 @@ export default function BackgroundMedia({
           vimeoSrc={activeVimeoSrc}
           previewSrc={activePreviewSrc}
           controls={effectiveControls}
+          autoPlay={resolvedAutoPlay}
           iframeRef={iframeRef}
           variant={variant}
           onNativePlaybackStart={handleNativePlaybackStart}

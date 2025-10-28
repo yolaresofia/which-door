@@ -35,8 +35,8 @@ export default function ControlsDesktop(props: Props) {
     >
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="mr-4 min-w-0">
-          {title && <div className="text-base font-semibold leading-tight truncate sm:text-lg">{title}</div>}
-          {subtitle && <div className="text-xs text-white/85 truncate sm:text-sm">{subtitle}</div>}
+          {title && <div className="text-base font-semibold leading-tight truncate sm:text-2xl">{title}</div>}
+          {subtitle && <div className="text-white/85 truncate text-base">{subtitle}</div>}
         </div>
         <div className="ml-auto flex min-w-0 items-center gap-6">
           <button

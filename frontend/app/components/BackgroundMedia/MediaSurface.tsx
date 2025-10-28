@@ -6,6 +6,7 @@ type Props = {
   vimeoSrc?: string;
   previewSrc?: string;
   controls: boolean;
+  autoPlay: boolean;
   iframeRef: React.RefObject<HTMLIFrameElement | null>;
   variant: "full" | "preview";
   onNativePlaybackStart?: () => void;
@@ -15,11 +16,11 @@ export default function MediaSurface({
   vimeoSrc,
   previewSrc,
   controls,
+  autoPlay,
   iframeRef,
   variant,
   onNativePlaybackStart,
 }: Props) {
-  const autoPlay = !controls;
   const usingNative = Boolean(previewSrc) && (!controls || !vimeoSrc);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -132,7 +133,7 @@ export default function MediaSurface({
           iframeRef={iframeRef}
           vimeoSrc={vimeoSrc}
           autoPlay={autoPlay}
-          muted={true}
+          muted={!controls}
           fillMode={variant === "preview" ? "contain" : "cover"}
           className={mediaClass}
         />
