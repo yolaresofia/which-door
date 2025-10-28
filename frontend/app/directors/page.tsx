@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { directors } from '../components/constants'
 import { useCrossfadeMedia } from '../utils/useCrossfadeMedia'
 import { useSequencedReveal } from '../utils/useSequencedReveal'
+import { usePageTransitionVideo } from '../utils/usePageTransitionVideo'
 import BackgroundMedia from '../components/BackgroundMedia/BackgroundMedia'
 import { gsap } from 'gsap'
 
@@ -21,22 +22,29 @@ const getMedia = (d: any, i: number) => ({
 
 export default function DirectorsIndexPage() {
   const router = useRouter()
+  const { saveVideoState, getPreviousVideoState } = usePageTransitionVideo()
+
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [selectedIndex, setSelectedIndex] = useState(DEFAULT_INDEX) // For mobile
   const [fontLoaded, setFontLoaded] = useState(false)
   const [isNavigating, setIsNavigating] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
-  
+
   const listRef = useRef<HTMLUListElement | null>(null)
   const mainRef = useRef<HTMLElement | null>(null)
   const animationRef = useRef<gsap.core.Tween | null>(null)
   const scrollContainerRef = useRef<HTMLDivElement | null>(null) // Mobile scroll container
   const observerRef = useRef<IntersectionObserver | null>(null) // Mobile observer
+  const hasTransitionedRef = useRef(false)
 
   const initialIdx =
     Number.isInteger(DEFAULT_INDEX) && directors[DEFAULT_INDEX] ? DEFAULT_INDEX : 0
-  const initialMedia = getMedia(directors[initialIdx], initialIdx)
-  
+  const targetMedia = getMedia(directors[initialIdx], initialIdx)
+
+  // Check for previous video state to determine initial state
+  const previousVideo = getPreviousVideoState()
+  const initialMedia = previousVideo || targetMedia
+
   const { setSlotRef, slotMedia, crossfadeTo } = useCrossfadeMedia(initialMedia, {
     duration: 0.45,
   })
@@ -57,6 +65,21 @@ export default function DirectorsIndexPage() {
       ease: 'power2.inOut'
     },
   })
+
+  // Handle incoming page transition video
+  useEffect(() => {
+    if (hasTransitionedRef.current || !previousVideo || isMobile) return
+
+    console.log('📹 Directors: Transitioning from previous page video')
+    hasTransitionedRef.current = true
+
+    // Crossfade from previous video to directors default video after a brief delay
+    const timeoutId = setTimeout(() => {
+      crossfadeTo(targetMedia)
+    }, 400)
+
+    return () => clearTimeout(timeoutId)
+  }, [isMobile, previousVideo, crossfadeTo, targetMedia])
 
   // Detect mobile
   useEffect(() => {
@@ -161,15 +184,28 @@ export default function DirectorsIndexPage() {
   const resetToDefault = () => {
     if (isNavigating || isMobile) return
     setHoveredIndex(null)
-    crossfadeTo(initialMedia)
+    crossfadeTo(targetMedia)
   }
 
   // Fade-out animation function - EXACT SAME as ProjectsLanding
   const fadeOutAndNavigate = useCallback((url: string) => {
     if (isNavigating) return
-    
+
     console.log('🎬 Directors: Starting fade-out animation...')
     setIsNavigating(true)
+
+    // Save current video state for the next page to use
+    const currentMedia = slotMedia[0] || slotMedia[1]
+    if (currentMedia) {
+      saveVideoState({
+        id: currentMedia.id,
+        videoSrc: currentMedia.videoSrc || '',
+        previewUrl: currentMedia.previewUrl,
+        vimeoUrl: currentMedia.vimeoUrl,
+        previewPoster: currentMedia.previewPoster,
+        bgColor: currentMedia.bgColor,
+      })
+    }
 
     // Disable pointer events during animation
     if (mainRef.current) {
@@ -179,9 +215,9 @@ export default function DirectorsIndexPage() {
     // Fade out all director names
     if (listRef.current) {
       const items = listRef.current.querySelectorAll('[data-reveal]')
-      
+
       console.log('🎬 Directors: Found items to animate:', items.length)
-      
+
       if (items.length === 0) {
         console.warn('⚠️ Directors: No items found with [data-reveal], navigating immediately')
         router.push(url)
@@ -220,7 +256,7 @@ export default function DirectorsIndexPage() {
       // Fallback
       router.push(url)
     }
-  }, [isNavigating, router])
+  }, [isNavigating, router, slotMedia, saveVideoState])
 
   // Handle director click with fade-out
   const handleDirectorClick = useCallback((e: React.MouseEvent, slug: string) => {

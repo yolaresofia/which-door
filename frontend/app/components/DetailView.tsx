@@ -1,5 +1,6 @@
 'use client'
 import {useEffect, useMemo, useState} from 'react'
+import {usePathname} from 'next/navigation'
 import BackgroundMedia from './BackgroundMedia/BackgroundMedia'
 
 type RelatedItem = {title: string; directors: string[]; brand: string; previewUrl?: string}
@@ -25,6 +26,7 @@ export default function DetailView({
   item: DetailItem
   backgroundStrategy?: BackgroundStrategy
 }) {
+  const pathname = usePathname()
   const [hoveredProjectUrl, setHoveredProjectUrl] = useState<string | null>(null)
 
   // Use hovered project video if allowed, otherwise fall back to the item's preview
@@ -67,7 +69,9 @@ export default function DetailView({
         ) : null}
         {item.relatedProjects?.length ? (
           <div className="mt-24">
-            <h2 className="md:text-[18px] text-base mb-4">Related projects</h2>
+            <h2 className="md:text-[18px] text-base mb-4">
+              {pathname?.startsWith('/directors/') ? 'Projects' : 'Related projects'}
+            </h2>
             <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {item.relatedProjects.map((proj) => (
                 <li

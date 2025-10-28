@@ -6,6 +6,7 @@ import BackgroundMedia from '../components/BackgroundMedia'
 import { projects } from '../components/constants'
 import { useCrossfadeMedia } from '../utils/useCrossfadeMedia'
 import { useSequencedReveal } from '../utils/useSequencedReveal'
+import { usePageTransitionVideo } from '../utils/usePageTransitionVideo'
 import { gsap } from 'gsap'
 
 const getTitle = (p: any) => p?.name ?? p?.title ?? 'Untitled'
@@ -17,8 +18,10 @@ const getBgColor = (p: any) => p?.bgColor ?? '#000'
 export default function ProjectsLanding() {
   const router = useRouter()
   const pathname = usePathname()
+  const { saveVideoState, getPreviousVideoState } = usePageTransitionVideo()
+
   const first = projects[0]
-  const initial = {
+  const targetVideo = {
     id: first?.slug ?? 0,
     videoSrc: getPreview(first) || getVimeo(first),
     previewUrl: getPreview(first),
@@ -27,17 +30,22 @@ export default function ProjectsLanding() {
     bgColor: getBgColor(first),
   }
 
-  const { setSlotRef, slotMedia, crossfadeTo } = useCrossfadeMedia(initial, { duration: 0.6 })
+  // Check for previous video state to determine initial state
+  const previousVideo = getPreviousVideoState()
+  const initialVideo = previousVideo || targetVideo
+
+  const { setSlotRef, slotMedia, crossfadeTo } = useCrossfadeMedia(initialVideo, { duration: 0.6 })
 
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [fontLoaded, setFontLoaded] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [isNavigating, setIsNavigating] = useState(false)
-  
+
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const listRef = useRef<HTMLUListElement | null>(null)
   const observerRef = useRef<IntersectionObserver | null>(null)
   const mainRef = useRef<HTMLElement | null>(null)
+  const hasTransitionedRef = useRef(false)
 
   const select = useCallback((i: number) => {
     if (i === selectedIndex) return
@@ -67,6 +75,21 @@ export default function ProjectsLanding() {
       ease: 'power2.inOut'
     },
   })
+
+  // Handle incoming page transition video
+  useEffect(() => {
+    if (hasTransitionedRef.current || !previousVideo || isMobile) return
+
+    console.log('📹 Projects: Transitioning from previous page video')
+    hasTransitionedRef.current = true
+
+    // Crossfade from previous video to projects default video after a brief delay
+    const timeoutId = setTimeout(() => {
+      crossfadeTo(targetVideo)
+    }, 400)
+
+    return () => clearTimeout(timeoutId)
+  }, [isMobile, previousVideo, crossfadeTo, targetVideo])
 
   // Detect mobile
   useEffect(() => {
@@ -157,6 +180,19 @@ export default function ProjectsLanding() {
     if (isNavigating) return
     setIsNavigating(true)
 
+    // Save current video state for the next page to use
+    const currentMedia = slotMedia[0] || slotMedia[1]
+    if (currentMedia) {
+      saveVideoState({
+        id: currentMedia.id,
+        videoSrc: currentMedia.videoSrc || '',
+        previewUrl: currentMedia.previewUrl,
+        vimeoUrl: currentMedia.vimeoUrl,
+        previewPoster: currentMedia.previewPoster,
+        bgColor: currentMedia.bgColor,
+      })
+    }
+
     // Disable pointer events during animation
     if (mainRef.current) {
       mainRef.current.style.pointerEvents = 'none'
@@ -165,7 +201,7 @@ export default function ProjectsLanding() {
     // Fade out all project titles
     if (listRef.current) {
       const items = listRef.current.querySelectorAll('[data-reveal]')
-      
+
       gsap.to(items, {
         opacity: 0,
         y: -30,
@@ -184,7 +220,7 @@ export default function ProjectsLanding() {
       // Fallback
       router.push(url)
     }
-  }, [isNavigating, router])
+  }, [isNavigating, router, slotMedia, saveVideoState])
 
   // Handle project click
   const handleProjectClick = useCallback((slug: string) => {
