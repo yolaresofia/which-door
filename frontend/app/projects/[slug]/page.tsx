@@ -27,7 +27,6 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
 
   // Derive project after hooks
   const project = useMemo(() => projects.find((p) => p.slug === slug), [slug])
-  if (!project) return notFound()
 
   const videoSrc = (project as any).vimeoUrl ?? (project as any).videoURL
 
@@ -106,7 +105,7 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
       delete (window as any).__projectDetailFadeOut
     }
   }, [isMobile, fadeOutAndNavigate])
-
+  if (!project) return notFound()
   return (
     <main ref={mainRef} className="text-white">
       <section className="relative h-dvh w-screen overflow-hidden isolate">
