@@ -19,7 +19,6 @@ export function useVimeoController({ vimeoSrc, controls }: Options) {
   const [ready, setReady] = useState(false);
 
   const normalizedSrc = useMemo(() => normalizeUrl(vimeoSrc) ?? undefined, [vimeoSrc]);
-  const autoplay = !controls;
 
   useEffect(() => {
     const iframe = iframeRef.current;
@@ -40,6 +39,7 @@ export function useVimeoController({ vimeoSrc, controls }: Options) {
     playerRef.current = player;
     setReady(false);
 
+    const autoplay = !controls;
     console.debug("[useVimeoController] init", { vimeoSrc, normalizedSrc, controls, autoplay });
 
     player.on("loaded", async () => {
@@ -61,7 +61,7 @@ export function useVimeoController({ vimeoSrc, controls }: Options) {
         });
 
         await player.setLoop(true);
-        await player.setVolume(muted ? 0 : 1);
+        await player.setVolume(controls ? 1 : 0);
         if (autoplay) {
           await player.play().catch((err) => {
             console.warn("[useVimeoController] autoplay blocked", err?.name || err);
@@ -92,7 +92,7 @@ export function useVimeoController({ vimeoSrc, controls }: Options) {
       playerRef.current = null;
       console.debug("[useVimeoController] teardown");
     };
-  }, [normalizedSrc]); // re-init when URL meaningfully changes
+  }, [normalizedSrc, controls, vimeoSrc]); // re-init when URL or control mode changes
 
   useEffect(() => {
     const p = playerRef.current;

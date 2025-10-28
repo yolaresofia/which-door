@@ -195,7 +195,7 @@ export default function AboutPage() {
             aid and development industry. Humpback whale mating season in Tonga, spoken word poets in
             off strip Las Vegas, bedouin kitesurfers in the Sinai Desert, hunting lava in Iceland,
             yoga in Mogadishu. We showed the world of aid and development something different. Now
-            we're here to do the same in the commercial industry. We're bringing our lens, our
+            we&apos;re here to do the same in the commercial industry. We&apos;re bringing our lens, our
             stranger than fiction TRUE stories, to the world of commercial content. Creative
             non-fiction storytelling for the commercial and branded universe. Welcome to our world.
           </p>

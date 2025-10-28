@@ -96,7 +96,7 @@ export function useSequencedReveal(
     }, containerRef)
 
     cleanupRef.current = () => ctx.revert()
-  }, [containerRef, target, duration, gap, ease, prefersReduced, from, to, stagger])
+  }, [containerRef, target, duration, ease, prefersReduced, from, to, stagger])
 
   const reset = useCallback(() => {
     ranRef.current = false

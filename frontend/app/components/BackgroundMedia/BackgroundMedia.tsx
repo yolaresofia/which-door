@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
+import Image from "next/image";
 import { useFullscreen } from "./hooks/useFullscreen";
 import { useVimeoController } from "./hooks/useVimeoController";
 import MediaSurface from "./MediaSurface";
@@ -228,11 +229,14 @@ export default function BackgroundMedia({
           className="pointer-events-none absolute inset-0 z-10 overflow-hidden transition-opacity ease-in-out"
           style={{ opacity: posterOpacity, transitionDuration: `${POSTER_FADE_MS}ms` }}
         >
-          <img
-            src={previewPoster}
+          <Image
+            src={previewPoster as string}
             alt=""
-            className="h-full w-full object-cover transform"
+            fill
+            className="object-cover transform"
             style={{ filter: "blur(10px)", transform: "scale(1.05)" }}
+            sizes="100vw"
+            priority={variant === "preview"}
           />
           <div className="absolute inset-0 bg-black/10" />
         </div>
