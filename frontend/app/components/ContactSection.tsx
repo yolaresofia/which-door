@@ -1,9 +1,10 @@
 // app/components/ContactSection.tsx
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, useEffect } from "react";
 import gsap from "gsap";
 import BackgroundMedia from "./BackgroundMedia/BackgroundMedia";
+import { useSequencedReveal } from "@/app/utils/useSequencedReveal";
 
 type ContactSectionProps = {
   bgColor?: string;
@@ -11,6 +12,7 @@ type ContactSectionProps = {
   showScrim?: boolean;
   showLeftGradient?: boolean;
   previewPoster?: string;
+  enableAnimations?: boolean;
 };
 
 export default function ContactSection({
@@ -19,10 +21,37 @@ export default function ContactSection({
   showScrim = false,
   showLeftGradient = false,
   previewPoster,
+  enableAnimations = false,
 }: ContactSectionProps) {
   const useColorOnly = !!bgColor; // color takes priority
   const desktopLinkRef = useRef<HTMLAnchorElement | null>(null);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
+
+  // Desktop animation - EXACT SAME as ProjectsLanding (only when enableAnimations is true)
+  const { start } = useSequencedReveal(contentRef, {
+    target: '[data-reveal]',
+    duration: 0.8,
+    ease: 'power2.out',
+    from: { opacity: 0, y: 20, scale: 0.98 },
+    to: { opacity: 1, y: 0, scale: 1 },
+    autoStart: false,
+    stagger: {
+      each: 0.08,
+      from: 'start',
+      ease: 'power2.inOut'
+    },
+  });
+
+  // Trigger animation on mount (only if enableAnimations is true)
+  useEffect(() => {
+    if (!enableAnimations) return;
+
+    // Start with RAF to ensure DOM is ready
+    requestAnimationFrame(() => {
+      start();
+    });
+  }, [start, enableAnimations]);
 
   useLayoutEffect(() => {
     const el = desktopLinkRef.current;
@@ -115,7 +144,7 @@ export default function ContactSection({
       </div>
 
       {/* FOREGROUND CONTENT */}
-      <div className="relative min-h-screen flex flex-col pt-20">
+      <div ref={contentRef} className="relative min-h-screen flex flex-col pt-20">
         <div className="flex-1 grid items-center justify-items-start px-6 md:justify-items-center">
           {/* Tablet & smaller: show BOTH lines stacked, no hover */}
           <a
@@ -123,6 +152,7 @@ export default function ContactSection({
             className="block lg:hidden text-left leading-tight text-3xl md:text-6xl md:text-center"
             aria-label="Get in touch via email"
             title="Get in touch"
+            data-reveal={enableAnimations ? true : undefined}
           >
             <span className="block">Have an idea?</span>
             <span className="block mt-1 md:mt-2 opacity-90">Get in touch.</span>
@@ -140,6 +170,7 @@ export default function ContactSection({
             onMouseLeave={reverseSwap}
             onFocus={playSwap}
             onBlur={reverseSwap}
+            data-reveal={enableAnimations ? true : undefined}
           >
             {/* NOTE: removed transition classes to avoid fighting GSAP */}
             <span className="line-idea col-start-1 row-start-1">
@@ -153,12 +184,18 @@ export default function ContactSection({
 
         <footer className="w-full px-6 md:px-12 pb-8">
           <div className="mx-auto grid gap-8 md:grid-cols-3 text-sm md:text-base">
-            <p className="leading-tight">
+            <p
+              className="leading-tight"
+              data-reveal={enableAnimations ? true : undefined}
+            >
               We exist on 5 continents, with bases in Stockholm, Barcelona, Baltimore/DC, Beirut,
               Berlin, Buenos Aires, NYC, Nairobi and Iceland.
             </p>
 
-            <div className="leading-tight">
+            <div
+              className="leading-tight"
+              data-reveal={enableAnimations ? true : undefined}
+            >
               <p>
                 For Inquiries &amp; Commissions{" "}
                 <a href="mailto:info@whichdoor.com">info@whichdoor.com</a>
@@ -169,7 +206,10 @@ export default function ContactSection({
               </p>
             </div>
 
-            <nav className="leading-relaxed">
+            <nav
+              className="leading-relaxed"
+              data-reveal={enableAnimations ? true : undefined}
+            >
               <ul className="flex gap-4 md:justify-end">
                 <li>
                   <a href="https://vimeo.com/" target="_blank" rel="noopener noreferrer">

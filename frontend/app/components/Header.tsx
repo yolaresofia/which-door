@@ -44,17 +44,32 @@ export default function Header() {
       // Check if we're on directors page
       const isDirectorsPage = pathname === '/directors'
       const fadeOutDirectors = (window as any).__directorsFadeOut
-      
+
       if (isDirectorsPage && fadeOutDirectors) {
         e.preventDefault()
         fadeOutDirectors(url)
         return
       }
 
-      // Add more pages here as needed:
-      // const isContactPage = pathname === '/contact'
-      // const fadeOutContact = (window as any).__contactFadeOut
-      // if (isContactPage && fadeOutContact) { ... }
+      // Check if we're on a project detail page
+      const isProjectDetailPage = pathname?.startsWith('/projects/')
+      const fadeOutProjectDetail = (window as any).__projectDetailFadeOut
+
+      if (isProjectDetailPage && fadeOutProjectDetail) {
+        e.preventDefault()
+        fadeOutProjectDetail(url)
+        return
+      }
+
+      // Check if we're on contact page
+      const isContactPage = pathname === '/contact'
+      const fadeOutContact = (window as any).__contactFadeOut
+
+      if (isContactPage && fadeOutContact) {
+        e.preventDefault()
+        fadeOutContact(url)
+        return
+      }
     }
     
     // Otherwise: normal Next.js navigation

@@ -19,12 +19,9 @@ export function useSequencedReveal(
   containerRef: React.RefObject<HTMLElement | null>,
   {
     target = '[data-reveal]',
-    // Smoother, longer duration like doity.de
     duration = 0.8,
     gap = 0,
-    // Softer, more natural easing
     ease = 'power2.out',
-    // More subtle initial state - less distance, slight opacity
     from = { opacity: 0, y: 20, scale: 0.98 },
     to   = { opacity: 1, y: 0, scale: 1 },
     autoStart = true,
@@ -54,23 +51,22 @@ export function useSequencedReveal(
       const items = gsap.utils.toArray<HTMLElement>(target)
       if (!items.length) return
 
-      // Set will-change for performance
-      gsap.set(items, { 
+      // Set will-change for performance and initial state
+      gsap.set(items, {
         willChange: 'transform, opacity',
         backfaceVisibility: 'hidden',
-        // Important: don't hide completely, start at the 'from' state
+        force3D: true,
         ...from
       })
 
       const tl = gsap.timeline({
-        defaults: { 
+        defaults: {
           ease,
-          // Smooth interpolation
           force3D: true,
         },
-        onComplete: () => { 
+        onComplete: () => {
           // Clean up will-change after animation
-          gsap.set(items, { willChange: 'auto' }) 
+          gsap.set(items, { willChange: 'auto' })
         },
       })
 
@@ -79,16 +75,14 @@ export function useSequencedReveal(
         {
           ...to,
           duration,
-          // Stagger creates the sequential reveal effect
-          // Using a shorter stagger amount for smoother cascading
-          stagger: stagger ?? { 
-            each: 0.08, // Much faster cascade like doity.de
+          stagger: stagger ?? {
+            each: 0.08,
             from: 'start',
             ease: 'power2.inOut'
           },
           overwrite: 'auto',
-          // Smooth sub-pixel rendering
           autoRound: false,
+          force3D: true,
         }
       )
 

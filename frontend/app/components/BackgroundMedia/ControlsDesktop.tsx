@@ -1,4 +1,8 @@
+'use client'
+
+import { useRef, useEffect } from 'react'
 import { fmt } from "./utils";
+import { useSequencedReveal } from '@/app/utils/useSequencedReveal'
 
 type Props = {
   title?: string;
@@ -23,6 +27,31 @@ export default function ControlsDesktop(props: Props) {
     isFullscreen, onToggleFullscreen
   } = props;
 
+  const containerRef = useRef<HTMLDivElement | null>(null)
+
+  // Desktop animation - EXACT SAME as ProjectsLanding
+  const { start } = useSequencedReveal(containerRef, {
+    target: '[data-reveal]',
+    duration: 0.8,
+    ease: 'power2.out',
+    from: { opacity: 0, y: 20, scale: 0.98 },
+    to: { opacity: 1, y: 0, scale: 1 },
+    autoStart: false,
+    stagger: {
+      each: 0.08,
+      from: 'start',
+      ease: 'power2.inOut'
+    },
+  })
+
+  // Trigger animation on mount
+  useEffect(() => {
+    // Start with RAF to ensure DOM is ready
+    requestAnimationFrame(() => {
+      start()
+    })
+  }, [start])
+
   const handleBarClick: React.MouseEventHandler<HTMLDivElement> = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     onSeekRatio((e.clientX - rect.left) / rect.width);
@@ -30,16 +59,21 @@ export default function ControlsDesktop(props: Props) {
 
   return (
     <div
+      ref={containerRef}
       className="absolute inset-x-0 top-1/2 -translate-y-1/2 z-10 hidden px-6 md:px-12 text-white sm:p-6 md:block"
       data-touch-toggle-ignore
     >
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="mr-4 min-w-0">
+        <div
+          className="mr-4 min-w-0"
+          data-reveal
+        >
           {title && <div className="text-base font-semibold leading-tight truncate sm:text-2xl">{title}</div>}
           {subtitle && <div className="text-white/85 truncate text-base">{subtitle}</div>}
         </div>
         <div className="ml-auto flex min-w-0 items-center gap-6">
           <button
+            data-reveal
             onClick={onTogglePlay}
             aria-label={playing ? "Pause" : "Play"}
             className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/10 transition hover:bg-white/20"
@@ -55,8 +89,12 @@ export default function ControlsDesktop(props: Props) {
               </svg>
             )}
           </button>
-          <div className="tabular-nums shrink-0 text-sm">{fmt(current)}</div>
           <div
+            data-reveal
+            className="tabular-nums shrink-0 text-sm"
+          >{fmt(current)}</div>
+          <div
+            data-reveal
             className="relative h-[2px] w-32 cursor-pointer bg-white/30 sm:w-56 md:w-80 lg:w-[32rem]"
             onClick={handleBarClick}
             role="progressbar"
@@ -66,14 +104,29 @@ export default function ControlsDesktop(props: Props) {
               <div className="h-full w-full bg-white/80" />
             </div>
           </div>
-          <div className="tabular-nums shrink-0 text-sm">{fmt(remaining)}</div>
-          <button onClick={onToggleMute} className="shrink-0 text-sm underline-offset-4 decoration-white/60 hover:underline">
+          <div
+            data-reveal
+            className="tabular-nums shrink-0 text-sm"
+          >{fmt(remaining)}</div>
+          <button
+            data-reveal
+            onClick={onToggleMute}
+            className="shrink-0 text-sm underline-offset-4 decoration-white/60 hover:underline"
+          >
             {muted ? "Sound OFF" : "Sound ON"}
           </button>
-          <button onClick={() => (onShare ? onShare() : console.log("share clicked"))} className="shrink-0 text-sm underline-offset-4 decoration-white/60 hover:underline">
+          <button
+            data-reveal
+            onClick={() => (onShare ? onShare() : console.log("share clicked"))}
+            className="shrink-0 text-sm underline-offset-4 decoration-white/60 hover:underline"
+          >
             Share
           </button>
-          <button onClick={onToggleFullscreen} className="shrink-0 text-sm underline-offset-4 decoration-white/60 hover:underline">
+          <button
+            data-reveal
+            onClick={onToggleFullscreen}
+            className="shrink-0 text-sm underline-offset-4 decoration-white/60 hover:underline"
+          >
             {isFullscreen ? "Close" : "Fullscreen"}
           </button>
         </div>

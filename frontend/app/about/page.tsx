@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import BackgroundMedia from '../components/BackgroundMedia/BackgroundMedia'
 import { useSequencedReveal } from '../utils/useSequencedReveal'
@@ -26,13 +26,13 @@ export default function AboutPage() {
   const animationRef = useRef<gsap.core.Tween | null>(null)
   const hasTransitionedRef = useRef(false)
 
-  const targetVideo = {
+  const targetVideo = useMemo(() => ({
     id: 'about',
     videoSrc: bg,
     previewUrl: bg,
     previewPoster: previewPoster,
     bgColor: '#000',
-  }
+  }), [])
 
   // Check for previous video state to determine initial state
   const previousVideo = getPreviousVideoState()
@@ -88,11 +88,12 @@ export default function AboutPage() {
     const triggerAnimation = () => {
       if (cancelled) return
       setFontLoaded(true)
-      requestAnimationFrame(() => {
+      // Start with RAF to ensure DOM is ready
+      if (!isMobile) {
         requestAnimationFrame(() => {
-          if (!isMobile) start()
+          start()
         })
-      })
+      }
     }
 
     if ('fonts' in document && (document as any).fonts?.ready) {
@@ -249,9 +250,6 @@ export default function AboutPage() {
           )}
         </div>
       </div>
-
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/30 z-[1]" aria-hidden="true" />
       
       {/* Content with animation - EXACT SAME structure as ProjectsLanding */}
       <section 
@@ -260,17 +258,9 @@ export default function AboutPage() {
       >
         <div
           data-reveal
-          style={{
-            overflow: 'visible', // Critical: allow text to animate freely
-            willChange: 'opacity, transform'
-          }}
         >
-          <p 
+          <p
             className="text-lg md:text-2xl leading-5 md:leading-7 md:text-left"
-            style={{
-              overflow: 'visible', // Allow text to animate freely
-              backfaceVisibility: 'hidden'
-            }}
           >
             We are a group of documentary filmmakers, war photographers, disaster relief workers, and
             climate activists that have spent the past 15 years in over 150 countries disrupting the

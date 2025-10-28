@@ -41,6 +41,7 @@ export function useVimeoController({ vimeoSrc, controls, autoplay }: Options) {
     setReady(false);
 
     console.debug("[useVimeoController] init", { vimeoSrc, normalizedSrc, controls, autoplay });
+    let destroyed = false;
 
     player.on("loaded", async () => {
       try {
@@ -63,9 +64,24 @@ export function useVimeoController({ vimeoSrc, controls, autoplay }: Options) {
         await player.setLoop(true);
         await player.setVolume(!controls ? 0 : 1);
         if (autoplay) {
-          await player.play().catch((err) => {
-            console.warn("[useVimeoController] autoplay blocked", err?.name || err);
-          });
+          try {
+            await player.play();
+          } catch (err: any) {
+            const errName = err?.name || err;
+            console.warn("[useVimeoController] autoplay blocked", errName);
+            if (controls && !destroyed) {
+              try {
+                await player.setVolume(0);
+                setMuted(true);
+                await player.play();
+              } catch (retryErr: any) {
+                console.warn(
+                  "[useVimeoController] autoplay retry failed",
+                  retryErr?.name || retryErr
+                );
+              }
+            }
+          }
         }
       } catch (e) {
         console.warn("[useVimeoController] loaded handler error", e);
@@ -85,9 +101,21 @@ export function useVimeoController({ vimeoSrc, controls, autoplay }: Options) {
       console.debug("[useVimeoController] pause");
     });
 
-    player.on("error", (e: any) => console.error("[useVimeoController] player error", e));
+    player.on("error", (e: any) => {
+      const message: string | undefined = typeof e?.message === "string" ? e.message : undefined;
+      if (
+        e?.name === "TypeError" &&
+        message &&
+        message.includes("reading 'includes'")
+      ) {
+        console.warn("[useVimeoController] ignoring Safari play() TypeError", e);
+        return;
+      }
+      console.error("[useVimeoController] player error", e);
+    });
 
     return () => {
+      destroyed = true;
       player.unload().catch(() => {});
       playerRef.current = null;
       console.debug("[useVimeoController] teardown");

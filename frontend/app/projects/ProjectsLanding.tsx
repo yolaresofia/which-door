@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import BackgroundMedia from '../components/BackgroundMedia'
 import { projects } from '../components/constants'
@@ -21,14 +21,14 @@ export default function ProjectsLanding() {
   const { saveVideoState, getPreviousVideoState } = usePageTransitionVideo()
 
   const first = projects[0]
-  const targetVideo = {
+  const targetVideo = useMemo(() => ({
     id: first?.slug ?? 0,
     videoSrc: getPreview(first) || getVimeo(first),
     previewUrl: getPreview(first),
     vimeoUrl: getVimeo(first),
     previewPoster: getPoster(first),
     bgColor: getBgColor(first),
-  }
+  }), [first])
 
   // Check for previous video state to determine initial state
   const previousVideo = getPreviousVideoState()
@@ -109,11 +109,12 @@ export default function ProjectsLanding() {
     const triggerAnimation = () => {
       if (cancelled) return
       setFontLoaded(true)
-      requestAnimationFrame(() => {
+      // Start with RAF to ensure DOM is ready
+      if (!isMobile) {
         requestAnimationFrame(() => {
-          if (!isMobile) start()
+          start()
         })
-      })
+      }
     }
 
     if ('fonts' in document && (document as any).fonts?.ready) {
@@ -321,14 +322,10 @@ export default function ProjectsLanding() {
                   className={`transition-opacity duration-300 ease-out ${
                     dimOthers ? 'opacity-40' : 'opacity-100'
                   }`}
-                  style={{ 
-                    willChange: 'opacity, transform',
-                    overflow: 'visible' // Allow content to animate outside bounds
-                  }}
                 >
                   <div
                     onClick={() => handleProjectClick(project?.slug)}
-                    className="block w-full text-left group outline-none cursor-pointer" 
+                    className="block w-full text-left group outline-none cursor-pointer"
                     data-reveal
                     role="button"
                     tabIndex={0}
@@ -338,18 +335,11 @@ export default function ProjectsLanding() {
                         handleProjectClick(project?.slug)
                       }
                     }}
-                    style={{
-                      overflow: 'visible' // Critical: allow text to move outside during animation
-                    }}
                   >
                     <h3
                       className={`max-w-[20ch] leading-tight font-semibold text-2xl transition-all duration-300 ease-out ${
                         isHighlighted ? 'text-white' : 'text-white/90'
                       }`}
-                      style={{ 
-                        backfaceVisibility: 'hidden',
-                        overflow: 'visible' // Allow text to animate freely
-                      }}
                       onMouseEnter={() => !isNavigating && select(index)}
                     >
                       {title}
@@ -359,9 +349,6 @@ export default function ProjectsLanding() {
                         className={`text-base transition-all duration-300 ease-out ${
                           isHighlighted ? 'text-white/90' : 'text-white/70'
                         }`}
-                        style={{
-                          overflow: 'visible' // Allow text to animate freely
-                        }}
                       >
                         {project.director}
                       </p>

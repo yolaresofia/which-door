@@ -99,11 +99,12 @@ export default function DirectorsIndexPage() {
     const triggerAnimation = () => {
       if (cancelled) return
       setFontLoaded(true)
-      requestAnimationFrame(() => {
+      // Start with RAF to ensure DOM is ready
+      if (!isMobile) {
         requestAnimationFrame(() => {
-          if (!isMobile) start()
+          start()
         })
-      })
+      }
     }
 
     if ('fonts' in document && (document as any).fonts?.ready) {
@@ -336,17 +337,9 @@ export default function DirectorsIndexPage() {
                   className={`transition-opacity duration-200 ${
                     isActive ? 'opacity-100' : 'opacity-70'
                   }`}
-                  style={{
-                    overflow: 'visible', // Allow animation to move freely
-                    willChange: 'opacity, transform'
-                  }}
                 >
                   <div
                     data-reveal
-                    style={{
-                      overflow: 'visible', // Critical: allow text to animate freely
-                      willChange: 'opacity, transform'
-                    }}
                   >
                     <a
                       href={`/directors/${d.slug}`}
@@ -363,10 +356,6 @@ export default function DirectorsIndexPage() {
                           'md:text-6xl text-3xl',
                           isActive ? 'text-white' : 'text-white/80',
                         ].join(' ')}
-                        style={{
-                          overflow: 'visible', // Allow text to animate freely
-                          backfaceVisibility: 'hidden'
-                        }}
                       >
                         {d.name}
                       </span>
