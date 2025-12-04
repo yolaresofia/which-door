@@ -11,9 +11,9 @@
     "prebuild": "npm run extract-types",
     "build": "sanity build",
     "deploy": "sanity deploy",
-    "dev": "sanity dev",
+    "dev": "sanity dev --port 4001",
     "extract-types": "sanity schema extract --enforce-required-fields",
-    "start": "sanity start",
+    "start": "sanity start --port 4001",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {

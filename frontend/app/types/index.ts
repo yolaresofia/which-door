@@ -11,5 +11,5 @@ export type Director = {
   vimeoUrl?: string
   specialization: string
   bio: string
-  relatedProjects: RelatedProject[]
+  otherProjects: RelatedProject[]
 }

@@ -31,10 +31,11 @@ export default function MediaSurface({
   const containerClass =
     "absolute inset-0 flex bg-black items-center justify-center " +
     (variant === "preview" ? "h-screen md:h-full" : "");
+  // Always use w-full h-full on large screens (lg+) to ensure full coverage
   const mediaClass =
     variant === "preview"
       ? "w-full h-full"
-      : "w-full aspect-video md:aspect-auto md:w-full md:h-full";
+      : "w-full aspect-video md:aspect-auto md:w-full md:h-full lg:!w-full lg:!h-full";
 
   useEffect(() => {
     const el = containerRef.current;

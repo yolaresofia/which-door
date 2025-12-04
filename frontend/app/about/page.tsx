@@ -9,7 +9,7 @@ import { useCrossfadeMedia } from '../utils/useCrossfadeMedia'
 import { gsap } from 'gsap'
 
 const bg =
-  'https://cdn.sanity.io/files/xerhtqd5/production/5068305fa81bd755e7c0dd4f119c8e2b995a8813.mp4'
+  'https://cdn.sanity.io/files/xerhtqd5/production/b1fb3f7027236bb169f9a5a32741e6e71b9c7652.mp4'
 const previewPoster =
   'https://cdn.sanity.io/images/xerhtqd5/production/99945ce01a04899a2742da8865740039d7513b57-3024x1964.png'
 

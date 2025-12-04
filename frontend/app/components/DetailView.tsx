@@ -14,7 +14,7 @@ export type DetailItem = {
   backgroundColor?: string
   specialization?: string
   description?: string
-  relatedProjects?: RelatedItem[]
+  otherProjects?: RelatedItem[]
 }
 
 type BackgroundStrategy = 'auto' | 'color' | 'video' | 'image' | 'none'
@@ -63,17 +63,17 @@ export default function DetailView({
           ) : null}
         </header>
         {item.description ? (
-          <article className="max-w-3xl md:text-2xl text-[18px] md:text-left text-white/90 leading-tight">
+          <article className=" text-[18px] md:text-left text-white/90 leading-tight">
             <p>{item.description}</p>
           </article>
         ) : null}
-        {item.relatedProjects?.length ? (
+        {item.otherProjects?.length ? (
           <div className="mt-24">
             <h2 className="md:text-[18px] text-base mb-4">
-              {pathname?.startsWith('/directors/') ? 'Projects' : 'Related projects'}
+              Other projects
             </h2>
             <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {item.relatedProjects.map((proj) => (
+              {item.otherProjects.map((proj) => (
                 <li
                   key={`${proj.title}-${proj.brand}`}
                   onMouseEnter={() =>
