@@ -27,8 +27,25 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
 
   // Derive project after hooks
   const project = useMemo(() => projects.find((p) => p.slug === slug), [slug])
+  const relatedProjects = useMemo(
+    () =>
+      projects
+        .filter((p) => p.slug !== slug)
+        .map((p) => ({
+          title: p.name,
+          directors: p.director ? [p.director] : [],
+          previewUrl: p.previewUrl,
+          url: `/projects/${p.slug}`,
+        }))
+        .slice(0, 3),
+    [projects, slug]
+  )
+  const projectWithRelated = useMemo(
+    () => (project ? {...project, otherProjects: relatedProjects} : project),
+    [project, relatedProjects]
+  )
 
-  const videoSrc = (project as any).vimeoUrl ?? (project as any).videoURL
+  const videoSrc = project ? (project as any).vimeoUrl ?? (project as any).videoURL : ''
 
   // Detect mobile
   useEffect(() => {
@@ -119,7 +136,7 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
         />
       </section>
 
-      <DetailView item={project as any} backgroundStrategy="color" />
+      <DetailView item={projectWithRelated as any} backgroundStrategy="color" />
 
       <GalleryGrid
         images={galleryImages.map((g) => g.url)}

@@ -1,6 +1,7 @@
 // utils/useSequencedReveal.ts
-import { useLayoutEffect, useRef, useCallback } from 'react'
+import { useRef, useCallback } from 'react'
 import { gsap } from 'gsap'
+import { useGSAP } from '@gsap/react'
 
 type EaseLike = gsap.TweenVars['ease']
 
@@ -97,7 +98,7 @@ export function useSequencedReveal(
     killAll()
   }, [])
 
-  useLayoutEffect(() => {
+  useGSAP(() => {
     if (autoStart) start()
     return () => killAll()
   }, [autoStart, start])

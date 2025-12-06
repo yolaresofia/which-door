@@ -1,8 +1,9 @@
 // app/components/ContactSection.tsx
 "use client";
 
-import { useLayoutEffect, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import BackgroundMedia from "./BackgroundMedia/BackgroundMedia";
 import { useSequencedReveal } from "@/app/utils/useSequencedReveal";
 
@@ -53,7 +54,7 @@ export default function ContactSection({
     });
   }, [start, enableAnimations]);
 
-  useLayoutEffect(() => {
+  useGSAP(() => {
     const el = desktopLinkRef.current;
     if (!el) return;
 

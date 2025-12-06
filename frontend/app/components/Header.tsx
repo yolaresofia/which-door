@@ -51,6 +51,16 @@ export default function Header() {
         return
       }
 
+      // Check if we're on a director detail page
+      const isDirectorDetailPage = pathname?.startsWith('/directors/') && pathname !== '/directors'
+      const fadeOutDirectorDetail = (window as any).__directorDetailFadeOut
+
+      if (isDirectorDetailPage && fadeOutDirectorDetail) {
+        e.preventDefault()
+        fadeOutDirectorDetail(url)
+        return
+      }
+
       // Check if we're on a project detail page
       const isProjectDetailPage = pathname?.startsWith('/projects/')
       const fadeOutProjectDetail = (window as any).__projectDetailFadeOut

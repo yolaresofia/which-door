@@ -20,7 +20,13 @@ export default function ProjectsLanding() {
   const pathname = usePathname()
   const { saveVideoState, getPreviousVideoState } = usePageTransitionVideo()
 
-  const first = projects[0]
+  const homepageProjects = useMemo(
+    () => projects.filter((project) => project.isInHomePage),
+    [projects]
+  )
+  const visibleProjects = homepageProjects.length ? homepageProjects : projects
+
+  const first = visibleProjects[0] ?? projects[0]
   const targetVideo = useMemo(() => ({
     id: first?.slug ?? 0,
     videoSrc: getPreview(first) || getVimeo(first),
@@ -50,7 +56,8 @@ export default function ProjectsLanding() {
   const select = useCallback((i: number) => {
     if (i === selectedIndex) return
     setSelectedIndex(i)
-    const project = projects[i]
+    const project = visibleProjects[i]
+    if (!project) return
     crossfadeTo({
       id: project?.slug ?? i,
       videoSrc: getPreview(project) || getVimeo(project),
@@ -59,7 +66,7 @@ export default function ProjectsLanding() {
       previewPoster: getPoster(project),
       bgColor: getBgColor(project),
     })
-  }, [selectedIndex, crossfadeTo])
+  }, [selectedIndex, crossfadeTo, visibleProjects])
 
   // Desktop animation
   const { start } = useSequencedReveal(listRef, {
@@ -311,7 +318,7 @@ export default function ProjectsLanding() {
             ref={listRef}
             className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-12 gap-y-10"
           >
-            {projects.map((project, index) => {
+            {visibleProjects.map((project, index) => {
               const title = getTitle(project)
               const isHighlighted = selectedIndex === index
               const dimOthers = !isHighlighted
@@ -419,7 +426,7 @@ export default function ProjectsLanding() {
             ref={isMobile ? listRef : undefined}
             className="min-h-full"
           >
-            {projects.map((project, index) => {
+            {visibleProjects.map((project, index) => {
               const title = getTitle(project)
               const isActive = selectedIndex === index
 

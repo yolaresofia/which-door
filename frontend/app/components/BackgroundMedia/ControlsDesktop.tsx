@@ -63,12 +63,12 @@ export default function ControlsDesktop(props: Props) {
       className="absolute inset-x-0 top-1/2 -translate-y-1/2 z-10 hidden px-6 md:px-12 text-white sm:p-6 md:block"
       data-touch-toggle-ignore
     >
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div
           className="mr-4 min-w-0"
           data-reveal
         >
-          {title && <div className="text-base font-semibold leading-tight truncate sm:text-2xl">{title}</div>}
+          {title && <div className="text-base font-semibold leading-tight sm:text-2xl max-w-2xs">{title}</div>}
           {subtitle && <div className="text-white/85 truncate text-base">{subtitle}</div>}
         </div>
         <div className="ml-auto flex min-w-0 items-center gap-6">

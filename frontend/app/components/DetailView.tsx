@@ -1,9 +1,10 @@
 'use client'
 import {useEffect, useMemo, useState} from 'react'
+import Link from 'next/link'
 import {usePathname} from 'next/navigation'
 import BackgroundMedia from './BackgroundMedia/BackgroundMedia'
 
-type RelatedItem = {title: string; directors: string[]; brand: string; previewUrl?: string}
+type RelatedItem = {title: string; directors: string[]; brand?: string; previewUrl?: string; url?: string}
 
 export type DetailItem = {
   name: string
@@ -22,9 +23,11 @@ type BackgroundStrategy = 'auto' | 'color' | 'video' | 'image' | 'none'
 export default function DetailView({
   item,
   backgroundStrategy = 'auto',
+  enableAnimations = false,
 }: {
   item: DetailItem
   backgroundStrategy?: BackgroundStrategy
+  enableAnimations?: boolean
 }) {
   const pathname = usePathname()
   const [hoveredProjectUrl, setHoveredProjectUrl] = useState<string | null>(null)
@@ -56,39 +59,50 @@ export default function DetailView({
     <main className="relative min-h-dvh w-full overflow-hidden text-white" style={mainStyle}>
       {showBackgroundMedia && <BackgroundMedia variant="preview" previewUrl={activePreviewSrc} bgColor={color} />}
       <section className="relative z-10 pt-32 pb-16 md:px-12 px-6 max-w-6xl">
-        <header className="mb-8">
+        <header className="mb-8" data-reveal={enableAnimations ? true : undefined}>
           <h1 className="md:text-6xl text-2xl leading-[1.05] tracking-tight">{item.name}</h1>
           {item.specialization ? (
             <p className="mt-2 text-2xl text-white/85">{item.specialization}</p>
           ) : null}
         </header>
         {item.description ? (
-          <article className=" text-[18px] md:text-left text-white/90 leading-tight">
+          <article className=" text-[18px] md:text-left text-white/90 leading-tight" data-reveal={enableAnimations ? true : undefined}>
             <p>{item.description}</p>
           </article>
         ) : null}
         {item.otherProjects?.length ? (
-          <div className="mt-24">
+          <div className="mt-24" data-reveal={enableAnimations ? true : undefined}>
             <h2 className="md:text-[18px] text-base mb-4">
               Other projects
             </h2>
             <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {item.otherProjects.map((proj) => (
                 <li
-                  key={`${proj.title}-${proj.brand}`}
+                  key={proj.url ?? `${proj.title}-${proj.brand ?? 'related'}`}
                   onMouseEnter={() =>
                     allowPreview && proj.previewUrl && setHoveredProjectUrl(proj.previewUrl)
                   }
                   onMouseLeave={() => allowPreview && setHoveredProjectUrl(null)}
                   onFocus={() => allowPreview && proj.previewUrl && setHoveredProjectUrl(proj.previewUrl)}
                   onBlur={() => allowPreview && setHoveredProjectUrl(null)}
-                  className="cursor-pointer transition-opacity hover:opacity-100 opacity-90"
+                  className={`transition-opacity hover:opacity-100 opacity-90 ${proj.url ? 'cursor-pointer' : ''}`}
                 >
-                  <div className="rounded-2xl h-full">
-                    <div className="text-base text-white/80">{proj.brand}</div>
-                    <div className="text-xl">{proj.title}</div>
-                    <div className="mt-1 text-sm text-white/70">{proj.directors.join(', ')}</div>
-                  </div>
+                  {proj.url ? (
+                    <Link
+                      href={proj.url}
+                      className="block rounded-2xl h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                    >
+                      {proj.brand ? <div className="text-base text-white/80">{proj.brand}</div> : null}
+                      <div className="text-xl">{proj.title}</div>
+                      <div className="mt-1 text-sm text-white/70">{proj.directors.join(', ')}</div>
+                    </Link>
+                  ) : (
+                    <div className="rounded-2xl h-full">
+                      {proj.brand ? <div className="text-base text-white/80">{proj.brand}</div> : null}
+                      <div className="text-xl">{proj.title}</div>
+                      <div className="mt-1 text-sm text-white/70">{proj.directors.join(', ')}</div>
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>

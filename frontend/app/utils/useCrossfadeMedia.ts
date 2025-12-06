@@ -1,7 +1,8 @@
 'use client'
 
-import { useRef, useState, useEffect, useCallback } from 'react'
+import { useRef, useState, useCallback } from 'react'
 import { gsap } from 'gsap'
+import { useGSAP } from '@gsap/react'
 
 export type Media = {
   id: string | number;
@@ -82,7 +83,7 @@ export function useCrossfadeMedia(initial: Media, opts?: { duration?: number }) 
     [currentSlot, slots, D, prefersReduced]
   )
 
-  useEffect(() => {
+  useGSAP(() => {
     return () => {
       tlRef.current?.kill();
     };

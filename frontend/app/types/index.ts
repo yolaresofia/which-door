@@ -1,7 +1,8 @@
 export type RelatedProject = {
   title: string
   directors: string[]
-  brand: string
+  brand?: string
+  url?: string
 }
 
 export type Director = {
