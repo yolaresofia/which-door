@@ -69,7 +69,7 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
   )
 
   const gallery = useMemo(
-    () => project?.galleryImages ?? galleryImages,
+    () => project?.galleryImages?.filter((g) => g?.url) ?? galleryImages,
     [project]
   )
 
@@ -167,7 +167,7 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
       <DetailView item={projectWithRelated as any} backgroundStrategy="color" />
 
       <GalleryGrid
-        images={gallery.map((g) => g.url)}
+        images={gallery}
         onImageClick={(i: number) => {
           setStartIndex(i)
           setOpen(true)

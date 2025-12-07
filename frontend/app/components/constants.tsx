@@ -32,6 +32,68 @@ export const projects = [
         url: '/projects/ufc-return-to-london-ft-kojey-radical',
       },
     ],
+    galleryImages: [
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/afcd2a263f5c2a6460196cb33258fbaa8ca072dc-4362x2454.webp',
+        alt: 'Joy Anonymous 1',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/950e9a6bb9c23a42bd71097d5a4892599f067bc0-5120x2880.webp',
+        alt: 'Joy Anonymous 2',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/5f8f641974ce7f9d0d04dab43c8f21c3823ebd8d-4362x2454.webp',
+        alt: 'Joy Anonymous 3',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/33a274329cd56e14d6ad7910ad12dc48d1ad9527-4362x2454.webp',
+        alt: 'Joy Anonymous 4',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/6dc33b9fcf498ffe0f5d9b85c12db0f8bfcefae3-4362x2454.webp',
+        alt: 'Joy Anonymous 5',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/2b24a9ed5a2105d58409c814b23f3d1b183e921d-5120x2880.webp',
+        alt: 'Joy Anonymous 6',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/2b70aac191c3bcfe60115b3ca32181e46e0341f0-5120x2880.webp',
+        alt: 'Joy Anonymous 7',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/292133ad90005b264ff784ee1e5134afb730556f-4362x2454.webp',
+        alt: 'Joy Anonymous 8',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/0a5d4869489494838cd26b2069dc3a26020b10ad-4362x2454.webp',
+        alt: 'Joy Anonymous 9',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/af0973be168c2727ff5777d582f7529c6ad0b2fe-4362x2454.webp',
+        alt: 'Joy Anonymous 10',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/876dc6e4080cfe00eeceecd79f496969f5e61327-5120x2880.webp',
+        alt: 'Joy Anonymous 11',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/e1730a5f052f9a068234b098405626f9d148fd4d-4362x2454.webp',
+        alt: 'Joy Anonymous 12',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/35d5049557ed6d426db70fc053f7a491719ec6a0-4362x2454.webp',
+        alt: 'Joy Anonymous 13',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/ea7175ea652ce5f758d52fc66a8b5df202f36d70-5120x2880.webp',
+        alt: 'Joy Anonymous 14',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/0da95a98d6823a0f643f05372d4dd416b5ffd852-4362x2454.webp',
+        alt: 'Joy Anonymous 15',
+      },
+    ],
   },
   {
     name: 'Inside José Andrés’ Mini Bar',
@@ -70,6 +132,128 @@ export const projects = [
         url: '/projects/la-magicienne-film-v1-bridal-couture-collection',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/79397636e29b834e4fb57ecf3ed8ffd779738314.webm',
+      },
+    ],
+    galleryImages: [
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/98e8d6b381c6a4caa1b9711c03a3d63628ac702b-4525x2545.webp',
+        alt: 'Inside José Andrés Mini bar 1',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/63e221848b037bd9a0263c928d949d0f435a5b8c-4525x2545.webp',
+        alt: 'Inside José Andrés Mini bar 2',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/97e15cd3dafb67b27a47f5df724c2bb8be9eee29-4525x2545.webp',
+        alt: 'Inside José Andrés Mini bar 3',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/142718d960b312919f7908df7fd3e96c3502c27d-4525x2545.webp',
+        alt: 'Inside José Andrés Mini bar 4',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/bca2cae82aee3b5a62e513645009f3933060afe7-4525x2545.webp',
+        alt: 'Inside José Andrés Mini bar 5',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/420ba4ddaf22fec94fc4be20c91e58f2e4e03f7e-4525x2545.webp',
+        alt: 'Inside José Andrés Mini bar 6',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/6f26efd6f160eb72f2b47c5252d7f2a3f2ab4e86-4092x2302.webp',
+        alt: 'Inside José Andrés Mini bar 7',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/5800ee80527113059fc649b3b9e23226c3f54d1f-4525x2545.webp',
+        alt: 'Inside José Andrés Mini bar 8',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/96f82082bbf1701be4cef26b4489428139cb2be3-4062x2285.webp',
+        alt: 'Inside José Andrés Mini bar 9',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/7a2a6170862e16f38a37e2a717deb8013be1c0db-4525x2545.webp',
+        alt: 'Inside José Andrés Mini bar 10',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/4aa0869d7931c4d5578dcf3c27aa2fc7931780ef-4525x2545.webp',
+        alt: 'Inside José Andrés Mini bar 11',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/26dca14a7dc1c0160498fb53bc6f6d6b7b0a008e-4525x2545.webp',
+        alt: 'Inside José Andrés Mini bar 12',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/ff8bb51a6ec112b8ce3cc9579a1c8441bd8066c3-4525x2545.webp',
+        alt: 'Inside José Andrés Mini bar 13',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/1b89ed1040e746b10833063ba3e10afd88d15045-4525x2545.webp',
+        alt: 'Inside José Andrés Mini bar 14',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/0d17c96671994f79c3e9a05ec73fb50363a29aef-4558x2564.webp',
+        alt: 'Inside José Andrés Mini bar 15',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/13c8a774bc920d767f66a2bb8f7abb08ea78ddae-4525x2545.webp',
+        alt: 'Inside José Andrés Mini bar 16',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/d22af6e697ad16ee11408f235f97292647b897a2-4525x2545.webp',
+        alt: 'Inside José Andrés Mini bar 17',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/c0b8ee4cd27a827cf1fb361ef4da60fc5b7a2bc0-4525x2545.webp',
+        alt: 'Inside José Andrés Mini bar 18',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/04b572cf50d1f4ae0840d7d1655bfffe78aa85c9-4525x2545.webp',
+        alt: 'Inside José Andrés Mini bar 19',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/eae5684053765447c6a44e8d7bbec6578c3d490c-4525x2545.webp',
+        alt: 'Inside José Andrés Mini bar 20',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/13e64e6070fe6dfbdce01615dcb3561eccd2cff4-4402x2476.webp',
+        alt: 'Inside José Andrés Mini bar 21',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/b479de691a29e095167cadc65c483247301a8a55-4525x2545.webp',
+        alt: 'Inside José Andrés Mini bar 22',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/9858293931f791411221e712b472333bd52fc5ba-4525x2545.webp',
+        alt: 'Inside José Andrés Mini bar 23',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/12b576f9e21525239d00c9cb538c76a83800c824-4430x2492.webp',
+        alt: 'Inside José Andrés Mini bar 24',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/45e5265d73bd3331435b94d78f8b19efad93cf55-4525x2545.webp',
+        alt: 'Inside José Andrés Mini bar 25',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/6bc0ab986a726f90d515d9a086c6db4f24f6b57b-4525x2545.webp',
+        alt: 'Inside José Andrés Mini bar 26',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/28e9d88db1ebce90726c34c998ef252400ed78f0-4525x2545.webp',
+        alt: 'Inside José Andrés Mini bar 27',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/98516fbf00d661bb566257623bc282906c669038-4525x2545.webp',
+        alt: 'Inside José Andrés Mini bar 28',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/9c5f12ec23fd484d492f0a9e074fe5878d08ce26-4525x2545.webp',
+        alt: 'Inside José Andrés Mini bar 29',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/a27bf97f5276720fe2bf8228d1a0bebfc197db3b-4525x2545.webp',
+        alt: 'Inside José Andrés Mini bar 30',
       },
     ],
   },
@@ -151,7 +335,7 @@ export const projects = [
         url: 'https://cdn.sanity.io/images/xerhtqd5/production/12931bb145c3fd248cfb875300db8115dbf7c298-4853x2730.webp',
         alt: 'Grandma Artsakh 12',
       },
-            {
+      {
         url: 'https://cdn.sanity.io/images/xerhtqd5/production/e66c15967c5d82539da0e5227b434ad426e8ae91-5120x2880.webp',
         alt: 'Grandma Artsakh 13',
       },
@@ -296,6 +480,80 @@ export const projects = [
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/e723f5af4ae111bb4df2ed754b9a55d8d9758c30.mp4',
         url: '/projects/ufc-return-to-london-ft-kojey-radical',
+      },
+    ],
+    galleryImages: [
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/2ce9b1590cd9447c1534b469b7b80749f38bae06-4855x2731.webp',
+        alt: 'Idris Elba x King Charles 1',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/a5b88f592e141bac64840843b4f0db7dbed41569-4855x2731.webp',
+        alt: 'Idris Elba x King Charles 2',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/b3eb1d8b7c95cc789a614940458c55849b79bff5-4855x2731.webp',
+        alt: 'Idris Elba x King Charles 3',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/2aeb499a36bd54bdc94ee1f9da963bcea6cd1258-4855x2731.webp',
+        alt: 'Idris Elba x King Charles 4',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/21bd882ccf173faef218da89cf3e0db9399a5a02-4855x2731.webp',
+        alt: 'Idris Elba x King Charles 5',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/bcb92fef149ab08bc9fe764640a80621cd8dc3e2-4855x2731.webp',
+        alt: 'Idris Elba x King Charles 6',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/e981d81acfd2f9be4060a0d1dcf281e4b9bfd69a-4855x2731.webp',
+        alt: 'Idris Elba x King Charles 7',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/27812b83cc10c826a388fff1d51b37e95e79f432-4855x2731.webp',
+        alt: 'Idris Elba x King Charles 8',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/8f557cfdbfd90269c5539668c64cfdda3508e665-4864x2736.webp',
+        alt: 'Idris Elba x King Charles 9',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/9dbe367d0b24b3c87b427dea83ae9e894989f893-4855x2731.webp',
+        alt: 'Idris Elba x King Charles 10',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/dde5541e827f2dabe05073990efb2f533abf3e1e-5120x2880.webp',
+        alt: 'Idris Elba x King Charles 11',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/c5dc3c2b52473a3351f1f3722e8d8d07d2f734b3-4855x2731.webp',
+        alt: 'Idris Elba x King Charles 12',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/09f33fc273365cff6c2c64971d04a432163f4bf9-4855x2731.webp',
+        alt: 'Idris Elba x King Charles 13',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/50772df585e4772c096cc24d3343d16a5717bc71-4855x2731.webp',
+        alt: 'Idris Elba x King Charles 14',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/2215d4a6ec5cea36a1a335075a97afdaa32fa7cc-4855x2731.webp',
+        alt: 'Idris Elba x King Charles 15',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/60b5c9901eaa6a498c6e9a86c6f0d32a6bde8ef7-4855x2731.webp',
+        alt: 'Idris Elba x King Charles 16',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/e72df12e237a803036f7a216f3798027ff2e868d-4855x2731.webp',
+        alt: 'Idris Elba x King Charles 17',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/402731c1fee0c0915512de0fb714ddb97102e7ce-5120x2880.webp',
+        alt: 'Idris Elba x King Charles 18',
       },
     ],
   },
@@ -517,6 +775,80 @@ export const projects = [
           'https://cdn.sanity.io/files/xerhtqd5/production/79397636e29b834e4fb57ecf3ed8ffd779738314.webm',
       },
     ],
+    galleryImages: [
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/b4cbab8cbb260340e63b5a3bcbe264660bca4dcd-4864x2736.webp',
+        alt: 'Gucci Marie Claire 1',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/a07957b98d83c4379d88c8bbb88cbf3b498aba0b-4864x2736.webp',
+        alt: 'Gucci Marie Claire 2',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/5aab54a11d13059ea49a14731e98055b17623332-4864x2736.webp',
+        alt: 'Gucci Marie Claire 3',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/24120814dd1824330ff6537c723aad101e4dd26b-4864x2736.webp',
+        alt: 'Gucci Marie Claire 4',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/60acab8b2141bc20dc0059384d020426d77c87bc-4864x2736.webp',
+        alt: 'Gucci Marie Claire 5',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/c6df325fe22baa19d1b8a80b8d767a13cada6553-4864x2736.webp',
+        alt: 'Gucci Marie Claire 6',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/02eded75b9ac4446b3eaecc55915ebaf3ee06ab0-4864x2736.webp',
+        alt: 'Gucci Marie Claire 7',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/f753366e18e474f12c9bd4ffd029d43f3d18fb23-4864x2736.webp',
+        alt: 'Gucci Marie Claire 8',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/8f557cfdbfd90269c5539668c64cfdda3508e665-4864x2736.webp',
+        alt: 'Gucci Marie Claire 9',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/cad1265c3d8ca0c9916c1b0e467e796d774a039c-4864x2736.webp',
+        alt: 'Gucci Marie Claire 10',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/35e00fe814a3645f76973c546d2659ad544ac4fc-4864x2736.webp',
+        alt: 'Gucci Marie Claire 11',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/71e74ce5f5cbaae2a7f6f35c1f6f68549faee04b-4864x2736.webp',
+        alt: 'Gucci Marie Claire 12',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/09de5d93e3cc7c81bc087f9c907ec4aed762edb3-4864x2736.webp',
+        alt: 'Gucci Marie Claire 13',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/575b4d164ad6afed0b2811f0d5405467fe2f6c6b-4864x2736.webp',
+        alt: 'Gucci Marie Claire 14',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/ab04ec279493174c9bd3c7125af1a38a96e62728-4864x2736.webp',
+        alt: 'Gucci Marie Claire 15',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/66a195ef916c0497d9012bbbf51bde1a478bd67e-4864x2736.webp',
+        alt: 'Gucci Marie Claire 16',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/c7fe262119d9656c4c6555509c9a7e618af666dd-4864x2736.webp',
+        alt: 'Gucci Marie Claire 17',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/442271401dcaa4082a1581a464b4aeb8fa07a6dc-4864x2736.webp',
+        alt: 'Gucci Marie Claire 18',
+      },
+    ],
   },
   {
     name: 'TRANCE - A Road Trip With Burberry',
@@ -656,6 +988,68 @@ export const projects = [
         brand: 'UNDP Sweden',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/e723f5af4ae111bb4df2ed754b9a55d8d9758c30.mp4',
+      },
+    ],
+     galleryImages: [
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/1e6fc22642e694aeb0bb60b210bb56296862aea2-4682x2634.webp',
+        alt: 'Island Island Island 1',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/597350e2e3a5de5e67e6c5f438f9fd42084a27a2-4682x2634.webp',
+        alt: 'Island Island Island 2',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/e1407f2345f9fbb470eef4bc564ed1869548921e-4682x2634.webp',
+        alt: 'Island Island Island 3',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/ca5e891e8968bcc680a74f035043e28820dc07e7-4682x2634.webp',
+        alt: 'Island Island Island 4',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/4a6de851df158cdf206dd2c078b80b3254bfeb04-4682x2634.webp',
+        alt: 'Island Island Island 5',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/4a6de851df158cdf206dd2c078b80b3254bfeb04-4682x2634.webp',
+        alt: 'Island Island Island 6',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/c21a491d0a4bc23b4bc14e5d048482e598b682b0-4682x2634.webp',
+        alt: 'Island Island Island 7',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/29dfa5c5df5e1fb358d1ae8674fff6f486335ce0-4682x2634.webp',
+        alt: 'Island Island Island 8',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/e214b0e7220d955cc10de2eda09435ea985ccbb4-4682x2634.webp',
+        alt: 'Island Island Island 9',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/c2c57516ca462a2efe5e0908b18c1836cf4050e2-4682x2634.webp',
+        alt: 'Island Island Island 10',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/0bf9060633bb54dd5934086824567b26eac7e8a9-4682x2634.webp',
+        alt: 'Island Island Island 11',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/3d62f67e800ba8d1f8f55c6b3ee1f546cd901fb3-4682x2634.webp',
+        alt: 'Island Island Island 12',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/e385aed2450144860b356cbd16a6e87429c14070-4682x2634.webp',
+        alt: 'Island Island Island 13',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/7be5a6bf3ad37096c7e583faf702215165bd7a81-4682x2634.webp',
+        alt: 'Island Island Island 14',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/bba611bd3cf4fa27210b2710b20c9f63ccab691d-4682x2634.webp',
+        alt: 'Island Island Island 15',
       },
     ],
   },
