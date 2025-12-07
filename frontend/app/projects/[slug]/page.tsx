@@ -27,22 +27,50 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
 
   // Derive project after hooks
   const project = useMemo(() => projects.find((p) => p.slug === slug), [slug])
-  const relatedProjects = useMemo(
-    () =>
-      projects
-        .filter((p) => p.slug !== slug)
-        .map((p) => ({
-          title: p.name,
-          directors: p.director ? [p.director] : [],
-          previewUrl: p.previewUrl,
-          url: `/projects/${p.slug}`,
-        }))
-        .slice(0, 3),
-    [projects, slug]
-  )
+  const relatedProjects = useMemo(() => {
+    if (!project) return []
+
+    const slugify = (value: string) =>
+      value
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+
+    if (project.otherProjects?.length) {
+      return project.otherProjects.map((proj: any) => {
+        if (proj.url) return proj
+
+        const match =
+          projects.find((p) => p.name.toLowerCase() === (proj.title ?? '').toLowerCase()) ||
+          projects.find((p) => p.slug === slugify(proj.title ?? ''))
+
+        return {
+          ...proj,
+          url: match ? `/projects/${match.slug}` : undefined,
+          directors: proj.directors ?? (match?.director ? [match.director] : []),
+          previewUrl: proj.previewUrl ?? match?.previewUrl ?? project.previewUrl,
+        }
+      })
+    }
+
+    return projects
+      .filter((p) => p.slug !== slug)
+      .map((p) => ({
+        title: p.name,
+        directors: p.director ? [p.director] : [],
+        previewUrl: p.previewUrl,
+        url: `/projects/${p.slug}`,
+      }))
+      .slice(0, 3)
+  }, [project, slug, projects])
   const projectWithRelated = useMemo(
     () => (project ? {...project, otherProjects: relatedProjects} : project),
     [project, relatedProjects]
+  )
+
+  const gallery = useMemo(
+    () => project?.galleryImages ?? galleryImages,
+    [project]
   )
 
   const videoSrc = project ? (project as any).vimeoUrl ?? (project as any).videoURL : ''
@@ -139,7 +167,7 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
       <DetailView item={projectWithRelated as any} backgroundStrategy="color" />
 
       <GalleryGrid
-        images={galleryImages.map((g) => g.url)}
+        images={gallery.map((g) => g.url)}
         onImageClick={(i: number) => {
           setStartIndex(i)
           setOpen(true)
@@ -147,7 +175,7 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
       />
       <ContactSection bgColor="#477AA1" />
       <ImageLightbox
-        images={galleryImages}
+        images={gallery}
         isOpen={open}
         initialIndex={startIndex}
         onClose={() => setOpen(false)}
