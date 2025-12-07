@@ -31,5 +31,11 @@
     "@sanity/prettier-config": "^2.0.1",
     "npm-run-all2": "^5.0.2",
     "prettier": "^3.6.2"
+  },
+  "dependencies": {
+    "next": "^16.0.7",
+    "next-sanity": "^11.6.10",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1"
   }
 }
