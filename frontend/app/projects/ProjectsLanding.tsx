@@ -8,6 +8,7 @@ import { useCrossfadeMedia } from '../utils/useCrossfadeMedia'
 import { useSequencedReveal } from '../utils/useSequencedReveal'
 import { usePageTransitionVideo } from '../utils/usePageTransitionVideo'
 import { gsap } from 'gsap'
+import { useGSAP } from '@gsap/react'
 
 const getTitle = (p: any) => p?.name ?? p?.title ?? 'Untitled'
 const getPreview = (p: any) => p?.previewUrl ?? ''
@@ -124,30 +125,40 @@ export default function ProjectsLanding() {
       }
     }
 
-    if ('fonts' in document && (document as any).fonts?.ready) {
-      ;(document as any).fonts.ready.then(() => {
-        ;(document as any).fonts.load('normal 1em Neue').then(
-          () => {
+    // Simplified font loading that works in production
+    if (typeof window !== 'undefined' && 'fonts' in document) {
+      const fonts = (document as any).fonts
+      if (fonts?.ready) {
+        fonts.ready.then(() => {
+          // Try to load the font, but don't wait forever
+          Promise.race([
+            fonts.load('normal 1em Neue').catch(() => null),
+            new Promise(resolve => setTimeout(resolve, 500))
+          ]).then(() => {
             if (!cancelled) triggerAnimation()
-          },
-          () => {
-            if (!cancelled) triggerAnimation()
-          }
-        )
-      })
+          })
+        }).catch(() => {
+          // If fonts.ready fails, fallback to timeout
+          if (!cancelled) timeoutId = setTimeout(triggerAnimation, 100)
+        })
+      } else {
+        timeoutId = setTimeout(triggerAnimation, 100)
+      }
     } else {
       timeoutId = setTimeout(triggerAnimation, 100)
     }
 
+    // Safety timeout to ensure animation always runs
     const safetyTimeout = setTimeout(() => {
       if (!cancelled && !fontLoaded) {
+        console.log('⏰ Projects: Safety timeout triggered, starting animation')
         triggerAnimation()
       }
-    }, 3000)
+    }, 1000)
 
     return () => {
       cancelled = true
-      clearTimeout(timeoutId)
+      if (timeoutId) clearTimeout(timeoutId)
       clearTimeout(safetyTimeout)
     }
   }, [start, fontLoaded, isMobile])
@@ -209,6 +220,10 @@ export default function ProjectsLanding() {
     // Fade out all project titles
     if (listRef.current) {
       const items = listRef.current.querySelectorAll('[data-reveal]')
+      if (items.length === 0) {
+        router.push(url)
+        return
+      }
 
       gsap.to(items, {
         opacity: 0,

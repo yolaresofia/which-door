@@ -1,7 +1,7 @@
 // app/components/ContactSection.tsx
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import BackgroundMedia from "./BackgroundMedia/BackgroundMedia";
@@ -45,14 +45,14 @@ export default function ContactSection({
   });
 
   // Trigger animation on mount (only if enableAnimations is true)
-  useEffect(() => {
+  useGSAP(() => {
     if (!enableAnimations) return;
 
     // Start with RAF to ensure DOM is ready
     requestAnimationFrame(() => {
       start();
     });
-  }, [start, enableAnimations]);
+  }, { dependencies: [start, enableAnimations] });
 
   useGSAP(() => {
     const el = desktopLinkRef.current;
