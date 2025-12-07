@@ -449,6 +449,60 @@ export const projects = [
         url: '/projects/joy-anonymous',
       },
     ],
+    galleryImages: [
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/8f9aece8b36c881463b5066eb0ed108ea13920b9-4850x2728.webp',
+        alt: 'UFC 1',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/462767a744fb67013caed9801d204fdb9caad4ab-4850x2728.webp',
+        alt: 'UFC 2',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/4ce47aec38979f886e2a11b0921d3d11e5081585-4850x2728.webp',
+        alt: 'UFC 3',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/4ee3e0f7079b182c7edea2e198a629f6bcf80399-4850x2728.webp',
+        alt: 'UFC 4',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/b8d872477aefdf46f168358d6b4dedd10d380580-4850x2728.webp',
+        alt: 'UFC 5',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/90782c1e2aa85e8303c21e3954e2bc82b20a3ad3-4850x2728.webp',
+        alt: 'UFC 6',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/8c20f301a3d6caa567478af20da2f3fbd41b84b8-4850x2728.webp',
+        alt: 'UFC 7',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/a622541234aabbd1d40b32140484076b805f85a5-4850x2728.webp',
+        alt: 'UFC 8',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/bbc7b2fee5b1c49aae3dbdadf9b71e7eb7175641-4850x2728.webp',
+        alt: 'UFC 9',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/727e5e190ffba64406f7c6af6ec8e9f658f92c81-4850x2728.webp',
+        alt: 'UFC 10',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/6a606cb00359d0d3a7097aff0ee351049966d80b-4850x2728.webp',
+        alt: 'UFC 11',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/8817722f37c5d43e654d1fde8a5c83c226dec367-4850x2728.webp',
+        alt: 'UFC 12',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/16ba6a6cd7ab8c68bdcaf6e4ac49d233051da8e6-4850x2728.webp',
+        alt: 'UFC 13',
+      },
+    ],
   },
   {
     name: 'Idris Elba x King Charles | Creative Futures',
@@ -990,7 +1044,7 @@ export const projects = [
           'https://cdn.sanity.io/files/xerhtqd5/production/e723f5af4ae111bb4df2ed754b9a55d8d9758c30.mp4',
       },
     ],
-     galleryImages: [
+    galleryImages: [
       {
         url: 'https://cdn.sanity.io/images/xerhtqd5/production/1e6fc22642e694aeb0bb60b210bb56296862aea2-4682x2634.webp',
         alt: 'Island Island Island 1',
@@ -1147,6 +1201,64 @@ export const projects = [
         url: '/projects/arrogance',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/42a969d616fadeb6654b143e770e39fc48921795.webm',
+      },
+    ],
+    galleryImages: [
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/6c4d9bca6699858d7313c2897e42060e6537d2a0-4400x2475.webp',
+        alt: 'Is the world getting better? 1',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/0547c7c756ac1067611dbef6a6486c333be90cba-4400x2475.webp',
+        alt: 'Is the world getting better? 2',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/32ab98063051818db64e47b83706b6978893cb99-4400x2475.webp',
+        alt: 'Is the world getting better? 3',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/f1eda11c6ff5305ba940504b2ca2de5aaca4f16b-4400x2475.webp',
+        alt: 'Is the world getting better? 4',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/a4fcacb978bb405f68fd28dd74b1fb8b0107dfd2-5120x2880.webp',
+        alt: 'Is the world getting better? 5',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/4f2b7894228f2d2e220d790265e85846b8244f18-5120x2880.webp',
+        alt: 'Is the world getting better? 6',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/305fd0526dd015ea30a2225ca8148c3c5fd97db9-5120x2880.webp',
+        alt: 'Is the world getting better? 7',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/ad676dacd7cf96c314596de29346130b8cb8a928-5120x2880.webp',
+        alt: 'Is the world getting better? 8',
+      },
+         {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/6fd81b4024cfe68153b6bf53bf95496c2da415b2-5120x2880.webp',
+        alt: 'Is the world getting better? 9',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/88056dc36b42434615f6e96f59a8a883fe48c12f-5120x2880.webp',
+        alt: 'Is the world getting better? 10',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/e63f37a788108aa3370da053ba2338c44c6b4980-5120x2880.webp',
+        alt: 'Is the world getting better? 11',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/5ae4721e739dcaa105631a9314e9f51fa1ef4d21-5120x2880.webp',
+        alt: 'Is the world getting better? 12',
+      },
+           {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/24d707551fc69791bbc3b3431aeadf53a7151ec2-5120x2880.webp',
+        alt: 'Is the world getting better? 13',
+      },
+      {
+        url: 'https://cdn.sanity.io/images/xerhtqd5/production/a89f0a645e7b153ce7a1c226367794017072f298-5120x2880.webp',
+        alt: 'Is the world getting better? 14',
       },
     ],
   },
