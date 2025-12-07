@@ -77,28 +77,6 @@ export default function BackgroundMedia({
     setVideoHasStarted(true);
   }, []);
 
-  useEffect(() => {
-    console.debug("[BackgroundMedia] props", {
-      variant,
-      usingNativeVideo,
-      vimeoSrc: activeVimeoSrc,
-      previewSrc: activePreviewSrc,
-      effectiveControls,
-      hasPoster: !!previewPoster,
-      bgColor,
-      shouldUsePoster,
-    });
-  }, [
-    activePreviewSrc,
-    activeVimeoSrc,
-    bgColor,
-    effectiveControls,
-    previewPoster,
-    shouldUsePoster,
-    usingNativeVideo,
-    variant,
-  ]);
-
   const clearControlsHideTimer = useCallback(() => {
     if (controlsHideTimerRef.current != null) {
       window.clearTimeout(controlsHideTimerRef.current);
@@ -190,20 +168,6 @@ export default function BackgroundMedia({
   const posterOpacity = posterPhase === "shown" ? 1 : 0;
   const videoVisible = !shouldUsePoster || videoHasStarted;
   const pointerTrapActive = effectiveControls && isFullscreen && !controlsVisible;
-
-  // Quick container size log
-  useEffect(() => {
-    const el = containerEl.current;
-    if (!el) return;
-    const log = (ctx: string) => {
-      const r = el.getBoundingClientRect();
-      console.debug("[BackgroundMedia] container size", ctx, { w: r.width, h: r.height });
-    };
-    log("mount");
-    const ro = new ResizeObserver(() => log("ResizeObserver"));
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
 
   return (
     <div

@@ -18,10 +18,8 @@ export function handleError(error: unknown) {
         : undefined,
     })
   } else if (error instanceof Error) {
-    console.error(error)
     toast.error(error.name, {description: error.message, duration: Infinity})
   } else {
-    console.error(error)
     toast.error('Unknown error', {
       description: 'Check the console for more details',
       duration: Infinity,

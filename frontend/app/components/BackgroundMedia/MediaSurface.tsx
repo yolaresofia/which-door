@@ -38,60 +38,6 @@ export default function MediaSurface({
       : "w-full aspect-video md:aspect-auto md:w-full md:h-full lg:!w-full lg:!h-full";
 
   useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    console.debug(`[${name}] mount`, {
-      vimeoSrc,
-      previewSrc,
-      controls,
-      autoPlay,
-      usingNative,
-      containerClass,
-      mediaClass,
-      ua: navigator.userAgent,
-    });
-
-    const logSizes = (ctx = "initial") => {
-      const r = el.getBoundingClientRect();
-      const vv = (window as any).visualViewport;
-      console.debug(`[${name}] sizes (${ctx})`, {
-        container: { w: r.width, h: r.height },
-        innerHeight: window.innerHeight,
-        visualViewportH: vv?.height,
-        devicePixelRatio: window.devicePixelRatio,
-      });
-    };
-
-    logSizes("mount");
-
-    const ro = new ResizeObserver(() => logSizes("ResizeObserver"));
-    ro.observe(el);
-
-    const onResize = () => logSizes("window.resize");
-    window.addEventListener("resize", onResize);
-
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", onResize);
-      console.debug(`[${name}] unmount`);
-    };
-  }, [autoPlay, containerClass, mediaClass, name, usingNative, vimeoSrc, previewSrc, controls]);
-
-  // Quick viewport unit sanity
-  useEffect(() => {
-    const testEl = document.createElement("div");
-    testEl.style.position = "absolute";
-    testEl.style.height = "100svh";
-    document.body.appendChild(testEl);
-    const svhPx = testEl.getBoundingClientRect().height;
-    testEl.style.height = "100vh";
-    const vhPx = testEl.getBoundingClientRect().height;
-    document.body.removeChild(testEl);
-    console.debug(`[${name}] viewport-units`, { svhPx, vhPx, innerHeight: window.innerHeight });
-  }, [name]);
-
-  useEffect(() => {
     if (!usingNative) return;
     const video = videoRef.current;
     if (!video) return;

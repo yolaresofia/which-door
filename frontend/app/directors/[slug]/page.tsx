@@ -1,29 +1,35 @@
 // app/directors/[slug]/page.tsx
 'use client'
 
-import { use, useEffect, useRef, useState, useCallback, useMemo } from 'react'
-import { notFound, useRouter } from 'next/navigation'
+import { use, useEffect, useRef, useState, useMemo } from 'react'
+import { notFound } from 'next/navigation'
 import DetailView from '@/app/components/DetailView'
 import { directors, projects } from '@/app/components/constants'
 import { useSequencedReveal } from '@/app/utils/useSequencedReveal'
 import { usePageTransitionVideo } from '@/app/utils/usePageTransitionVideo'
 import { useCrossfadeMedia } from '@/app/utils/useCrossfadeMedia'
+import { useFadeOutNavigation } from '@/app/utils/useFadeOutNavigation'
 import BackgroundMedia from '@/app/components/BackgroundMedia/BackgroundMedia'
 import { gsap } from 'gsap'
+import { useGSAP } from '@gsap/react'
 
 export default function DirectorPage({params}: {params: Promise<{slug: string}>}) {
   const {slug} = use(params)
-  const router = useRouter()
-  const { saveVideoState, getPreviousVideoState } = usePageTransitionVideo()
+  const { getPreviousVideoState } = usePageTransitionVideo()
 
   const [fontLoaded, setFontLoaded] = useState(false)
-  const [isNavigating, setIsNavigating] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
   const contentRef = useRef<HTMLElement | null>(null)
   const mainRef = useRef<HTMLElement | null>(null)
-  const animationRef = useRef<gsap.core.Tween | null>(null)
   const hasTransitionedRef = useRef(false)
+
+  // Use the reusable fade-out navigation hook
+  const { fadeOutAndNavigate, isNavigating } = useFadeOutNavigation(mainRef, {
+    selector: '[data-reveal]',
+    isMobile,
+    saveVideo: true,
+  })
 
   const item = useMemo(() => directors.find((d) => d.slug === slug), [slug])
 
@@ -81,7 +87,6 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
   useEffect(() => {
     if (hasTransitionedRef.current || !previousVideo || isMobile) return
 
-    console.log('📹 DirectorDetail: Transitioning from previous page video')
     hasTransitionedRef.current = true
 
     // Crossfade from previous video to director video after a brief delay
@@ -103,13 +108,13 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
   }, [])
 
   // Hide content initially to prevent FOUC
-  useEffect(() => {
+  useGSAP(() => {
     if (!contentRef.current || isMobile) return
 
     // Set initial hidden state before animation
     const items = contentRef.current.querySelectorAll('[data-reveal]')
     gsap.set(items, { opacity: 0, y: 20, scale: 0.98 })
-  }, [isMobile])
+  }, { dependencies: [isMobile], scope: contentRef })
 
   // Font loading + trigger enter animation
   useEffect(() => {
@@ -155,7 +160,6 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
     // Safety timeout to ensure animation always runs
     const safetyTimeout = setTimeout(() => {
       if (!cancelled && !fontLoaded) {
-        console.log('⏰ DirectorDetail: Safety timeout triggered, starting animation')
         triggerAnimation()
       }
     }, 1000)
@@ -167,86 +171,19 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
     }
   }, [start, fontLoaded, isMobile])
 
-  // Fade-out animation function
-  const fadeOutAndNavigate = useCallback((url: string) => {
-    if (isNavigating) return
-
-    console.log('🎬 DirectorDetail: Starting fade-out animation...')
-    setIsNavigating(true)
-
-    // Save current video state for the next page to use
-    const currentMedia = slotMedia[0] || slotMedia[1]
-    if (currentMedia) {
-      saveVideoState({
-        id: currentMedia.id,
-        videoSrc: currentMedia.videoSrc || '',
-        previewUrl: currentMedia.previewUrl,
-        vimeoUrl: currentMedia.vimeoUrl,
-        previewPoster: currentMedia.previewPoster,
-        bgColor: currentMedia.bgColor,
-      })
-    }
-
-    // Disable pointer events during animation
-    if (mainRef.current) {
-      mainRef.current.style.pointerEvents = 'none'
-    }
-
-    // Fade out content
-    if (contentRef.current) {
-      const items = contentRef.current.querySelectorAll('[data-reveal]')
-
-      console.log('🎬 DirectorDetail: Found items to animate:', items.length)
-
-      if (items.length === 0) {
-        console.warn('⚠️ DirectorDetail: No items found with [data-reveal], navigating immediately')
-        router.push(url)
-        return
-      }
-
-      // Kill any existing animation
-      if (animationRef.current) {
-        animationRef.current.kill()
-      }
-
-      // Create the animation
-      animationRef.current = gsap.to(items, {
-        opacity: 0,
-        y: -30,
-        scale: 0.92,
-        duration: 0.7,
-        ease: 'power2.in',
-        stagger: {
-          each: 0.05,
-          from: 'start'
-        },
-        onStart: () => {
-          console.log('▶️ DirectorDetail: Animation started')
-        },
-        onComplete: () => {
-          console.log('✅ DirectorDetail: Animation complete, navigating to:', url)
-          // Small safety delay to ensure animation is fully visible
-          setTimeout(() => {
-            router.push(url)
-          }, 50)
-        }
-      })
-    } else {
-      console.warn('⚠️ DirectorDetail: contentRef not found, navigating immediately')
-      // Fallback
-      router.push(url)
-    }
-  }, [isNavigating, router, slotMedia, saveVideoState])
-
   // Handle navigation from other pages (like clicking back to directors list)
   useEffect(() => {
     if (isMobile) return
+
+    const handleFadeOutAndNavigate = (url: string) => {
+      fadeOutAndNavigate(url, slotMedia)
+    }
 
     // Custom event listener for navigation from anywhere
     const handleNavigationRequest = (e: CustomEvent) => {
       const url = e.detail?.url
       if (url && !isNavigating) {
-        fadeOutAndNavigate(url)
+        handleFadeOutAndNavigate(url)
       }
     }
 
@@ -255,20 +192,23 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
     return () => {
       window.removeEventListener('navigate-with-fade' as any, handleNavigationRequest as any)
     }
-  }, [isMobile, isNavigating, fadeOutAndNavigate])
+  }, [isMobile, isNavigating, slotMedia, fadeOutAndNavigate])
 
   // Expose fade-out function globally for header navigation
   useEffect(() => {
     if (isMobile) return
 
+    const handleFadeOutAndNavigate = (url: string) => {
+      fadeOutAndNavigate(url, slotMedia)
+    }
+
     // Make fade-out function available globally
-    (window as any).__directorDetailFadeOut = fadeOutAndNavigate
+    (window as any).__directorDetailFadeOut = handleFadeOutAndNavigate
 
     return () => {
-      console.log('🔧 DirectorDetail: Cleaning up __directorDetailFadeOut function')
       delete (window as any).__directorDetailFadeOut
     }
-  }, [isMobile, fadeOutAndNavigate])
+  }, [isMobile, slotMedia, fadeOutAndNavigate])
 
   // Check if item exists after all hooks have been called
   if (!itemWithLinks) {

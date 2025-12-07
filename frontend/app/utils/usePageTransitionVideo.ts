@@ -39,9 +39,8 @@ export function usePageTransitionVideo() {
 
     try {
       sessionStorage.setItem(VIDEO_STORAGE_KEY, JSON.stringify(stateWithTimestamp))
-      console.log('📹 Saved video state for transition:', videoState.id)
     } catch (error) {
-      console.error('Failed to save video state:', error)
+      // ignore storage errors
     }
   }, [])
 
@@ -62,12 +61,10 @@ export function usePageTransitionVideo() {
 
       // Check if state has expired
       if (age > VIDEO_EXPIRY_MS) {
-        console.log('📹 Video state expired, clearing')
         sessionStorage.removeItem(VIDEO_STORAGE_KEY)
         return null
       }
 
-      console.log('📹 Retrieved video state from previous page:', state.id, `(${age}ms old)`)
       hasProcessedRef.current = true
 
       // Clear the state immediately after reading to prevent reuse
@@ -75,7 +72,6 @@ export function usePageTransitionVideo() {
 
       return state
     } catch (error) {
-      console.error('Failed to retrieve video state:', error)
       return null
     }
   }, [])
@@ -89,9 +85,8 @@ export function usePageTransitionVideo() {
 
     try {
       sessionStorage.removeItem(VIDEO_STORAGE_KEY)
-      console.log('📹 Cleared video state')
     } catch (error) {
-      console.error('Failed to clear video state:', error)
+      // ignore storage errors
     }
   }, [])
 

@@ -29,27 +29,7 @@ export default function VimeoVideo({
   const fitClass = fillMode === "cover" ? "object-cover" : "object-contain lg:object-cover";
   const finalClass = `${fitClass} ${className || "h-full w-full"}`;
 
-  useEffect(() => {
-    console.debug("[VimeoVideo] src", { vimeoSrc, base, finalSrc: src, autoPlay, muted });
-  }, [autoPlay, base, muted, src, vimeoSrc]);
-
-  useEffect(() => {
-    const el = (iframeRef?.current ?? localRef.current) as HTMLIFrameElement | null;
-    if (!el) return;
-    const log = (ctx: string) => {
-      const r = el.getBoundingClientRect();
-      console.debug("[VimeoVideo] iframe size", ctx, { w: r.width, h: r.height, className: finalClass });
-    };
-    log("mount");
-    const ro = new ResizeObserver(() => log("ResizeObserver"));
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [finalClass, iframeRef]);
-
   if (!src) {
-    if (process.env.NODE_ENV !== "production") {
-      console.warn("[VimeoVideo] Invalid Vimeo src:", vimeoSrc);
-    }
     return null;
   }
 

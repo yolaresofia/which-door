@@ -117,7 +117,7 @@ export default function ControlsDesktop(props: Props) {
           </button>
           <button
             data-reveal
-            onClick={() => (onShare ? onShare() : console.log("share clicked"))}
+            onClick={() => (onShare && onShare())}
             className="shrink-0 text-sm underline-offset-4 decoration-white/60 hover:underline"
           >
             Share

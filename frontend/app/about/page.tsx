@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import BackgroundMedia from '../components/BackgroundMedia/BackgroundMedia'
 import { useSequencedReveal } from '../utils/useSequencedReveal'
 import { usePageTransitionVideo } from '../utils/usePageTransitionVideo'
 import { useCrossfadeMedia } from '../utils/useCrossfadeMedia'
+import { useFadeOutNavigation } from '../utils/useFadeOutNavigation'
 import { gsap } from 'gsap'
+import { useGSAP } from '@gsap/react'
 
 const bg =
   'https://cdn.sanity.io/files/xerhtqd5/production/b1fb3f7027236bb169f9a5a32741e6e71b9c7652.mp4'
@@ -14,17 +15,21 @@ const previewPoster =
   'https://cdn.sanity.io/images/xerhtqd5/production/99945ce01a04899a2742da8865740039d7513b57-3024x1964.png'
 
 export default function AboutPage() {
-  const router = useRouter()
-  const { saveVideoState, getPreviousVideoState } = usePageTransitionVideo()
+  const { getPreviousVideoState } = usePageTransitionVideo()
 
   const [fontLoaded, setFontLoaded] = useState(false)
-  const [isNavigating, setIsNavigating] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
   const contentRef = useRef<HTMLElement | null>(null)
   const mainRef = useRef<HTMLElement | null>(null)
-  const animationRef = useRef<gsap.core.Tween | null>(null)
   const hasTransitionedRef = useRef(false)
+
+  // Use the reusable fade-out navigation hook
+  const { fadeOutAndNavigate, isNavigating } = useFadeOutNavigation(mainRef, {
+    selector: '[data-reveal]',
+    isMobile,
+    saveVideo: true,
+  })
 
   const targetVideo = useMemo(() => ({
     id: 'about',
@@ -58,8 +63,6 @@ export default function AboutPage() {
   // Handle incoming page transition video
   useEffect(() => {
     if (hasTransitionedRef.current || !previousVideo || isMobile) return
-
-    console.log('📹 About: Transitioning from previous page video')
     hasTransitionedRef.current = true
 
     // Crossfade from previous video to about page video after a brief delay
@@ -79,6 +82,15 @@ export default function AboutPage() {
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
+
+  // Hide content initially to prevent FOUC (Flash of Unstyled Content)
+  useGSAP(() => {
+    if (!contentRef.current || isMobile) return
+
+    // Set initial hidden state before animation
+    const items = contentRef.current.querySelectorAll('[data-reveal]')
+    gsap.set(items, { opacity: 0, y: 20, scale: 0.98 })
+  }, { dependencies: [isMobile], scope: contentRef })
 
   // Font loading - EXACT SAME as ProjectsLanding
   useEffect(() => {
@@ -124,7 +136,6 @@ export default function AboutPage() {
     // Safety timeout to ensure animation always runs
     const safetyTimeout = setTimeout(() => {
       if (!cancelled && !fontLoaded) {
-        console.log('⏰ About: Safety timeout triggered, starting animation')
         triggerAnimation()
       }
     }, 1000)
@@ -136,89 +147,21 @@ export default function AboutPage() {
     }
   }, [start, fontLoaded, isMobile])
 
-  // Fade-out animation function - EXACT SAME as ProjectsLanding with extra safety
-  const fadeOutAndNavigate = useCallback((url: string) => {
-    if (isNavigating) return
-
-    console.log('🎬 About: Starting fade-out animation...')
-    setIsNavigating(true)
-
-    // Save current video state for the next page to use
-    const currentMedia = slotMedia[0] || slotMedia[1]
-    if (currentMedia) {
-      saveVideoState({
-        id: currentMedia.id,
-        videoSrc: currentMedia.videoSrc || '',
-        previewUrl: currentMedia.previewUrl,
-        vimeoUrl: currentMedia.vimeoUrl,
-        previewPoster: currentMedia.previewPoster,
-        bgColor: currentMedia.bgColor,
-      })
-    }
-
-    // Disable pointer events during animation
-    if (mainRef.current) {
-      mainRef.current.style.pointerEvents = 'none'
-    }
-
-    // Fade out content - EXACT SAME animation
-    if (contentRef.current) {
-      const items = contentRef.current.querySelectorAll('[data-reveal]')
-
-      console.log('🎬 About: Found items to animate:', items.length)
-
-      if (items.length === 0) {
-        console.warn('⚠️ About: No items found with [data-reveal], navigating immediately')
-        router.push(url)
-        return
-      }
-
-      // Kill any existing animation
-      if (animationRef.current) {
-        animationRef.current.kill()
-      }
-
-      // Create the animation
-      animationRef.current = gsap.to(items, {
-        opacity: 0,
-        y: -30,
-        scale: 0.92,
-        duration: 0.7,
-        ease: 'power2.in',
-        stagger: {
-          each: 0.05,
-          from: 'start'
-        },
-        onStart: () => {
-          console.log('▶️ About: Animation started')
-        },
-        onComplete: () => {
-          console.log('✅ About: Animation complete, navigating to:', url)
-          // Small safety delay to ensure animation is fully visible
-          setTimeout(() => {
-            router.push(url)
-          }, 50)
-        }
-      })
-    } else {
-      console.warn('⚠️ About: contentRef not found, navigating immediately')
-      // Fallback
-      router.push(url)
-    }
-  }, [isNavigating, router, slotMedia, saveVideoState])
-
   // Expose fade-out function globally for header navigation
   useEffect(() => {
     if (isMobile) return
 
+    const handleFadeOutAndNavigate = (url: string) => {
+      fadeOutAndNavigate(url, slotMedia)
+    }
+
     // Make fade-out function available globally
-    (window as any).__aboutFadeOut = fadeOutAndNavigate
+    (window as any).__aboutFadeOut = handleFadeOutAndNavigate
 
     return () => {
-      console.log('🔧 About: Cleaning up __aboutFadeOut function')
       delete (window as any).__aboutFadeOut
     }
-  }, [isMobile, fadeOutAndNavigate])
+  }, [isMobile, slotMedia, fadeOutAndNavigate])
 
   return (
     <main

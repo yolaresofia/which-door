@@ -89,7 +89,6 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
   const fadeOutAndNavigate = useCallback((url: string) => {
     if (isNavigating || isMobile) return
 
-    console.log('🎬 ProjectDetail: Starting fade-out animation...')
     setIsNavigating(true)
 
     // Disable pointer events during animation
@@ -102,10 +101,7 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
     if (controlsContainer) {
       const items = controlsContainer.querySelectorAll('[data-reveal]')
 
-      console.log('🎬 ProjectDetail: Found items to animate:', items.length)
-
       if (items.length === 0) {
-        console.warn('⚠️ ProjectDetail: No items found with [data-reveal], navigating immediately')
         router.push(url)
         return
       }
@@ -121,11 +117,7 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
           each: 0.05,
           from: 'start'
         },
-        onStart: () => {
-          console.log('▶️ ProjectDetail: Animation started')
-        },
         onComplete: () => {
-          console.log('✅ ProjectDetail: Animation complete, navigating to:', url)
           // Small safety delay to ensure animation is fully visible
           setTimeout(() => {
             router.push(url)
@@ -133,7 +125,6 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
         }
       })
     } else {
-      console.warn('⚠️ ProjectDetail: Controls container not found, navigating immediately')
       router.push(url)
     }
   }, [isNavigating, isMobile, router])
@@ -146,7 +137,6 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
     ;(window as any).__projectDetailFadeOut = fadeOutAndNavigate
 
     return () => {
-      console.log('🔧 ProjectDetail: Cleaning up __projectDetailFadeOut function')
       delete (window as any).__projectDetailFadeOut
     }
   }, [isMobile, fadeOutAndNavigate])

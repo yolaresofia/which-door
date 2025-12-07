@@ -40,7 +40,6 @@ export function useVimeoController({ vimeoSrc, controls, autoplay }: Options) {
     playerRef.current = player;
     setReady(false);
 
-    console.debug("[useVimeoController] init", { vimeoSrc, normalizedSrc, controls, autoplay });
     let destroyed = false;
 
     player.on("loaded", async () => {
@@ -54,12 +53,6 @@ export function useVimeoController({ vimeoSrc, controls, autoplay }: Options) {
         ]);
         setDuration(d || 0);
         setReady(true);
-        console.debug("[useVimeoController] loaded", {
-          duration: d,
-          intrinsic: { width: vw, height: vh, ar: vw && vh ? vw / vh : undefined },
-          volume: vol,
-          loop,
-        });
 
         await player.setLoop(true);
         await player.setVolume(!controls ? 0 : 1);
@@ -67,24 +60,19 @@ export function useVimeoController({ vimeoSrc, controls, autoplay }: Options) {
           try {
             await player.play();
           } catch (err: any) {
-            const errName = err?.name || err;
-            console.warn("[useVimeoController] autoplay blocked", errName);
             if (controls && !destroyed) {
               try {
                 await player.setVolume(0);
                 setMuted(true);
                 await player.play();
               } catch (retryErr: any) {
-                console.warn(
-                  "[useVimeoController] autoplay retry failed",
-                  retryErr?.name || retryErr
-                );
+                // ignore retry errors
               }
             }
           }
         }
       } catch (e) {
-        console.warn("[useVimeoController] loaded handler error", e);
+        // ignore load errors
       }
     });
 
@@ -94,11 +82,9 @@ export function useVimeoController({ vimeoSrc, controls, autoplay }: Options) {
 
     player.on("play", () => {
       setPlaying(true);
-      console.debug("[useVimeoController] play");
     });
     player.on("pause", () => {
       setPlaying(false);
-      console.debug("[useVimeoController] pause");
     });
 
     player.on("error", (e: any) => {
@@ -108,17 +94,14 @@ export function useVimeoController({ vimeoSrc, controls, autoplay }: Options) {
         message &&
         message.includes("reading 'includes'")
       ) {
-        console.warn("[useVimeoController] ignoring Safari play() TypeError", e);
         return;
       }
-      console.error("[useVimeoController] player error", e);
     });
 
     return () => {
       destroyed = true;
       player.unload().catch(() => {});
       playerRef.current = null;
-      console.debug("[useVimeoController] teardown");
     };
   }, [normalizedSrc, controls, vimeoSrc, autoplay]); // re-init when URL or settings change
 
@@ -128,7 +111,6 @@ export function useVimeoController({ vimeoSrc, controls, autoplay }: Options) {
     (async () => {
       try {
         await p.setVolume(muted ? 0 : 1);
-        console.debug("[useVimeoController] setVolume", { muted });
       } catch {}
     })();
   }, [muted]);
@@ -140,7 +122,7 @@ export function useVimeoController({ vimeoSrc, controls, autoplay }: Options) {
     const p = playerRef.current;
     if (!p) return;
     if (playing) p.pause();
-    else p.play().catch((err) => console.warn("[useVimeoController] play reject", err));
+    else p.play().catch(() => {});
   };
 
   const toggleMute = () => setMuted((m) => !m);
@@ -150,7 +132,7 @@ export function useVimeoController({ vimeoSrc, controls, autoplay }: Options) {
     const clamped = Math.min(1, Math.max(0, ratio));
     const target = clamped * duration;
     const p = playerRef.current;
-    if (p) p.setCurrentTime(target).catch((err) => console.warn("[useVimeoController] seek reject", err));
+    if (p) p.setCurrentTime(target).catch(() => {});
   };
 
   return {
