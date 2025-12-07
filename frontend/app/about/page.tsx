@@ -82,6 +82,10 @@ export default function AboutPage() {
 
   // Font loading - EXACT SAME as ProjectsLanding
   useEffect(() => {
+    // Only run on desktop
+    if (isMobile) return
+    if (fontLoaded) return // Prevent re-running
+
     let cancelled = false
     let timeoutId: NodeJS.Timeout
 
@@ -89,11 +93,9 @@ export default function AboutPage() {
       if (cancelled) return
       setFontLoaded(true)
       // Start with RAF to ensure DOM is ready
-      if (!isMobile) {
-        requestAnimationFrame(() => {
-          start()
-        })
-      }
+      requestAnimationFrame(() => {
+        start()
+      })
     }
 
     // Simplified font loading that works in production

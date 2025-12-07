@@ -62,7 +62,7 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
         url: `/projects/${p.slug}`,
       }))
       .slice(0, 3)
-  }, [project, slug, projects])
+  }, [project, slug])
   const projectWithRelated = useMemo(
     () => (project ? {...project, otherProjects: relatedProjects} : project),
     [project, relatedProjects]

@@ -25,10 +25,11 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
   const animationRef = useRef<gsap.core.Tween | null>(null)
   const hasTransitionedRef = useRef(false)
 
-  const item = directors.find((d) => d.slug === slug)
-  if (!item) return notFound()
+  const item = useMemo(() => directors.find((d) => d.slug === slug), [slug])
 
   const itemWithLinks = useMemo(() => {
+    if (!item) return null
+
     const slugify = (value: string) =>
       value
         .toLowerCase()
@@ -48,10 +49,10 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
   }, [item])
 
   const targetVideo = useMemo(() => ({
-    id: itemWithLinks.slug ?? slug,
-    videoSrc: itemWithLinks.previewUrl ?? '',
-    previewUrl: itemWithLinks.previewUrl ?? '',
-    previewPoster: itemWithLinks.previewPoster,
+    id: itemWithLinks?.slug ?? slug,
+    videoSrc: itemWithLinks?.previewUrl ?? '',
+    previewUrl: itemWithLinks?.previewUrl ?? '',
+    previewPoster: itemWithLinks?.previewPoster,
     bgColor: '#477AA1',
   }), [itemWithLinks, slug])
 
@@ -112,6 +113,10 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
 
   // Font loading + trigger enter animation
   useEffect(() => {
+    // Only run on desktop
+    if (isMobile) return
+    if (fontLoaded) return // Prevent re-running
+
     let cancelled = false
     let timeoutId: NodeJS.Timeout
 
@@ -119,37 +124,45 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
       if (cancelled) return
       setFontLoaded(true)
       // Start with RAF to ensure DOM is ready
-      if (!isMobile) {
-        requestAnimationFrame(() => {
-          start()
-        })
-      }
+      requestAnimationFrame(() => {
+        start()
+      })
     }
 
-    if ('fonts' in document && (document as any).fonts?.ready) {
-      ;(document as any).fonts.ready.then(() => {
-        ;(document as any).fonts.load('normal 1em Neue').then(
-          () => {
+    // Simplified font loading that works in production
+    if (typeof window !== 'undefined' && 'fonts' in document) {
+      const fonts = (document as any).fonts
+      if (fonts?.ready) {
+        fonts.ready.then(() => {
+          // Try to load the font, but don't wait forever
+          Promise.race([
+            fonts.load('normal 1em Neue').catch(() => null),
+            new Promise(resolve => setTimeout(resolve, 500))
+          ]).then(() => {
             if (!cancelled) triggerAnimation()
-          },
-          () => {
-            if (!cancelled) triggerAnimation()
-          }
-        )
-      })
+          })
+        }).catch(() => {
+          // If fonts.ready fails, fallback to timeout
+          if (!cancelled) timeoutId = setTimeout(triggerAnimation, 100)
+        })
+      } else {
+        timeoutId = setTimeout(triggerAnimation, 100)
+      }
     } else {
       timeoutId = setTimeout(triggerAnimation, 100)
     }
 
+    // Safety timeout to ensure animation always runs
     const safetyTimeout = setTimeout(() => {
       if (!cancelled && !fontLoaded) {
+        console.log('⏰ DirectorDetail: Safety timeout triggered, starting animation')
         triggerAnimation()
       }
-    }, 3000)
+    }, 1000)
 
     return () => {
       cancelled = true
-      clearTimeout(timeoutId)
+      if (timeoutId) clearTimeout(timeoutId)
       clearTimeout(safetyTimeout)
     }
   }, [start, fontLoaded, isMobile])
@@ -257,6 +270,11 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
     }
   }, [isMobile, fadeOutAndNavigate])
 
+  // Check if item exists after all hooks have been called
+  if (!itemWithLinks) {
+    return notFound()
+  }
+
   return (
     <main
       ref={mainRef}
@@ -305,7 +323,7 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
       ref={contentRef}
       className="relative z-10"
     >
-      <DetailView item={itemWithLinks as any} enableAnimations={true} />
+      <DetailView item={itemWithLinks} enableAnimations={true} />
     </section>
   </main>
 )

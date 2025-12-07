@@ -23,7 +23,7 @@ export default function ProjectsLanding() {
 
   const homepageProjects = useMemo(
     () => projects.filter((project) => project.isInHomePage),
-    [projects]
+    []
   )
   const visibleProjects = homepageProjects.length ? homepageProjects : projects
 
@@ -111,6 +111,10 @@ export default function ProjectsLanding() {
 
   // Font loading
   useEffect(() => {
+    // Only run on desktop
+    if (isMobile) return
+    if (fontLoaded) return // Prevent re-running
+
     let cancelled = false
     let timeoutId: NodeJS.Timeout
 
@@ -118,11 +122,9 @@ export default function ProjectsLanding() {
       if (cancelled) return
       setFontLoaded(true)
       // Start with RAF to ensure DOM is ready
-      if (!isMobile) {
-        requestAnimationFrame(() => {
-          start()
-        })
-      }
+      requestAnimationFrame(() => {
+        start()
+      })
     }
 
     // Simplified font loading that works in production
