@@ -125,26 +125,31 @@ export default function ProjectsLanding() {
   useGSAP(() => {
     if (!isMobile || !scrollContainerRef.current) return
 
-    const listElement = scrollContainerRef.current.querySelector('ul')
-    if (!listElement) return
+    try {
+      const listElement = scrollContainerRef.current.querySelector('ul')
+      if (!listElement) return
 
-    const items = listElement.querySelectorAll('li')
+      const items = listElement.querySelectorAll('li')
+      if (!items || items.length === 0) return
 
-    // Set initial hidden state
-    gsap.set(items, { opacity: 0, scale: 0.95 })
+      // Set initial hidden state
+      gsap.set(items, { opacity: 0, scale: 0.95 })
 
-    // Animate in
-    gsap.to(items, {
-      opacity: 1,
-      scale: 1,
-      duration: 0.6,
-      ease: 'power2.out',
-      stagger: {
-        each: 0.08,
-        from: 'start' as const,
-      },
-      delay: 0.1,
-    })
+      // Simplified animate in - faster, more reliable
+      gsap.to(items, {
+        opacity: 1,
+        scale: 1,
+        duration: 0.4,
+        ease: 'power2.out',
+        stagger: {
+          each: 0.05,
+          from: 'start' as const,
+        },
+        delay: 0.05,
+      })
+    } catch (error) {
+      console.error('Mobile enter animation error:', error)
+    }
   }, { dependencies: [isMobile], scope: scrollContainerRef })
 
   // Font loading
@@ -206,33 +211,42 @@ export default function ProjectsLanding() {
   useGSAP(() => {
     if (!isMobile || !scrollContainerRef.current) return
 
-    const listElement = scrollContainerRef.current.querySelector('ul')
-    if (!listElement) return
+    try {
+      const listElement = scrollContainerRef.current.querySelector('ul')
+      if (!listElement) return
 
-    const items = listElement.querySelectorAll('li')
+      const items = listElement.querySelectorAll('li')
+      if (!items || items.length === 0) return
 
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const index = parseInt(entry.target.getAttribute('data-index') || '0', 10)
-            select(index)
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          try {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                const index = parseInt(entry.target.getAttribute('data-index') || '0', 10)
+                select(index)
+              }
+            })
+          } catch (error) {
+            console.error('Intersection observer callback error:', error)
           }
-        })
-      },
-      {
-        root: scrollContainerRef.current,
-        threshold: 0.5,
-        rootMargin: '0px'
+        },
+        {
+          root: scrollContainerRef.current,
+          threshold: 0.5,
+          rootMargin: '0px'
+        }
+      )
+
+      items.forEach((item) => {
+        observerRef.current?.observe(item)
+      })
+
+      return () => {
+        observerRef.current?.disconnect()
       }
-    )
-
-    items.forEach((item) => {
-      observerRef.current?.observe(item)
-    })
-
-    return () => {
-      observerRef.current?.disconnect()
+    } catch (error) {
+      console.error('Intersection observer setup error:', error)
     }
   }, { dependencies: [isMobile, select], scope: scrollContainerRef })
 

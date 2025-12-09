@@ -26,59 +26,79 @@ export default function MobileMenu({
   const contentRef = useRef<HTMLDivElement | null>(null)
   const navRef = useRef<HTMLElement | null>(null)
   const [isVisible, setIsVisible] = useState(false)
-  const [isAnimating, setIsAnimating] = useState(false)
+  const isAnimatingRef = useRef(false)
+  const timelineRef = useRef<gsap.core.Timeline | null>(null)
 
   // Handle close with exit animation
   const handleClose = useCallback(() => {
-    if (isAnimating) return
-    setIsAnimating(true)
+    if (isAnimatingRef.current) {
+      console.log('⚠️ Menu already animating, ignoring close request')
+      return
+    }
 
-    const backdrop = backdropRef.current
-    const content = contentRef.current
-    const navItemsList = navRef.current?.querySelectorAll('li')
+    isAnimatingRef.current = true
 
-    // Create exit animation timeline
-    const tl = gsap.timeline({
-      onComplete: () => {
-        setIsAnimating(false)
-        setIsVisible(false)
-        onClose()
+    try {
+      const backdrop = backdropRef.current
+      const content = contentRef.current
+      const navItemsList = navRef.current?.querySelectorAll('li')
+
+      // Kill any existing timeline
+      if (timelineRef.current) {
+        timelineRef.current.kill()
       }
-    })
 
-    // Fade out nav items (reverse order)
-    if (navItemsList && navItemsList.length > 0) {
-      tl.to(navItemsList, {
-        opacity: 0,
-        y: -10,
-        duration: 0.3,
-        ease: 'power2.in',
-        stagger: {
-          each: 0.05,
-          from: 'end' as const,
-        },
+      // Create exit animation timeline
+      timelineRef.current = gsap.timeline({
+        onComplete: () => {
+          isAnimatingRef.current = false
+          setIsVisible(false)
+          onClose()
+        }
       })
-    }
 
-    // Fade out content
-    if (content) {
-      tl.to(content, {
-        opacity: 0,
-        y: -20,
-        duration: 0.3,
-        ease: 'power2.in',
-      }, '-=0.15')
-    }
+      // Simplified exit: just fade out everything together
+      if (navItemsList && navItemsList.length > 0) {
+        timelineRef.current.to(navItemsList, {
+          opacity: 0,
+          scale: 0.95,
+          duration: 0.25,
+          ease: 'power2.in',
+        })
+      }
 
-    // Fade out backdrop
-    if (backdrop) {
-      tl.to(backdrop, {
-        opacity: 0,
-        duration: 0.25,
-        ease: 'power2.in',
-      }, '-=0.1')
+      if (content) {
+        timelineRef.current.to(content, {
+          opacity: 0,
+          duration: 0.25,
+          ease: 'power2.in',
+        }, '-=0.2')
+      }
+
+      if (backdrop) {
+        timelineRef.current.to(backdrop, {
+          opacity: 0,
+          duration: 0.2,
+          ease: 'power2.in',
+        }, '-=0.15')
+      }
+
+      // Safety timeout - close even if animation fails
+      setTimeout(() => {
+        if (isAnimatingRef.current) {
+          console.log('⏰ Menu animation timeout, closing immediately')
+          isAnimatingRef.current = false
+          setIsVisible(false)
+          onClose()
+        }
+      }, 500)
+    } catch (error) {
+      console.error('Menu close animation error:', error)
+      isAnimatingRef.current = false
+      setIsVisible(false)
+      onClose()
     }
-  }, [isAnimating, onClose])
+  }, [onClose])
 
   const onKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -89,22 +109,31 @@ export default function MobileMenu({
 
   // Show menu when open prop changes
   useEffect(() => {
-    if (open) {
-      setIsVisible(true)
-      document.body.style.overflow = 'hidden'
-    } else if (!open && isVisible) {
-      // User closed from outside, just hide immediately
-      setIsVisible(false)
-      document.body.style.overflow = ''
+    try {
+      if (open && !isVisible) {
+        setIsVisible(true)
+        document.body.style.overflow = 'hidden'
+      } else if (!open && isVisible && !isAnimatingRef.current) {
+        // User closed from outside without animation
+        setIsVisible(false)
+        document.body.style.overflow = ''
+      }
+    } catch (error) {
+      console.error('Menu visibility error:', error)
     }
   }, [open, isVisible])
 
   useEffect(() => {
     if (!isVisible) return
-    window.addEventListener('keydown', onKeyDown)
-    return () => {
-      window.removeEventListener('keydown', onKeyDown)
-      document.body.style.overflow = ''
+
+    try {
+      window.addEventListener('keydown', onKeyDown)
+      return () => {
+        window.removeEventListener('keydown', onKeyDown)
+        document.body.style.overflow = ''
+      }
+    } catch (error) {
+      console.error('Menu keyboard listener error:', error)
     }
   }, [isVisible, onKeyDown])
 
@@ -112,53 +141,56 @@ export default function MobileMenu({
   useGSAP(() => {
     if (!open || !menuRef.current || !isVisible) return
 
-    const backdrop = backdropRef.current
-    const content = contentRef.current
-    const navItems = navRef.current?.querySelectorAll('li')
+    try {
+      const backdrop = backdropRef.current
+      const content = contentRef.current
+      const navItems = navRef.current?.querySelectorAll('li')
 
-    // Set initial states
-    if (backdrop) gsap.set(backdrop, { opacity: 0 })
-    if (content) gsap.set(content, { opacity: 0, y: -20 })
-    if (navItems) gsap.set(navItems, { opacity: 0, y: 10 })
+      // Set initial states
+      if (backdrop) gsap.set(backdrop, { opacity: 0 })
+      if (content) gsap.set(content, { opacity: 0, scale: 0.95 })
+      if (navItems) gsap.set(navItems, { opacity: 0, scale: 0.95 })
 
-    // Create timeline for smooth entrance
-    const tl = gsap.timeline()
+      // Simplified enter animation - everything fades in together
+      const tl = gsap.timeline()
 
-    // Fade in backdrop
-    if (backdrop) {
-      tl.to(backdrop, {
-        opacity: 1,
-        duration: 0.3,
-        ease: 'power2.out',
-      })
-    }
+      // Fade in backdrop
+      if (backdrop) {
+        tl.to(backdrop, {
+          opacity: 1,
+          duration: 0.25,
+          ease: 'power2.out',
+        })
+      }
 
-    // Fade in header content
-    if (content) {
-      tl.to(content, {
-        opacity: 1,
-        y: 0,
-        duration: 0.4,
-        ease: 'power2.out',
-      }, '-=0.1')
-    }
+      // Fade in content and nav items together
+      if (content) {
+        tl.to(content, {
+          opacity: 1,
+          scale: 1,
+          duration: 0.3,
+          ease: 'power2.out',
+        }, '-=0.1')
+      }
 
-    // Stagger in nav items
-    if (navItems && navItems.length > 0) {
-      tl.to(navItems, {
-        opacity: 1,
-        y: 0,
-        duration: 0.5,
-        ease: 'power2.out',
-        stagger: {
-          each: 0.08,
-          from: 'start' as const,
-        },
-      }, '-=0.2')
-    }
+      if (navItems && navItems.length > 0) {
+        tl.to(navItems, {
+          opacity: 1,
+          scale: 1,
+          duration: 0.3,
+          ease: 'power2.out',
+          stagger: {
+            each: 0.05,
+            from: 'start' as const,
+          },
+        }, '-=0.25')
+      }
 
-    return () => {
-      tl.kill()
+      return () => {
+        tl.kill()
+      }
+    } catch (error) {
+      console.error('Menu enter animation error:', error)
     }
   }, { dependencies: [open, isVisible], scope: menuRef })
 
