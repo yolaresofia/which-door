@@ -195,7 +195,7 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
   }, [isMobile, isNavigating, slotMedia, fadeOutAndNavigate])
 
   // Expose fade-out function globally for header navigation
-  useEffect(() => {
+  useGSAP(() => {
     if (isMobile) return
 
     const handleFadeOutAndNavigate = (url: string) => {
@@ -208,7 +208,7 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
     return () => {
       delete (window as any).__directorDetailFadeOut
     }
-  }, [isMobile, slotMedia, fadeOutAndNavigate])
+  }, { dependencies: [isMobile, slotMedia, fadeOutAndNavigate] })
 
   // Check if item exists after all hooks have been called
   if (!itemWithLinks) {

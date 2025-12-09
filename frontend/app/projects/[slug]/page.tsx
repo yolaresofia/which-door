@@ -11,6 +11,7 @@ import ContactPage from '@/app/contact/page'
 import ContactSection from '@/app/components/ContactSection'
 import BackgroundMedia from '@/app/components/BackgroundMedia/BackgroundMedia'
 import { gsap } from 'gsap'
+import { useGSAP } from '@gsap/react'
 
 export default function ProjectPage({params}: {params: Promise<{slug: string}>}) {
   // Unwrap params (Next 15)
@@ -130,7 +131,7 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
   }, [isNavigating, isMobile, router])
 
   // Expose fade-out function globally for header navigation
-  useEffect(() => {
+  useGSAP(() => {
     if (isMobile) return
 
     // Make fade-out function available globally
@@ -139,7 +140,7 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
     return () => {
       delete (window as any).__projectDetailFadeOut
     }
-  }, [isMobile, fadeOutAndNavigate])
+  }, { dependencies: [isMobile, fadeOutAndNavigate] })
   if (!project) return notFound()
   return (
     <main ref={mainRef} className="text-white">

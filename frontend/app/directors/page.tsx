@@ -97,10 +97,36 @@ export default function DirectorsIndexPage() {
   useGSAP(() => {
     if (!listRef.current || isMobile) return
 
-    // Set initial hidden state before animation
+    // Set initial hidden state before animation (desktop)
     const items = listRef.current.querySelectorAll('[data-reveal]')
     gsap.set(items, { opacity: 0, y: 20, scale: 0.98 })
   }, { dependencies: [isMobile], scope: listRef })
+
+  // Mobile enter animation
+  useGSAP(() => {
+    if (!isMobile || !scrollContainerRef.current) return
+
+    const listElement = scrollContainerRef.current.querySelector('ul')
+    if (!listElement) return
+
+    const items = listElement.querySelectorAll('li')
+
+    // Set initial hidden state
+    gsap.set(items, { opacity: 0, scale: 0.95 })
+
+    // Animate in
+    gsap.to(items, {
+      opacity: 1,
+      scale: 1,
+      duration: 0.6,
+      ease: 'power2.out',
+      stagger: {
+        each: 0.08,
+        from: 'start' as const,
+      },
+      delay: 0.1,
+    })
+  }, { dependencies: [isMobile], scope: scrollContainerRef })
 
   // Font loading + trigger enter animation
   useEffect(() => {
@@ -158,14 +184,14 @@ export default function DirectorsIndexPage() {
   }, [start, fontLoaded, isMobile])
 
   // Mobile: Intersection Observer for scroll detection
-  useEffect(() => {
+  useGSAP(() => {
     if (!isMobile || !scrollContainerRef.current) return
 
-    const listElement = isMobile ? scrollContainerRef.current?.querySelector('ul') : null
+    const listElement = scrollContainerRef.current.querySelector('ul')
     if (!listElement) return
 
     const items = listElement.querySelectorAll('li')
-    
+
     observerRef.current = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -193,7 +219,7 @@ export default function DirectorsIndexPage() {
     return () => {
       observerRef.current?.disconnect()
     }
-  }, [isMobile, crossfadeTo])
+  }, { dependencies: [isMobile, crossfadeTo], scope: scrollContainerRef })
 
   // Handlers to request a crossfade (desktop only)
   const select = (i: number) => {
@@ -224,7 +250,7 @@ export default function DirectorsIndexPage() {
   }, [isMobile, isNavigating, handleFadeOutAndNavigate])
 
   // Expose fade-out function globally for header navigation
-  useEffect(() => {
+  useGSAP(() => {
     if (isMobile) return
 
     // Make fade-out function available globally
@@ -233,7 +259,7 @@ export default function DirectorsIndexPage() {
     return () => {
       delete (window as any).__directorsFadeOut
     }
-  }, [isMobile, handleFadeOutAndNavigate])
+  }, { dependencies: [isMobile, handleFadeOutAndNavigate] })
 
   return (
     <>
@@ -387,6 +413,7 @@ export default function DirectorsIndexPage() {
                 <li
                   key={d.slug}
                   data-index={index}
+                  data-reveal
                   className="snap-center snap-always h-screen flex items-center px-6 transition-all duration-500 ease-out"
                   style={{
                     opacity: isActive ? 1 : 0.25,
@@ -395,8 +422,13 @@ export default function DirectorsIndexPage() {
                     transition: 'opacity 0.5s ease-out, transform 0.5s ease-out'
                   }}
                 >
-                  <a 
+                  <a
                     href={`/directors/${d.slug}`}
+                    onClick={(e) => {
+                      if (!isMobile || isNavigating) return
+                      e.preventDefault()
+                      handleFadeOutAndNavigate(`/directors/${d.slug}`)
+                    }}
                     className="block w-full text-left outline-none"
                   >
                     <h3 className="text-3xl sm:text-5xl md:text-6xl leading-[1.05] font-semibold text-white mb-3">

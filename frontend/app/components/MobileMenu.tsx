@@ -2,7 +2,9 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import {useEffect, useCallback} from 'react'
+import { useEffect, useCallback, useRef, useState } from 'react'
+import { gsap } from 'gsap'
+import { useGSAP } from '@gsap/react'
 
 type NavItem = {href: string; label: string}
 
@@ -19,29 +21,153 @@ export default function MobileMenu({
   navItems: ReadonlyArray<NavItem>
   currentPath: string
 }) {
+  const menuRef = useRef<HTMLDivElement | null>(null)
+  const backdropRef = useRef<HTMLDivElement | null>(null)
+  const contentRef = useRef<HTMLDivElement | null>(null)
+  const navRef = useRef<HTMLElement | null>(null)
+  const [isVisible, setIsVisible] = useState(false)
+  const [isAnimating, setIsAnimating] = useState(false)
+
+  // Handle close with exit animation
+  const handleClose = useCallback(() => {
+    if (isAnimating) return
+    setIsAnimating(true)
+
+    const backdrop = backdropRef.current
+    const content = contentRef.current
+    const navItemsList = navRef.current?.querySelectorAll('li')
+
+    // Create exit animation timeline
+    const tl = gsap.timeline({
+      onComplete: () => {
+        setIsAnimating(false)
+        setIsVisible(false)
+        onClose()
+      }
+    })
+
+    // Fade out nav items (reverse order)
+    if (navItemsList && navItemsList.length > 0) {
+      tl.to(navItemsList, {
+        opacity: 0,
+        y: -10,
+        duration: 0.3,
+        ease: 'power2.in',
+        stagger: {
+          each: 0.05,
+          from: 'end' as const,
+        },
+      })
+    }
+
+    // Fade out content
+    if (content) {
+      tl.to(content, {
+        opacity: 0,
+        y: -20,
+        duration: 0.3,
+        ease: 'power2.in',
+      }, '-=0.15')
+    }
+
+    // Fade out backdrop
+    if (backdrop) {
+      tl.to(backdrop, {
+        opacity: 0,
+        duration: 0.25,
+        ease: 'power2.in',
+      }, '-=0.1')
+    }
+  }, [isAnimating, onClose])
+
   const onKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') handleClose()
     },
-    [onClose],
+    [handleClose],
   )
 
+  // Show menu when open prop changes
   useEffect(() => {
-    if (!open) return
-    document.body.style.overflow = 'hidden'
+    if (open) {
+      setIsVisible(true)
+      document.body.style.overflow = 'hidden'
+    } else if (!open && isVisible) {
+      // User closed from outside, just hide immediately
+      setIsVisible(false)
+      document.body.style.overflow = ''
+    }
+  }, [open, isVisible])
+
+  useEffect(() => {
+    if (!isVisible) return
     window.addEventListener('keydown', onKeyDown)
     return () => {
-      document.body.style.overflow = ''
       window.removeEventListener('keydown', onKeyDown)
+      document.body.style.overflow = ''
     }
-  }, [open, onKeyDown])
+  }, [isVisible, onKeyDown])
 
-  if (!open) return null
+  // Enter animation when menu opens
+  useGSAP(() => {
+    if (!open || !menuRef.current || !isVisible) return
+
+    const backdrop = backdropRef.current
+    const content = contentRef.current
+    const navItems = navRef.current?.querySelectorAll('li')
+
+    // Set initial states
+    if (backdrop) gsap.set(backdrop, { opacity: 0 })
+    if (content) gsap.set(content, { opacity: 0, y: -20 })
+    if (navItems) gsap.set(navItems, { opacity: 0, y: 10 })
+
+    // Create timeline for smooth entrance
+    const tl = gsap.timeline()
+
+    // Fade in backdrop
+    if (backdrop) {
+      tl.to(backdrop, {
+        opacity: 1,
+        duration: 0.3,
+        ease: 'power2.out',
+      })
+    }
+
+    // Fade in header content
+    if (content) {
+      tl.to(content, {
+        opacity: 1,
+        y: 0,
+        duration: 0.4,
+        ease: 'power2.out',
+      }, '-=0.1')
+    }
+
+    // Stagger in nav items
+    if (navItems && navItems.length > 0) {
+      tl.to(navItems, {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        ease: 'power2.out',
+        stagger: {
+          each: 0.08,
+          from: 'start' as const,
+        },
+      }, '-=0.2')
+    }
+
+    return () => {
+      tl.kill()
+    }
+  }, { dependencies: [open, isVisible], scope: menuRef })
+
+  if (!isVisible) return null
 
   return (
-    <div id={id} role="dialog" aria-modal="true" className="fixed inset-0 z-50 lg:hidden">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="absolute inset-0 flex flex-col">
+    <div ref={menuRef} id={id} role="dialog" aria-modal="true" className="fixed inset-0 z-50 lg:hidden">
+      <div ref={backdropRef} className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose} />
+      <div ref={contentRef} className="absolute inset-0 flex flex-col">
         <div className="flex items-center justify-between px-6 md:px-12 h-28">
           <div className="lg:justify-self-start">
             <Link 
@@ -67,14 +193,14 @@ export default function MobileMenu({
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="text-white tracking-wide text-sm font-medium"
             aria-label="Close menu"
           >
             Close
           </button>
         </div>
-        <nav className="px-6 md:px-12 pt-6">
+        <nav ref={navRef} className="px-6 md:px-12 pt-6">
           <ul className="space-y-4">
             {navItems.map(({href, label}) => {
               const isActive = currentPath === href
@@ -82,7 +208,7 @@ export default function MobileMenu({
                 <li key={href}>
                   <Link
                     href={href}
-                    onClick={onClose}
+                    onClick={handleClose}
                     className={`block text-3xl tracking-wide transition-opacity duration-200 ${
                       isActive
                         ? 'text-white opacity-100'

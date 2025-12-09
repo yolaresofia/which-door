@@ -148,7 +148,7 @@ export default function AboutPage() {
   }, [start, fontLoaded, isMobile])
 
   // Expose fade-out function globally for header navigation
-  useEffect(() => {
+  useGSAP(() => {
     if (isMobile) return
 
     const handleFadeOutAndNavigate = (url: string) => {
@@ -161,7 +161,7 @@ export default function AboutPage() {
     return () => {
       delete (window as any).__aboutFadeOut
     }
-  }, [isMobile, slotMedia, fadeOutAndNavigate])
+  }, { dependencies: [isMobile, slotMedia, fadeOutAndNavigate] })
 
   return (
     <main

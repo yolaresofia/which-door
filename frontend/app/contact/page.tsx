@@ -2,6 +2,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useGSAP } from '@gsap/react'
 import ContactSection from '../components/ContactSection'
 import { useFadeOutNavigation } from '../utils/useFadeOutNavigation'
 
@@ -30,7 +31,7 @@ export default function ContactPage() {
   }, [])
 
   // Expose fade-out function globally for header navigation
-  useEffect(() => {
+  useGSAP(() => {
     if (isMobile) return
 
     // Make fade-out function available globally
@@ -39,7 +40,7 @@ export default function ContactPage() {
     return () => {
       delete (window as any).__contactFadeOut
     }
-  }, [isMobile, fadeOutAndNavigate])
+  }, { dependencies: [isMobile, fadeOutAndNavigate] })
 
   return (
     <div ref={mainRef}>

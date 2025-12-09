@@ -28,9 +28,9 @@ export function useFadeOutNavigation(
 
   const fadeOutAndNavigate = useCallback(
     (url: string, slotMedia?: any[]) => {
-      if (isNavigating || isMobile) return
+      if (isNavigating) return
 
-      console.log(`🎬 Fading out and navigating to: ${url}`)
+      console.log(`🎬 Fading out and navigating to: ${url} (mobile: ${isMobile})`)
       setIsNavigating(true)
 
       // Save current video state if enabled
@@ -70,8 +70,17 @@ export function useFadeOutNavigation(
         animationRef.current.kill()
       }
 
-      // Create the fade-out animation
-      animationRef.current = gsap.to(items, {
+      // Mobile animations: fade out with less movement
+      const mobileAnimation = isMobile ? {
+        opacity: 0,
+        scale: 0.95,
+        duration: 0.5,
+        ease: 'power2.in',
+        stagger: {
+          each: 0.03,
+          from: 'start' as const,
+        },
+      } : {
         opacity: 0,
         y: -30,
         scale: 0.92,
@@ -79,8 +88,13 @@ export function useFadeOutNavigation(
         ease: 'power2.in',
         stagger: {
           each: 0.05,
-          from: 'start',
+          from: 'start' as const,
         },
+      }
+
+      // Create the fade-out animation
+      animationRef.current = gsap.to(items, {
+        ...mobileAnimation,
         onStart: () => {
           console.log('▶️ Fade-out animation started')
         },
