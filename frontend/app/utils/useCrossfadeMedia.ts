@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, useCallback } from 'react'
+import { useRef, useState, useCallback, useEffect } from 'react'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
 
@@ -163,6 +163,19 @@ export function useCrossfadeMedia(initial: Media, opts?: { duration?: number, wa
       tlRef.current?.kill();
     };
   }, [])
+
+  // CRITICAL FIX: Wait for initial video to load on first mount
+  useEffect(() => {
+    if (!waitForLoad) return
+
+    const initialSlot = slotRefs.current[0]
+    if (!initialSlot) return
+
+    // Wait for initial video without blocking render
+    waitForVideoReady(initialSlot).then(() => {
+      console.log('✅ Initial video ready on first load')
+    })
+  }, [waitForLoad, waitForVideoReady])
 
   return {
     // which slot is visible

@@ -3,6 +3,7 @@
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useFullscreen } from "./hooks/useFullscreen";
 import { useVimeoController } from "./hooks/useVimeoController";
 import MediaSurface from "./MediaSurface";
@@ -76,6 +77,8 @@ export default function BackgroundMedia({
 
   const { isFullscreen, toggleFullscreen } = useFullscreen(containerEl);
 
+  const pathname = usePathname();
+
   const [posterPhase, setPosterPhase] = useState<"shown" | "fading" | "hidden">(
     shouldUsePoster ? "shown" : "hidden"
   );
@@ -141,6 +144,21 @@ export default function BackgroundMedia({
     const timeout = window.setTimeout(() => setPosterPhase("hidden"), POSTER_FADE_MS);
     return () => window.clearTimeout(timeout);
   }, [posterPhase]);
+
+  const handleShare = useCallback(async () => {
+    const url = `https://www.whichdoorstudios.com${pathname ?? window.location?.pathname ?? ""}`;
+
+    try {
+      if (!navigator?.clipboard?.writeText) {
+        throw new Error("Clipboard not available");
+      }
+      await navigator.clipboard.writeText(url);
+    } catch (error) {
+      // no-op if copy fails
+    }
+
+    onShare?.();
+  }, [onShare, pathname]);
 
   useEffect(() => {
     if (!effectiveControls) return;
@@ -265,7 +283,7 @@ export default function BackgroundMedia({
               onTogglePlay={togglePlay}
               onSeekRatio={seekToRatio}
               onToggleMute={toggleMute}
-              onShare={onShare}
+              onShare={handleShare}
               isFullscreen={isFullscreen}
               onToggleFullscreen={toggleFullscreen}
             />

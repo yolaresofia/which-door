@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { fmt } from "./utils";
 import { useSequencedReveal } from '@/app/utils/useSequencedReveal'
 
@@ -28,6 +28,8 @@ export default function ControlsDesktop(props: Props) {
   } = props;
 
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const [shareState, setShareState] = useState<'share' | 'copied'>('share')
+  const shareResetRef = useRef<number | null>(null)
 
   // Desktop animation - EXACT SAME as ProjectsLanding
   const { start } = useSequencedReveal(containerRef, {
@@ -52,10 +54,32 @@ export default function ControlsDesktop(props: Props) {
     })
   }, [start])
 
+  useEffect(() => {
+    return () => {
+      if (shareResetRef.current) {
+        window.clearTimeout(shareResetRef.current)
+        shareResetRef.current = null
+      }
+    }
+  }, [])
+
   const handleBarClick: React.MouseEventHandler<HTMLDivElement> = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     onSeekRatio((e.clientX - rect.left) / rect.width);
   };
+
+  const handleShareClick = () => {
+    if (shareResetRef.current) {
+      window.clearTimeout(shareResetRef.current)
+      shareResetRef.current = null
+    }
+    setShareState('copied')
+    shareResetRef.current = window.setTimeout(() => {
+      setShareState('share')
+      shareResetRef.current = null
+    }, 2000)
+    onShare?.()
+  }
 
   return (
     <div
@@ -117,10 +141,26 @@ export default function ControlsDesktop(props: Props) {
           </button>
           <button
             data-reveal
-            onClick={() => (onShare && onShare())}
-            className="shrink-0 text-sm underline-offset-4 decoration-white/60 hover:underline"
+            onClick={handleShareClick}
+            className="shrink-0 text-sm underline-offset-4 decoration-white/60 hover:underline relative"
           >
-            Share
+            <span className="relative inline-block h-5 min-w-[3.5rem] overflow-hidden">
+              <span
+                className={`absolute inset-0 transition-all duration-200 ease-out ${
+                  shareState === 'share' ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1.5'
+                }`}
+              >
+                Share
+              </span>
+              <span
+                className={`absolute inset-0 transition-all duration-200 ease-out ${
+                  shareState === 'copied' ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1.5'
+                }`}
+              >
+                Copied!
+              </span>
+              <span className="opacity-0">Share</span>
+            </span>
           </button>
           <button
             data-reveal

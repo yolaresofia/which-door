@@ -141,13 +141,14 @@ const projectsData = [
       {
         title: 'Dreams of Blue Lagoon',
         directors: ['Chris Kousouros'],
+        brand:"Which Door original",
         url: '/projects/dreams-of-blue-lagoon',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/fd636fb8e66e21e8fb59f765617ead285549708c.webm',
       },
       {
         title: 'La Magicienne Film V.1 | Bridal Couture Collection',
-        directors: ['Mohammad Abdouni'],
+        directors: ['Mohamad Abdouni'],
         brand: 'HASSIDRISS',
         url: '/projects/la-magicienne-film-v1-bridal-couture-collection',
         previewUrl:
@@ -295,6 +296,7 @@ const projectsData = [
       {
         title: 'Dreams of Blue Lagoon',
         directors: ['Chris Kousouros'],
+        brand:"Which Door original",
         url: '/projects/dreams-of-blue-lagoon',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/fd636fb8e66e21e8fb59f765617ead285549708c.webm',
@@ -302,6 +304,7 @@ const projectsData = [
       {
         title: 'Leading the way',
         directors: ['Chris Kousouros'],
+        brand: 'VOX Media',
         url: '/projects/leading-the-way',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/c7268f59042501a370ea496db9008bc6cbdc5a06.webm',
@@ -384,6 +387,7 @@ const projectsData = [
       {
         title: 'Dreams of Blue Lagoon',
         directors: ['Chris Kousouros'],
+        brand:"Which Door original",
         url: '/projects/dreams-of-blue-lagoon',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/fd636fb8e66e21e8fb59f765617ead285549708c.webm',
@@ -639,7 +643,7 @@ const projectsData = [
     description:
       'Burberry and Sorbet Magazine collide in a crimson, cinematic short that layers sculptural styling with atmospheric landscape frames.',
     bgColor: '#477AA1',
-    director: 'Mohammad Abdouni',
+    director: 'Mohamad Abdouni',
     vimeoUrl:
       'https://player.vimeo.com/video/1144229044?h=10c18eed0f&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewUrl:
@@ -649,7 +653,7 @@ const projectsData = [
     otherProjects: [
       {
         title: 'Gucci | Marie Claire',
-        directors: ['Mohammad Abdouni'],
+        directors: ['Mohamad Abdouni'],
         url: '/projects/gucci-marie-claire',
         brand: 'Gucci/Marie Claire',
         previewUrl:
@@ -657,7 +661,7 @@ const projectsData = [
       },
       {
         title: 'Trance - A Road Trip With Burberry',
-        directors: ['Mohammad Abdouni'],
+        directors: ['Mohamad Abdouni'],
         brand: 'Burberry',
         url: '/projects/trance-a-road-trip-with-burberry',
         previewUrl:
@@ -665,7 +669,7 @@ const projectsData = [
       },
       {
         title: 'La Magicienne Film V.1 | Bridal Couture Collection',
-        directors: ['Mohammad Abdouni'],
+        directors: ['Mohamad Abdouni'],
         brand: 'HASSIDRISS',
         url: '/projects/la-magicienne-film-v1-bridal-couture-collection',
         previewUrl:
@@ -730,7 +734,7 @@ const projectsData = [
     description:
       "This is La Magicienne, the ethereal short film introducing the designer's very first bridal collection. The collection itself is a stunning homage to the cinematic genius of George Méliès, capturing the surreal wonder and early magic of film. Here, silk and lace become illusions, weaving a dreamlike narrative where the bride is both the star and the sorceress of her own world. It is a breathtaking fusion of fashion and fantasy, where every gown possesses the enchanting power of a vanished era.",
     bgColor: '#477AA1',
-    director: 'Mohammad Abdouni',
+    director: 'Mohamad Abdouni',
     vimeoUrl:
       'https://player.vimeo.com/video/1142355792?h=dc4b970af2&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewUrl:
@@ -740,7 +744,7 @@ const projectsData = [
     otherProjects: [
       {
         title: 'Gucci | Marie Claire',
-        directors: ['Mohammad Abdouni'],
+        directors: ['Mohamad Abdouni'],
         brand: 'Gucci/Marie Claire',
         url: '/projects/gucci-marie-claire',
         previewUrl:
@@ -748,7 +752,7 @@ const projectsData = [
       },
       {
         title: 'Trance - A Road Trip With Burberry',
-        directors: ['Mohammad Abdouni'],
+        directors: ['Mohamad Abdouni'],
         brand: 'Burberry',
         url: '/projects/trance-a-road-trip-with-burberry',
         previewUrl:
@@ -756,7 +760,7 @@ const projectsData = [
       },
       {
         title: 'Burberry x Sorbet Magazine • This Red Rock',
-        directors: ['Mohammad Abdouni'],
+        directors: ['Mohamad Abdouni'],
         brand: 'Burberry / Sorbet Magazine',
         url: '/projects/burberry-sorbet-magazine-this-red-rock',
         previewUrl:
@@ -817,7 +821,7 @@ const projectsData = [
     description:
       "Gucci's cinematic statement, revealing the fragile façade of wealth and dynasty. A formidable matriarch attempts to stage a perfect display of her family’s power during a lavish, meticulously controlled birthday dinner. Beneath the impeccable surface of luxury, however, family tensions and a desperate need for control threaten to fracture the meticulously crafted evening. What begins as a celebration quickly unravels into an unnerving spiral of dysfunction, ultimately exposing the chaos concealed beneath every veneer of perfection.",
     bgColor: '#477AA1',
-    director: 'Mohammad Abdouni',
+    director: 'Mohamad Abdouni',
     vimeoUrl:
       'https://player.vimeo.com/video/1142353634?h=7833d4515d&amp;title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewUrl:
@@ -827,7 +831,7 @@ const projectsData = [
     otherProjects: [
       {
         title: 'Trance - A Road Trip With Burberry',
-        directors: ['Mohammad Abdouni'],
+        directors: ['Mohamad Abdouni'],
         brand: 'Burberry',
         url: '/projects/trance-a-road-trip-with-burberry',
         previewUrl:
@@ -835,7 +839,7 @@ const projectsData = [
       },
       {
         title: 'La Magicienne Film V.1 | Bridal Couture Collection',
-        directors: ['Mohammad Abdouni'],
+        directors: ['Mohamad Abdouni'],
         brand: 'HASSIDRISS',
         url: '/projects/la-magicienne-film-v1-bridal-couture-collection',
         previewUrl:
@@ -843,7 +847,7 @@ const projectsData = [
       },
       {
         title: 'Burberry x Sorbet Magazine • This Red Rock',
-        directors: ['Mohammad Abdouni'],
+        directors: ['Mohamad Abdouni'],
         brand: 'Burberry /Sorbet Magazine',
         url: '/projects/burberry-sorbet-magazine-this-red-rock',
         previewUrl:
@@ -932,7 +936,7 @@ const projectsData = [
     description:
       'Student and model Tilila Meryem, emerging creative Daddyaaz, influencer Leena Alghouti, and model Ali Latif embark on a trippy journey at dawn, but as the day rolls on, tensions start to arise as they collectively start seeing familiar yet uncanny landscapes…',
     bgColor: '#477AA1',
-    director: 'Mohammad Abdouni',
+    director: 'Mohamad Abdouni',
     vimeoUrl:
       'https://player.vimeo.com/video/1142357356?h=7b779aa10b&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewUrl:
@@ -942,7 +946,7 @@ const projectsData = [
     otherProjects: [
       {
         title: 'Gucci | Marie Claire',
-        directors: ['Mohammad Abdouni'],
+        directors: ['Mohamad Abdouni'],
         brand: 'Gucci/Marie Claire',
         url: '/projects/gucci-marie-claire',
         previewUrl:
@@ -950,7 +954,7 @@ const projectsData = [
       },
       {
         title: 'La Magicienne Film V.1 | Bridal Couture Collection',
-        directors: ['Mohammad Abdouni'],
+        directors: ['Mohamad Abdouni'],
         brand: 'HASSIDRISS',
         url: '/projects/la-magicienne-film-v1-bridal-couture-collection',
         previewUrl:
@@ -958,7 +962,7 @@ const projectsData = [
       },
       {
         title: 'Burberry x Sorbet Magazine • This Red Rock',
-        directors: ['Mohammad Abdouni'],
+        directors: ['Mohamad Abdouni'],
         brand: 'Burberry / Sorbet Magazine',
         url: '/projects/burberry-sorbet-magazine-this-red-rock',
         previewUrl:
@@ -984,6 +988,7 @@ const projectsData = [
       {
         title: 'Grandma Artsakh',
         directors: ['Chris Kousouros'],
+        brand: 'Which Door original',
         url: '/projects/grandma-artsakh',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/732d0525dc8e2b41ddc9b72407136506ff5e692c.mp4',
@@ -991,6 +996,7 @@ const projectsData = [
       {
         title: 'Leading the way',
         directors: ['Chris Kousouros'],
+        brand: 'VOX Media',
         url: '/projects/leading-the-way',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/c7268f59042501a370ea496db9008bc6cbdc5a06.webm',
@@ -1052,6 +1058,7 @@ const projectsData = [
       {
         title: 'Arrogance',
         directors: ['Johan Eriksson'],
+        brand: 'Which Door + Terran Production',
         url: '/projects/arrogance',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/9b85daf7d3376be55af8608f287d59f1f8ac1837.mp4',
@@ -1145,6 +1152,7 @@ const projectsData = [
     otherProjects: [
       {
         title: 'Island Island Island',
+        brand: 'Which Door + Terran Production',
         directors: ['Johan Eriksson'],
         url: '/projects/island-island-island',
         previewUrl:
@@ -1212,6 +1220,7 @@ const projectsData = [
       {
         title: 'Island Island Island',
         directors: ['Johan Eriksson'],
+        brand: 'Which Door + Terran Production',
         url: '/projects/island-island-island',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/4e3a2ab2513bcef4499141387fd2f3f59ccf4d00.mp4',
@@ -1219,6 +1228,7 @@ const projectsData = [
       {
         title: 'Arrogance',
         directors: ['Johan Eriksson'],
+        brand: 'Which Door + Terran Production',
         url: '/projects/arrogance',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/9b85daf7d3376be55af8608f287d59f1f8ac1837.mp4',
@@ -1326,7 +1336,7 @@ const directorsData = [
     ],
   },
   {
-    name: 'Mohammad Abdouni',
+    name: 'Mohamad Abdouni',
     slug: 'mohamad-abdouni',
     bgImage: '/images/directors/riham.jpg',
     vimeoUrl:
@@ -1349,7 +1359,7 @@ const directorsData = [
       },
       {
         title: 'Gucci | Marie Claire',
-        directors: ['Mohammad Abdouni'],
+        directors: ['Mohamad Abdouni'],
         brand: 'Gucci/Marie Claire',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/3d80959f29a369a32503313968e9af53f14f6bae.webm',
@@ -1357,7 +1367,7 @@ const directorsData = [
       },
       {
         title: 'TRANCE - A Road Trip With Burberry',
-        directors: ['Mohammad Abdouni'],
+        directors: ['Mohamad Abdouni'],
         brand: 'BURBERRY',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/d4a3e53ff00dc9154d5709d1689039fbcd6dd6d3.webm',
@@ -1365,7 +1375,7 @@ const directorsData = [
       },
       {
         title: 'BURBERRY x Sorbet Magazine • This Red Rock',
-        directors: ['Mohammad Abdouni'],
+        directors: ['Mohamad Abdouni'],
         brand: 'Burberry / Sorbet Magazine',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/85ed3235c309f88da1306adeddd751ff18e97611.mp4',
@@ -1390,13 +1400,14 @@ const directorsData = [
       {
         title: 'Dreams of Blue Lagoon',
         directors: ['Chris Kousouros'],
+        brand:"Which Door original",
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/fd636fb8e66e21e8fb59f765617ead285549708c.webm',
         url: '/projects/dreams-of-blue-lagoon',
       },
       {
         title: 'TRANCE - A Road Trip With Burberry',
-        directors: ['Mohammad Abdouni'],
+        directors: ['Mohamad Abdouni'],
         brand: 'BURBERRY',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/d4a3e53ff00dc9154d5709d1689039fbcd6dd6d3.webm',
@@ -1429,6 +1440,7 @@ const directorsData = [
       {
         title: 'Island Island Island',
         directors: ['Johan Eriksson'],
+        brand: 'Which Door + Terran Production',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/4e3a2ab2513bcef4499141387fd2f3f59ccf4d00.mp4',
         url: '/projects/island-island-island',
@@ -1436,6 +1448,7 @@ const directorsData = [
       {
         title: 'Arrogance',
         directors: ['Johan Eriksson'],
+        brand: 'Which Door + Terran Production',
         url: '/projects/arrogance',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/9b85daf7d3376be55af8608f287d59f1f8ac1837.mp4',
@@ -1466,6 +1479,7 @@ const directorsData = [
       {
         title: 'Dreams of Blue Lagoon',
         directors: ['Chris Kousouros'],
+        brand:"Which Door original",
         url: '/projects/dreams-of-blue-lagoon',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/fd636fb8e66e21e8fb59f765617ead285549708c.webm',
@@ -1473,6 +1487,7 @@ const directorsData = [
       {
         title: 'Grandma Artsakh',
         directors: ['Chris Kousouros'],
+        brand: 'Which Door original',
         url: '/projects/grandma-artsakh',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/732d0525dc8e2b41ddc9b72407136506ff5e692c.mp4',

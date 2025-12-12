@@ -43,7 +43,7 @@ export default function ProjectsLanding() {
   const previousVideo = getPreviousVideoState()
   const initialVideo = previousVideo || targetVideo
 
-  const { setSlotRef, slotMedia, crossfadeTo } = useCrossfadeMedia(initialVideo, { duration: 0.6 })
+  const { setSlotRef, slotMedia, crossfadeTo } = useCrossfadeMedia(initialVideo, { duration: 0.45 })
 
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [fontLoaded, setFontLoaded] = useState(false)
