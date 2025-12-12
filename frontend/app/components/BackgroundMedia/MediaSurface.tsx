@@ -89,7 +89,6 @@ export default function MediaSurface({
     >
       {usingHLS ? (
         <HLSVideo
-          key={hlsSrc}
           hlsSrc={hlsSrc!}
           fallbackSrc={previewSrc}
           autoPlay={autoPlay}
@@ -101,7 +100,6 @@ export default function MediaSurface({
         />
       ) : usingNative ? (
         <video
-          key={previewSrc}
           ref={videoRef}
           className={`${mediaClass} object-cover`}
           src={previewSrc}

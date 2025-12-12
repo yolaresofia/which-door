@@ -18,7 +18,7 @@ export default function ContactPage() {
   })
 
   const bg = 'https://cdn.sanity.io/files/xerhtqd5/production/12d55cde7d28cf86f6a7a184bd19e069e1aae2f1.mp4'
-  const previewPoster = 'https://cdn.sanity.io/images/xerhtqd5/production/99945ce01a04899a2742da8865740039d7513b57-3024x1964.png'
+  const previewPoster = 'https://cdn.sanity.io/images/xerhtqd5/production/8e56015f1f0daa6cb7dfaeee8a476dde49013404-2832x1576.jpg'
 
   // Detect mobile
   useEffect(() => {

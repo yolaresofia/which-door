@@ -28,7 +28,6 @@ export function useCrossfadeMedia(initial: Media, opts?: { duration?: number, wa
 
   const slotRefs = useRef<[HTMLDivElement | null, HTMLDivElement | null]>([null, null])
   const tlRef = useRef<gsap.core.Timeline | null>(null)
-  const videoLoadTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   /**
    * Wait for video element in the target slot to be ready to play
@@ -54,6 +53,8 @@ export function useCrossfadeMedia(initial: Media, opts?: { duration?: number, wa
         console.log('⏳ Waiting for video to load...')
 
         let resolved = false
+        let timeoutId: NodeJS.Timeout | null = null
+
         const handleReady = () => {
           if (resolved) return
           resolved = true
@@ -65,9 +66,9 @@ export function useCrossfadeMedia(initial: Media, opts?: { duration?: number, wa
         const cleanup = () => {
           videoEl.removeEventListener('canplay', handleReady)
           videoEl.removeEventListener('loadeddata', handleReady)
-          if (videoLoadTimeoutRef.current) {
-            clearTimeout(videoLoadTimeoutRef.current)
-            videoLoadTimeoutRef.current = null
+          if (timeoutId) {
+            clearTimeout(timeoutId)
+            timeoutId = null
           }
         }
 
@@ -76,7 +77,7 @@ export function useCrossfadeMedia(initial: Media, opts?: { duration?: number, wa
         videoEl.addEventListener('loadeddata', handleReady, { once: true })
 
         // Safety timeout: proceed after 3 seconds even if video isn't ready
-        videoLoadTimeoutRef.current = setTimeout(() => {
+        timeoutId = setTimeout(() => {
           if (resolved) return
           console.log('⏰ Video load timeout, proceeding with crossfade')
           handleReady()
@@ -96,6 +97,12 @@ export function useCrossfadeMedia(initial: Media, opts?: { duration?: number, wa
 
       const from = currentSlot
       const to = (currentSlot === 0 ? 1 : 0) as 0 | 1
+
+      // CRITICAL: Cancel any in-flight animations before starting new transition
+      if (tlRef.current) {
+        tlRef.current.kill()
+        tlRef.current = null
+      }
 
       // Put next media into the hidden slot (no remount of visible slot)
       setSlots((prev) => {

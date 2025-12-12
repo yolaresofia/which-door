@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Hls from 'hls.js'
 
 type Props = {
@@ -25,6 +25,7 @@ type Props = {
  * - hls.js for Chrome/Firefox/Edge
  * - Fallback to MP4 if HLS not supported
  * - Mobile-optimized with bandwidth detection
+ * - Handles source changes without remounting
  */
 export default function HLSVideo({
   hlsSrc,
@@ -40,16 +41,35 @@ export default function HLSVideo({
 }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const hlsRef = useRef<Hls | null>(null)
+  const [currentSrc, setCurrentSrc] = useState<string>('')
+  const retryCountRef = useRef<number>(0)
+  const maxRetries = 3
 
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
+
+    // If source hasn't changed, don't reinitialize
+    if (currentSrc === hlsSrc && hlsRef.current) {
+      console.log('🔄 HLS source unchanged, skipping reload')
+      return
+    }
+
+    console.log('🎬 Loading new HLS source:', hlsSrc)
+    setCurrentSrc(hlsSrc)
 
     // Safari has native HLS support
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
 
     if (isSafari && video.canPlayType('application/vnd.apple.mpegurl')) {
       console.log('🍎 Using Safari native HLS support')
+
+      // Clean up any existing hls.js instance
+      if (hlsRef.current) {
+        hlsRef.current.destroy()
+        hlsRef.current = null
+      }
+
       video.src = hlsSrc
 
       // Attempt autoplay for Safari
@@ -68,26 +88,43 @@ export default function HLSVideo({
     if (Hls.isSupported()) {
       console.log('🎬 Using hls.js for HLS playback')
 
+      // Destroy existing instance if changing sources
+      if (hlsRef.current) {
+        console.log('🧹 Cleaning up previous hls.js instance')
+        hlsRef.current.destroy()
+        hlsRef.current = null
+      }
+
+      const isMobile = window.innerWidth < 1024
+
       const hls = new Hls({
-        // Optimize for background videos
-        maxBufferLength: 10, // Keep buffer small for faster start
-        maxMaxBufferLength: 20,
-        maxBufferSize: 5 * 1000 * 1000, // 5MB
+        // INCREASED buffer sizes for stability
+        maxBufferLength: isMobile ? 20 : 30, // Mobile: 20s, Desktop: 30s
+        maxMaxBufferLength: isMobile ? 40 : 60, // Mobile: 40s, Desktop: 60s
+        maxBufferSize: isMobile ? 30 * 1000 * 1000 : 60 * 1000 * 1000, // Mobile: 30MB, Desktop: 60MB
         maxBufferHole: 0.5,
 
         // Enable adaptive bitrate
-        abrEwmaDefaultEstimate: 500000, // Start with 500kbps estimate
+        abrEwmaDefaultEstimate: isMobile ? 1000000 : 2000000, // Mobile: 1Mbps, Desktop: 2Mbps estimate
         abrBandWidthFactor: 0.95,
         abrBandWidthUpFactor: 0.7,
 
-        // Prioritize loading speed over quality for background videos
-        startLevel: -1, // Auto-select best starting quality
+        // Auto-select best starting quality
+        startLevel: -1,
 
-        // Enable manifests with low latency
+        // Enable workers for better performance
         enableWorker: true,
         lowLatencyMode: false,
 
-        // Debug (remove in production if needed)
+        // Backoff settings for retry
+        manifestLoadingTimeOut: 10000,
+        manifestLoadingMaxRetry: 4,
+        levelLoadingTimeOut: 10000,
+        levelLoadingMaxRetry: 4,
+        fragLoadingTimeOut: 20000,
+        fragLoadingMaxRetry: 6,
+
+        // Debug in development
         debug: process.env.NODE_ENV === 'development',
       })
 
@@ -100,9 +137,9 @@ export default function HLSVideo({
       // HLS Events
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         console.log('✅ HLS manifest parsed, ready to play')
+        retryCountRef.current = 0 // Reset retry count on success
 
         // Mobile optimization: force lower quality on mobile
-        const isMobile = window.innerWidth < 1024
         if (isMobile && hls.levels.length > 0) {
           // Find the lowest quality level (best for mobile)
           const lowestLevel = 0
@@ -128,25 +165,57 @@ export default function HLSVideo({
           url: data.url,
           response: data.response,
           reason: data.reason,
+          retryCount: retryCountRef.current,
         })
 
         if (data.fatal) {
           switch (data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
               console.log('🔄 Fatal network error, trying to recover...')
-              hls.startLoad()
+
+              if (retryCountRef.current < maxRetries) {
+                retryCountRef.current++
+                const backoffDelay = Math.min(1000 * Math.pow(2, retryCountRef.current - 1), 5000)
+                console.log(`⏳ Retrying in ${backoffDelay}ms (attempt ${retryCountRef.current}/${maxRetries})`)
+
+                setTimeout(() => {
+                  if (hlsRef.current) {
+                    hls.startLoad()
+                  }
+                }, backoffDelay)
+              } else {
+                console.error('💥 Max retries reached, falling back to MP4')
+                hls.destroy()
+                if (fallbackSrc) {
+                  video.src = fallbackSrc
+                }
+                retryCountRef.current = 0
+              }
               break
+
             case Hls.ErrorTypes.MEDIA_ERROR:
               console.log('🔄 Fatal media error, trying to recover...')
-              hls.recoverMediaError()
+
+              if (retryCountRef.current < maxRetries) {
+                retryCountRef.current++
+                hls.recoverMediaError()
+              } else {
+                console.error('💥 Max media error retries reached, falling back to MP4')
+                hls.destroy()
+                if (fallbackSrc) {
+                  video.src = fallbackSrc
+                }
+                retryCountRef.current = 0
+              }
               break
+
             default:
               console.error('💥 Unrecoverable HLS error, falling back to MP4')
               hls.destroy()
-              // Use fallback MP4 if available
               if (fallbackSrc) {
                 video.src = fallbackSrc
               }
+              retryCountRef.current = 0
               break
           }
         }
@@ -158,8 +227,21 @@ export default function HLSVideo({
         console.log(`🎯 Quality switched to: ${level?.height}p @ ${Math.round(level?.bitrate / 1000)}kbps`)
       })
 
+      // Log buffer events for debugging
+      if (process.env.NODE_ENV === 'development') {
+        hls.on(Hls.Events.BUFFER_APPENDED, () => {
+          const buffered = video.buffered
+          if (buffered.length > 0) {
+            const bufferEnd = buffered.end(buffered.length - 1)
+            const bufferLength = bufferEnd - video.currentTime
+            console.log(`📊 Buffer: ${bufferLength.toFixed(1)}s`)
+          }
+        })
+      }
+
       return () => {
         if (hlsRef.current) {
+          console.log('🧹 Cleaning up HLS instance')
           hlsRef.current.destroy()
           hlsRef.current = null
         }
@@ -171,7 +253,7 @@ export default function HLSVideo({
         video.src = fallbackSrc
       }
     }
-  }, [hlsSrc, fallbackSrc, autoPlay])
+  }, [hlsSrc, fallbackSrc, autoPlay, currentSrc])
 
   return (
     <video
