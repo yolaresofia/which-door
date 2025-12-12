@@ -42,8 +42,15 @@ export default function HLSVideo({
   const videoRef = useRef<HTMLVideoElement>(null)
   const hlsRef = useRef<Hls | null>(null)
   const [currentSrc, setCurrentSrc] = useState<string>('')
+  const [error, setError] = useState<string | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
   const retryCountRef = useRef<number>(0)
   const maxRetries = 3
+
+  // Detect mobile on mount
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 1024)
+  }, [])
 
   useEffect(() => {
     const video = videoRef.current
@@ -72,16 +79,39 @@ export default function HLSVideo({
 
       video.src = hlsSrc
 
+      // Track native video errors
+      const handleVideoError = () => {
+        const error = video.error
+        if (error) {
+          const errorMsg = `Safari HLS Error (code ${error.code}): ${error.message}`
+          console.error(errorMsg)
+          setError(errorMsg)
+
+          // Try fallback on error
+          if (fallbackSrc) {
+            console.log('🔄 Falling back to MP4')
+            video.src = fallbackSrc
+            setError(null)
+          }
+        }
+      }
+
+      video.addEventListener('error', handleVideoError)
+
       // Attempt autoplay for Safari
       if (autoPlay) {
         const playPromise = video.play()
         if (playPromise) {
           playPromise.catch((error) => {
             console.warn('Safari autoplay blocked:', error)
+            setError(`Autoplay blocked: ${error.message}`)
           })
         }
       }
-      return
+
+      return () => {
+        video.removeEventListener('error', handleVideoError)
+      }
     }
 
     // Use hls.js for other browsers
@@ -158,7 +188,7 @@ export default function HLSVideo({
       })
 
       hls.on(Hls.Events.ERROR, (event, data) => {
-        console.error('HLS Error Details:', {
+        const errorInfo = {
           type: data.type,
           details: data.details,
           fatal: data.fatal,
@@ -166,7 +196,14 @@ export default function HLSVideo({
           response: data.response,
           reason: data.reason,
           retryCount: retryCountRef.current,
-        })
+        }
+
+        console.error('HLS Error Details:', errorInfo)
+
+        // Set error message for mobile UI
+        if (data.fatal) {
+          setError(`HLS ${data.type}: ${data.details} (Retry ${retryCountRef.current}/${maxRetries})`)
+        }
 
         if (data.fatal) {
           switch (data.type) {
@@ -185,9 +222,13 @@ export default function HLSVideo({
                 }, backoffDelay)
               } else {
                 console.error('💥 Max retries reached, falling back to MP4')
+                setError('Network error: Max retries. Using fallback.')
                 hls.destroy()
                 if (fallbackSrc) {
                   video.src = fallbackSrc
+                  setError(null) // Clear error on fallback
+                } else {
+                  setError('Network error: No fallback available')
                 }
                 retryCountRef.current = 0
               }
@@ -201,9 +242,13 @@ export default function HLSVideo({
                 hls.recoverMediaError()
               } else {
                 console.error('💥 Max media error retries reached, falling back to MP4')
+                setError('Media error: Max retries. Using fallback.')
                 hls.destroy()
                 if (fallbackSrc) {
                   video.src = fallbackSrc
+                  setError(null) // Clear error on fallback
+                } else {
+                  setError('Media error: No fallback available')
                 }
                 retryCountRef.current = 0
               }
@@ -211,9 +256,13 @@ export default function HLSVideo({
 
             default:
               console.error('💥 Unrecoverable HLS error, falling back to MP4')
+              setError(`Unrecoverable error: ${data.details}`)
               hls.destroy()
               if (fallbackSrc) {
                 video.src = fallbackSrc
+                setError(null) // Clear error on fallback
+              } else {
+                setError(`Fatal error: ${data.details}. No fallback.`)
               }
               retryCountRef.current = 0
               break
@@ -256,18 +305,45 @@ export default function HLSVideo({
   }, [hlsSrc, fallbackSrc, autoPlay, currentSrc])
 
   return (
-    <video
-      ref={videoRef}
-      className={`${className} object-cover`}
-      muted={muted}
-      loop={loop}
-      playsInline
-      preload="auto"
-      autoPlay={autoPlay}
-      onLoadStart={onLoadStart}
-      onCanPlay={onCanPlay}
-      onPlay={onPlay}
-      onPlaying={onPlaying}
-    />
+    <div className="relative w-full h-full">
+      <video
+        ref={videoRef}
+        className={`${className} object-cover`}
+        muted={muted}
+        loop={loop}
+        playsInline
+        preload="auto"
+        autoPlay={autoPlay}
+        data-hls-video="true"
+        onLoadStart={onLoadStart}
+        onCanPlay={onCanPlay}
+        onPlay={onPlay}
+        onPlaying={onPlaying}
+      />
+
+      {/* Mobile Error UI */}
+      {error && isMobile && (
+        <div className="absolute bottom-0 left-0 right-0 bg-red-600/90 text-white p-4 text-sm font-mono z-50">
+          <div className="font-bold mb-1">⚠️ Video Error (Mobile)</div>
+          <div className="text-xs opacity-90">{error}</div>
+          <div className="text-xs opacity-75 mt-2">
+            URL: {hlsSrc.split('/').pop()}
+          </div>
+          {fallbackSrc && (
+            <div className="text-xs opacity-75">
+              Fallback: {fallbackSrc.split('/').pop()}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Desktop Error UI (less obtrusive) */}
+      {error && !isMobile && (
+        <div className="absolute top-4 right-4 bg-red-600/80 text-white px-3 py-2 text-xs font-mono rounded z-50 max-w-xs">
+          <div className="font-bold">⚠️ Video Error</div>
+          <div className="opacity-90 mt-1">{error}</div>
+        </div>
+      )}
+    </div>
   )
 }

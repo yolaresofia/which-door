@@ -33,7 +33,7 @@
     "prettier": "^3.6.2"
   },
   "dependencies": {
-    "next": "^16.0.7",
+    "next": "^16.0.10",
     "next-sanity": "^11.6.10",
     "react": "^19.2.1",
     "react-dom": "^19.2.1"

@@ -1306,7 +1306,7 @@ const directorsData = [
       'https://cdn.sanity.io/files/xerhtqd5/production/c74d289e1c9327576dd6e710730550ee045221c4.webm',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/388b3b5495d0eae6d7d0eed4c33fafbfa117c58a-3024x1964.jpg',
-    specialization: 'Director',
+    specialization: 'Director | DOP',
     description:
       'Sam Mulvey is an award-winning filmmaker with over a decade of experience working across documentary, commercial, and music video projects. His films try to push visual language to its limits - transforming raw human stories into imaginative and emotionally resonant visual expressions. A graduate of Bristol film school, where he focused on documentary filmmaking, Sam has since broadened his horizons to encompass a wide range of cinematic forms. His recent nomination at the Berlin Commercial Film Awards and multiple features on the world-renowned platform Lens Addiction highlight his commitment to bold storytelling and visual innovation.',
     otherProjects: [
@@ -1393,9 +1393,9 @@ const directorsData = [
       'https://cdn.sanity.io/files/xerhtqd5/production/4d3df752ed60996dbcb945a2b5f14d26198f1a73.mp4',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/e44aaf0bd3677dcf945f8d9ca083990bdff9ccd8-3016x1689.jpg',
-    specialization: 'Music Videos | Sport | Lifestyle',
+    specialization: 'Director | Cinematographer',
     description:
-      'Jamal fuses rhythmic camera moves with graphic color to shape punchy, performance-led films for sport and music clients.',
+      'Alicia is an Emmy-nominated cinematographer who has 17 years of experience working in remote areas, conflict and disaster zones. Alicia studied at SUNY Purchase Film Conservatory in New York and cinematography at FAMU in the Czech Republic. She co-founded What Took You So Long after spending several formative years in Northern Ghana which resulted in a lifelong passion for participatory filmmaking. She has worked in more than 80 countries as Director of Photography, Producer, and Editor on hundreds of projects for a variety of clients and collaborators. She lead our team to several projects in Somalia including the production of a local TV series in collaboration with Hargeisa based Bulsho TV. She is born and raised in the US - her mother tongue is English. ',
     otherProjects: [
       {
         title: 'Dreams of Blue Lagoon',
@@ -1433,9 +1433,9 @@ const directorsData = [
       'https://cdn.sanity.io/files/xerhtqd5/production/7708e07c785880c13392463c35a517505dfc99e7.mp4',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/a89f0a645e7b153ce7a1c226367794017072f298-5120x2880.webp',
-    specialization: 'Art Direction | Experimental Film',
+    specialization: 'Director | Editor',
     description:
-      'Clara explores texture and space with a tactile visual language—sculptural light, negative space, and meticulous color stories.',
+      'Johan is an experienced award winning producer and filmmaker with a background in Development Studies from Uppsala University. He’s currently running the Swedish department of the international production house What Took You So Long?. His experience ranges from directing, project lead, director of photography to editing. He has worked in over 20 countries, many of which are complex low resource environments, which has moulded him into the agile and creative filmmaker he is today. Johan is passionate about telling stories mainstream media neglects and present a more nuanced picture of the world. Johan has led large projects with global UN entities and the H&M Group to small scale farmers in sub Saharan Africa.',
     otherProjects: [
       {
         title: 'Island Island Island',
@@ -1472,9 +1472,9 @@ const directorsData = [
       'https://cdn.sanity.io/files/xerhtqd5/production/b77f6282b701f9170c4e312b4c2e0c6091f3592d.mp4',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/9b1037e5dee41ab7919b274dd1d1e0bf8713a03f-3024x1687.jpg',
-    specialization: 'Automotive | Tech | Performance',
+    specialization: 'Director | DOP',
     description:
-      'Marcus pairs precision-engineered camera work with sleek CG accents to highlight craft, speed, and innovation.',
+      'Chris Kousouros made his transition to filmmaking from genocide prevention with the hopes of addressing global issues with visual products instead of cabinet meetings. He joined documentary production company What Took You So long in December 2014, and has since worked on films in over 50 countries. Chris Co-founded Which Door to bring the incredible stories he found across the world to a commercial audience. Chris speaks English, Spanish, and Levantine Arabic.',
     otherProjects: [
       {
         title: 'Dreams of Blue Lagoon',

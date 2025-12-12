@@ -164,18 +164,27 @@ export function useCrossfadeMedia(initial: Media, opts?: { duration?: number, wa
     };
   }, [])
 
-  // CRITICAL FIX: Wait for initial video to load on first mount
+  // CRITICAL FIX: Let initial video load in background, don't wait
+  // The LQIP poster will show immediately, video plays when ready
   useEffect(() => {
-    if (!waitForLoad) return
-
     const initialSlot = slotRefs.current[0]
     if (!initialSlot) return
 
-    // Wait for initial video without blocking render
-    waitForVideoReady(initialSlot).then(() => {
-      console.log('✅ Initial video ready on first load')
-    })
-  }, [waitForLoad, waitForVideoReady])
+    const videoEl = initialSlot.querySelector('video')
+    if (videoEl) {
+      console.log('📹 Initial video loading in background (readyState:', videoEl.readyState, ')')
+
+      const handleFirstPlay = () => {
+        console.log('✅ Initial video started playing')
+      }
+
+      videoEl.addEventListener('playing', handleFirstPlay, { once: true })
+
+      return () => {
+        videoEl.removeEventListener('playing', handleFirstPlay)
+      }
+    }
+  }, [])
 
   return {
     // which slot is visible
