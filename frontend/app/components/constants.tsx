@@ -19,14 +19,6 @@ function getLQIP(cdnUrl: string): string {
 }
 
 const projectsData = [
-//   {
-//   name: 'Test HLS',
-//   slug: 'test-hls',
-//   isInHomePage: true,
-//   previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/39307a58130a77d181ee0f7a126b45175917e9f7.mp4',
-//   hlsUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', // Public test HLS
-//   previewPoster: 'https://cdn.sanity.io/images/xerhtqd5/production/8f694e9509da50146838bfb0954e25f73a91afe0-3024x1964.png',
-// },
   {
     name: 'Joy Anonymous',
     slug: 'joy-anonymous',
@@ -35,7 +27,7 @@ const projectsData = [
       'From London\'s Southbank to Brooklyn, New York this is a story which captures how our community came along when it was needed most. An example of how the dance music industry has opened up with inclusivity and spontaneity as top priorities. Filmed between London and Brooklyn this short film spreads collective joy between the cities, diving deep into capturing Joy\'s growing community and its wonderful details',
     bgColor: '#477AA1',
     director: 'Sam Mulvey',
-    hlsUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/fdc8fa7fcb9da95b58fab24517f247e0a6c2dc29.m3u8', // PUBLIC TEST STREAM - Replace with your own after encoding!
+    hlsUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/fdc8fa7fcb9da95b58fab24517f247e0a6c2dc29.m3u8',
     vimeoUrl:
       'https://player.vimeo.com/video/1142353483?h=a2f71faa3d&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewUrl:

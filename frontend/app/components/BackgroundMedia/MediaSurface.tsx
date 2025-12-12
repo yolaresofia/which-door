@@ -25,7 +25,7 @@ export default function MediaSurface({
   onNativePlaybackStart,
 }: Props) {
   // Priority: HLS > native video > Vimeo
-  // HLS is best for adaptive streaming, especially on mobile
+  // HLS provides adaptive quality - perfect for mobile (will auto-select lower quality)
   const usingHLS = Boolean(hlsSrc) && !controls
   const usingNative = !usingHLS && Boolean(previewSrc) && (!controls || !vimeoSrc);
 
