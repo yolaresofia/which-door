@@ -13,7 +13,9 @@ import { useGSAP } from '@gsap/react'
 const getTitle = (p: any) => p?.name ?? p?.title ?? 'Untitled'
 const getPreview = (p: any) => p?.previewUrl ?? ''
 const getVimeo = (p: any) => p?.vimeoUrl ?? ''
+const getHLS = (p: any) => p?.hlsUrl ?? ''
 const getPoster = (p: any) => p?.previewPoster ?? ''
+const getPosterLQIP = (p: any) => p?.previewPosterLQIP ?? ''
 const getBgColor = (p: any) => p?.bgColor ?? '#000'
 
 export default function ProjectsLanding() {
@@ -30,8 +32,10 @@ export default function ProjectsLanding() {
     id: first?.slug ?? 0,
     videoSrc: getPreview(first) || getVimeo(first),
     previewUrl: getPreview(first),
+    hlsUrl: getHLS(first),
     vimeoUrl: getVimeo(first),
     previewPoster: getPoster(first),
+    previewPosterLQIP: getPosterLQIP(first),
     bgColor: getBgColor(first),
   }), [first])
 
@@ -50,6 +54,7 @@ export default function ProjectsLanding() {
   const observerRef = useRef<IntersectionObserver | null>(null)
   const mainRef = useRef<HTMLElement | null>(null)
   const hasTransitionedRef = useRef(false)
+  const mobileAnimationDoneRef = useRef(false)
 
   // Use the reusable fade-out navigation hook
   const { fadeOutAndNavigate, isNavigating } = useFadeOutNavigation(mainRef, {
@@ -67,8 +72,10 @@ export default function ProjectsLanding() {
       id: project?.slug ?? i,
       videoSrc: getPreview(project) || getVimeo(project),
       previewUrl: getPreview(project),
+      hlsUrl: getHLS(project),
       vimeoUrl: getVimeo(project),
       previewPoster: getPoster(project),
+      previewPosterLQIP: getPosterLQIP(project),
       bgColor: getBgColor(project),
     })
   }, [selectedIndex, crossfadeTo, visibleProjects])
@@ -123,7 +130,7 @@ export default function ProjectsLanding() {
 
   // Mobile enter animation
   useGSAP(() => {
-    if (!isMobile || !scrollContainerRef.current) return
+    if (!isMobile || !scrollContainerRef.current || mobileAnimationDoneRef.current) return
 
     try {
       const listElement = scrollContainerRef.current.querySelector('ul')
@@ -146,6 +153,9 @@ export default function ProjectsLanding() {
           from: 'start' as const,
         },
         delay: 0.05,
+        onComplete: () => {
+          mobileAnimationDoneRef.current = true
+        }
       })
     } catch (error) {
       console.error('Mobile enter animation error:', error)
@@ -248,7 +258,7 @@ export default function ProjectsLanding() {
     } catch (error) {
       console.error('Intersection observer setup error:', error)
     }
-  }, { dependencies: [isMobile, select], scope: scrollContainerRef })
+  }, { dependencies: [isMobile], scope: scrollContainerRef })
 
   // Wrap the hook's fadeOutAndNavigate to pass slotMedia
   const handleFadeOutAndNavigate = useCallback((url: string) => {
@@ -311,9 +321,11 @@ export default function ProjectsLanding() {
             {slotMedia[0] && (
               <BackgroundMedia
                 variant="preview"
+                hlsUrl={slotMedia[0].hlsUrl}
                 previewUrl={slotMedia[0].previewUrl ?? slotMedia[0].videoSrc}
                 vimeoUrl={slotMedia[0].vimeoUrl ?? slotMedia[0].videoSrc}
                 previewPoster={slotMedia[0].previewPoster}
+                previewPosterLQIP={slotMedia[0].previewPosterLQIP}
                 bgColor={slotMedia[0].bgColor}
               />
             )}
@@ -328,9 +340,11 @@ export default function ProjectsLanding() {
             {slotMedia[1] && (
               <BackgroundMedia
                 variant="preview"
+                hlsUrl={slotMedia[1].hlsUrl}
                 previewUrl={slotMedia[1].previewUrl ?? slotMedia[1].videoSrc}
                 vimeoUrl={slotMedia[1].vimeoUrl ?? slotMedia[1].videoSrc}
                 previewPoster={slotMedia[1].previewPoster}
+                previewPosterLQIP={slotMedia[1].previewPosterLQIP}
                 bgColor={slotMedia[1].bgColor}
               />
             )}
@@ -410,9 +424,11 @@ export default function ProjectsLanding() {
             {isMobile && slotMedia[0] && (
               <BackgroundMedia
                 variant="preview"
+                hlsUrl={slotMedia[0].hlsUrl}
                 previewUrl={slotMedia[0].previewUrl ?? slotMedia[0].videoSrc}
                 vimeoUrl={slotMedia[0].vimeoUrl ?? slotMedia[0].videoSrc}
                 previewPoster={slotMedia[0].previewPoster}
+                previewPosterLQIP={slotMedia[0].previewPosterLQIP}
                 bgColor={slotMedia[0].bgColor}
               />
             )}
@@ -428,9 +444,11 @@ export default function ProjectsLanding() {
             {isMobile && slotMedia[1] && (
               <BackgroundMedia
                 variant="preview"
+                hlsUrl={slotMedia[1].hlsUrl}
                 previewUrl={slotMedia[1].previewUrl ?? slotMedia[1].videoSrc}
                 vimeoUrl={slotMedia[1].vimeoUrl ?? slotMedia[1].videoSrc}
                 previewPoster={slotMedia[1].previewPoster}
+                previewPosterLQIP={slotMedia[1].previewPosterLQIP}
                 bgColor={slotMedia[1].bgColor}
               />
             )}

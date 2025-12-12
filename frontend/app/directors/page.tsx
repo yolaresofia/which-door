@@ -15,8 +15,10 @@ const getMedia = (d: any, i: number) => ({
   id: d?.slug ?? i,
   videoSrc: d?.previewUrl ?? d?.vimeoUrl ?? '',
   previewUrl: d?.previewUrl ?? '',
+  hlsUrl: d?.hlsUrl ?? '', // HLS adaptive streaming URL
   vimeoUrl: d?.vimeoUrl ?? '',
   previewPoster: d?.previewPoster ?? '',
+  previewPosterLQIP: d?.previewPosterLQIP ?? '',
   bgColor: d?.bgColor ?? '#477AA1',
 })
 
@@ -33,6 +35,7 @@ export default function DirectorsIndexPage() {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null) // Mobile scroll container
   const observerRef = useRef<IntersectionObserver | null>(null) // Mobile observer
   const hasTransitionedRef = useRef(false)
+  const mobileAnimationDoneRef = useRef(false)
 
   // Use the reusable fade-out navigation hook
   const { fadeOutAndNavigate, isNavigating } = useFadeOutNavigation(mainRef, {
@@ -104,7 +107,7 @@ export default function DirectorsIndexPage() {
 
   // Mobile enter animation
   useGSAP(() => {
-    if (!isMobile || !scrollContainerRef.current) return
+    if (!isMobile || !scrollContainerRef.current || mobileAnimationDoneRef.current) return
 
     try {
       const listElement = scrollContainerRef.current.querySelector('ul')
@@ -127,6 +130,9 @@ export default function DirectorsIndexPage() {
           from: 'start' as const,
         },
         delay: 0.05,
+        onComplete: () => {
+          mobileAnimationDoneRef.current = true
+        }
       })
     } catch (error) {
       console.error('Mobile enter animation error:', error)
@@ -233,7 +239,7 @@ export default function DirectorsIndexPage() {
     } catch (error) {
       console.error('Intersection observer setup error:', error)
     }
-  }, { dependencies: [isMobile, crossfadeTo], scope: scrollContainerRef })
+  }, { dependencies: [isMobile], scope: scrollContainerRef })
 
   // Handlers to request a crossfade (desktop only)
   const select = (i: number) => {
@@ -292,9 +298,11 @@ export default function DirectorsIndexPage() {
             {slotMedia[0] && (
               <BackgroundMedia
                 variant="preview"
+                hlsUrl={slotMedia[0].hlsUrl}
                 previewUrl={slotMedia[0].previewUrl ?? slotMedia[0].videoSrc}
                 vimeoUrl={slotMedia[0].vimeoUrl ?? slotMedia[0].videoSrc}
                 previewPoster={slotMedia[0].previewPoster}
+                previewPosterLQIP={slotMedia[0].previewPosterLQIP}
                 bgColor={slotMedia[0].bgColor}
               />
             )}
@@ -307,9 +315,11 @@ export default function DirectorsIndexPage() {
             {slotMedia[1] && (
               <BackgroundMedia
                 variant="preview"
+                hlsUrl={slotMedia[1].hlsUrl}
                 previewUrl={slotMedia[1].previewUrl ?? slotMedia[1].videoSrc}
                 vimeoUrl={slotMedia[1].vimeoUrl ?? slotMedia[1].videoSrc}
                 previewPoster={slotMedia[1].previewPoster}
+                previewPosterLQIP={slotMedia[1].previewPosterLQIP}
                 bgColor={slotMedia[1].bgColor}
               />
             )}
@@ -380,9 +390,11 @@ export default function DirectorsIndexPage() {
             {isMobile && slotMedia[0] && (
               <BackgroundMedia
                 variant="preview"
+                hlsUrl={slotMedia[0].hlsUrl}
                 previewUrl={slotMedia[0].previewUrl ?? slotMedia[0].videoSrc}
                 vimeoUrl={slotMedia[0].vimeoUrl ?? slotMedia[0].videoSrc}
                 previewPoster={slotMedia[0].previewPoster}
+                previewPosterLQIP={slotMedia[0].previewPosterLQIP}
                 bgColor={slotMedia[0].bgColor}
               />
             )}
@@ -398,9 +410,11 @@ export default function DirectorsIndexPage() {
             {isMobile && slotMedia[1] && (
               <BackgroundMedia
                 variant="preview"
+                hlsUrl={slotMedia[1].hlsUrl}
                 previewUrl={slotMedia[1].previewUrl ?? slotMedia[1].videoSrc}
                 vimeoUrl={slotMedia[1].vimeoUrl ?? slotMedia[1].videoSrc}
                 previewPoster={slotMedia[1].previewPoster}
+                previewPosterLQIP={slotMedia[1].previewPosterLQIP}
                 bgColor={slotMedia[1].bgColor}
               />
             )}

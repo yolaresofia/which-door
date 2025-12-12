@@ -9,13 +9,16 @@ export type Media = {
   imageSrc?: string;
   videoSrc?: string;
   previewUrl?: string;
+  hlsUrl?: string; // HLS (.m3u8) URL for adaptive streaming
   vimeoUrl?: string;
   bgColor?: string;
   previewPoster?: string;
+  previewPosterLQIP?: string; // Low Quality Image Placeholder
 };
 
-export function useCrossfadeMedia(initial: Media, opts?: { duration?: number }) {
+export function useCrossfadeMedia(initial: Media, opts?: { duration?: number, waitForLoad?: boolean }) {
   const D = opts?.duration ?? 0.45
+  const waitForLoad = opts?.waitForLoad ?? true // Wait for video load by default
   const prefersReduced =
     typeof window !== 'undefined' &&
     window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
@@ -25,6 +28,66 @@ export function useCrossfadeMedia(initial: Media, opts?: { duration?: number }) 
 
   const slotRefs = useRef<[HTMLDivElement | null, HTMLDivElement | null]>([null, null])
   const tlRef = useRef<gsap.core.Timeline | null>(null)
+  const videoLoadTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  /**
+   * Wait for video element in the target slot to be ready to play
+   */
+  const waitForVideoReady = useCallback((slotEl: HTMLDivElement): Promise<void> => {
+    return new Promise((resolve) => {
+      try {
+        // Find video element in the slot
+        const videoEl = slotEl.querySelector('video')
+        if (!videoEl) {
+          // No video found, resolve immediately
+          resolve()
+          return
+        }
+
+        // Check if video is already ready
+        if (videoEl.readyState >= 3) { // HAVE_FUTURE_DATA or higher
+          console.log('✅ Video already loaded')
+          resolve()
+          return
+        }
+
+        console.log('⏳ Waiting for video to load...')
+
+        let resolved = false
+        const handleReady = () => {
+          if (resolved) return
+          resolved = true
+          cleanup()
+          console.log('✅ Video ready to play')
+          resolve()
+        }
+
+        const cleanup = () => {
+          videoEl.removeEventListener('canplay', handleReady)
+          videoEl.removeEventListener('loadeddata', handleReady)
+          if (videoLoadTimeoutRef.current) {
+            clearTimeout(videoLoadTimeoutRef.current)
+            videoLoadTimeoutRef.current = null
+          }
+        }
+
+        // Listen for video ready events
+        videoEl.addEventListener('canplay', handleReady, { once: true })
+        videoEl.addEventListener('loadeddata', handleReady, { once: true })
+
+        // Safety timeout: proceed after 3 seconds even if video isn't ready
+        videoLoadTimeoutRef.current = setTimeout(() => {
+          if (resolved) return
+          console.log('⏰ Video load timeout, proceeding with crossfade')
+          handleReady()
+        }, 3000)
+
+      } catch (error) {
+        console.warn('Error waiting for video:', error)
+        resolve() // Resolve anyway to prevent blocking
+      }
+    })
+  }, [])
 
   const crossfadeTo = useCallback(
     (next: Media) => {
@@ -42,10 +105,15 @@ export function useCrossfadeMedia(initial: Media, opts?: { duration?: number }) 
       })
 
       // Run the fade after the slot receives content on next paint
-      requestAnimationFrame(() => {
+      requestAnimationFrame(async () => {
         const fromEl = slotRefs.current[from]
         const toEl = slotRefs.current[to]
         if (!fromEl || !toEl) return
+
+        // Wait for video to load if enabled
+        if (waitForLoad) {
+          await waitForVideoReady(toEl)
+        }
 
         // Kill in-flight tweens and set start states
         gsap.killTweensOf([fromEl, toEl])
@@ -80,7 +148,7 @@ export function useCrossfadeMedia(initial: Media, opts?: { duration?: number }) 
         tlRef.current = tl
       })
     },
-    [currentSlot, slots, D, prefersReduced]
+    [currentSlot, slots, D, prefersReduced, waitForLoad, waitForVideoReady]
   )
 
   useGSAP(() => {

@@ -1,20 +1,46 @@
 import {url} from 'inspector'
 
-export const projects = [
+/**
+ * Generate LQIP (Low Quality Image Placeholder) URL from Sanity CDN URL
+ * Creates a tiny, blurred version for instant loading
+ */
+function getLQIP(cdnUrl: string): string {
+  if (!cdnUrl || !cdnUrl.includes('cdn.sanity.io/images')) return ''
+  try {
+    const url = new URL(cdnUrl)
+    url.searchParams.set('w', '20')
+    url.searchParams.set('q', '20')
+    url.searchParams.set('blur', '120')
+    url.searchParams.set('auto', 'format')
+    return url.toString()
+  } catch {
+    return ''
+  }
+}
+
+const projectsData = [
+//   {
+//   name: 'Test HLS',
+//   slug: 'test-hls',
+//   isInHomePage: true,
+//   previewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/39307a58130a77d181ee0f7a126b45175917e9f7.mp4',
+//   hlsUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', // Public test HLS
+//   previewPoster: 'https://cdn.sanity.io/images/xerhtqd5/production/8f694e9509da50146838bfb0954e25f73a91afe0-3024x1964.png',
+// },
   {
     name: 'Joy Anonymous',
     slug: 'joy-anonymous',
     isInHomePage: true,
     description:
-      'From London’s Southbank to Brooklyn, New York this is a story which captures how our community came along when it was needed most. An example of how the dance music industry has opened up with inclusivity and spontaneity as top priorities. Filmed between London and Brooklyn this short film spreads collective joy between the cities, diving deep into capturing Joy’s growing community and its wonderful details',
+      'From London\'s Southbank to Brooklyn, New York this is a story which captures how our community came along when it was needed most. An example of how the dance music industry has opened up with inclusivity and spontaneity as top priorities. Filmed between London and Brooklyn this short film spreads collective joy between the cities, diving deep into capturing Joy\'s growing community and its wonderful details',
     bgColor: '#477AA1',
     director: 'Sam Mulvey',
     vimeoUrl:
       'https://player.vimeo.com/video/1142353483?h=a2f71faa3d&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewUrl:
-      'https://cdn.sanity.io/files/xerhtqd5/production/e39903985c5e8cc41b7726ea4fafcf39829c09ad.mp4',
+      'https://cdn.sanity.io/files/xerhtqd5/production/39307a58130a77d181ee0f7a126b45175917e9f7.mp4',
     previewPoster:
-      'https://cdn.sanity.io/images/xerhtqd5/production/8f694e9509da50146838bfb0954e25f73a91afe0-3024x1964.png',
+      'https://cdn.sanity.io/images/xerhtqd5/production/56e1c08338bae02337d4eb3156b2c81b31cfd118-3015x1694.jpg',
     otherProjects: [
       {
         title: 'Idris Elba x King Charles | Creative Futures',
@@ -107,7 +133,7 @@ export const projects = [
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/4d3df752ed60996dbcb945a2b5f14d26198f1a73.mp4',
     previewPoster:
-      'https://cdn.sanity.io/images/xerhtqd5/production/99945ce01a04899a2742da8865740039d7513b57-3024x1964.png',
+      'https://cdn.sanity.io/images/xerhtqd5/production/e44aaf0bd3677dcf945f8d9ca083990bdff9ccd8-3016x1689.jpg',
     bgColor: '#477AA1',
     otherProjects: [
       {
@@ -267,9 +293,9 @@ export const projects = [
     director: 'Chris Kousouros',
     vimeoUrl: 'https://player.vimeo.com/video/1129969216?h=69f4878882',
     previewUrl:
-      'https://cdn.sanity.io/files/xerhtqd5/production/85d11ee6a168134b1fd95a5f28b0c08820bf77e3.webm',
+      'https://cdn.sanity.io/files/xerhtqd5/production/732d0525dc8e2b41ddc9b72407136506ff5e692c.mp4',
     previewPoster:
-      'https://cdn.sanity.io/images/xerhtqd5/production/b2fa2e14a35d8fdbd46f65c6f9ff2a1609f3ef6b-3024x1964.png',
+      'https://cdn.sanity.io/images/xerhtqd5/production/beb4465767e968074e7dfc2143fff5a2a311e36c-3024x1664.jpg',
     otherProjects: [
       {
         title: 'Dreams of Blue Lagoon',
@@ -358,7 +384,7 @@ export const projects = [
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/c7268f59042501a370ea496db9008bc6cbdc5a06.webm',
     previewPoster:
-      'https://cdn.sanity.io/images/xerhtqd5/production/b2fa2e14a35d8fdbd46f65c6f9ff2a1609f3ef6b-3024x1964.png',
+      'https://cdn.sanity.io/images/xerhtqd5/production/f196a8938544a45832fe78b5aeec74199b5a9c5a-3017x1690.jpg',
     otherProjects: [
       {
         title: 'Dreams of Blue Lagoon',
@@ -431,7 +457,7 @@ export const projects = [
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/b49bd1325f9de47f66f65fe691b257bbdd209de4.mp4',
     previewPoster:
-      'https://cdn.sanity.io/images/xerhtqd5/production/99945ce01a04899a2742da8865740039d7513b57-3024x1964.png',
+      'https://cdn.sanity.io/images/xerhtqd5/production/2a639663763e4e484e1c77f4026a7b0e94ba4ef0-3020x1705.jpg',
     otherProjects: [
       {
         title: 'Idris Elba x King Charles | Creative Futures',
@@ -445,7 +471,7 @@ export const projects = [
         directors: ['Sam Mulvey'],
         brand: 'Brooklyn Pilsner',
         previewUrl:
-          'https://cdn.sanity.io/files/xerhtqd5/production/530325e24bae5b2ebc9b5008751797b24e7c6352.mp4',
+          'https://cdn.sanity.io/files/xerhtqd5/production/39307a58130a77d181ee0f7a126b45175917e9f7.mp4',
         url: '/projects/joy-anonymous',
       },
     ],
@@ -517,14 +543,14 @@ export const projects = [
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/530325e24bae5b2ebc9b5008751797b24e7c6352.mp4',
     previewPoster:
-      'https://cdn.sanity.io/images/xerhtqd5/production/99945ce01a04899a2742da8865740039d7513b57-3024x1964.png',
+      'https://cdn.sanity.io/images/xerhtqd5/production/388b3b5495d0eae6d7d0eed4c33fafbfa117c58a-3024x1964.jpg',
     otherProjects: [
       {
         title: 'Joy Anonymous',
         directors: ['Sam Mulvey'],
         brand: 'Brooklyn Pilsner',
         previewUrl:
-          'https://cdn.sanity.io/files/xerhtqd5/production/530325e24bae5b2ebc9b5008751797b24e7c6352.mp4',
+          'https://cdn.sanity.io/files/xerhtqd5/production/39307a58130a77d181ee0f7a126b45175917e9f7.mp4',
         url: '/projects/joy-anonymous',
       },
       {
@@ -622,9 +648,9 @@ export const projects = [
     vimeoUrl:
       'https://player.vimeo.com/video/1144229044?h=10c18eed0f&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewUrl:
-      'https://cdn.sanity.io/files/xerhtqd5/production/5068305fa81bd755e7c0dd4f119c8e2b995a8813.mp4',
+      'https://cdn.sanity.io/files/xerhtqd5/production/85ed3235c309f88da1306adeddd751ff18e97611.mp4',
     previewPoster:
-      'https://cdn.sanity.io/images/xerhtqd5/production/99945ce01a04899a2742da8865740039d7513b57-3024x1964.png',
+      'https://cdn.sanity.io/images/xerhtqd5/production/f86b5d94fe9adba777fe4a4f484417dd36279095-2651x1517.jpg',
     otherProjects: [
       {
         title: 'Gucci | Marie Claire',
@@ -715,7 +741,7 @@ export const projects = [
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/79397636e29b834e4fb57ecf3ed8ffd779738314.webm',
     previewPoster:
-      'https://cdn.sanity.io/images/xerhtqd5/production/99945ce01a04899a2742da8865740039d7513b57-3024x1964.png',
+      'https://cdn.sanity.io/images/xerhtqd5/production/4a6208aa627527b1cc6bc14d81ca9be0d8aaab51-2515x1704.jpg',
     otherProjects: [
       {
         title: 'Gucci | Marie Claire',
@@ -739,7 +765,7 @@ export const projects = [
         brand: 'Burberry / Sorbet Magazine',
         url: '/projects/burberry-sorbet-magazine-this-red-rock',
         previewUrl:
-          'https://cdn.sanity.io/files/xerhtqd5/production/79397636e29b834e4fb57ecf3ed8ffd779738314.webm',
+          'https://cdn.sanity.io/files/xerhtqd5/production/85ed3235c309f88da1306adeddd751ff18e97611.mp4',
       },
     ],
     galleryImages: [
@@ -802,7 +828,7 @@ export const projects = [
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/3d80959f29a369a32503313968e9af53f14f6bae.webm',
     previewPoster:
-      'https://cdn.sanity.io/images/xerhtqd5/production/99945ce01a04899a2742da8865740039d7513b57-3024x1964.png',
+      'https://cdn.sanity.io/images/xerhtqd5/production/aefe4cdb8816b2c5d82eec75cca90045b581c4a6-3011x1602.jpg',
     otherProjects: [
       {
         title: 'Trance - A Road Trip With Burberry',
@@ -826,7 +852,7 @@ export const projects = [
         brand: 'Burberry /Sorbet Magazine',
         url: '/projects/burberry-sorbet-magazine-this-red-rock',
         previewUrl:
-          'https://cdn.sanity.io/files/xerhtqd5/production/79397636e29b834e4fb57ecf3ed8ffd779738314.webm',
+          'https://cdn.sanity.io/files/xerhtqd5/production/85ed3235c309f88da1306adeddd751ff18e97611.mp4',
       },
     ],
     galleryImages: [
@@ -917,7 +943,7 @@ export const projects = [
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/d4a3e53ff00dc9154d5709d1689039fbcd6dd6d3.webm',
     previewPoster:
-      'https://cdn.sanity.io/images/xerhtqd5/production/99945ce01a04899a2742da8865740039d7513b57-3024x1964.png',
+      'https://cdn.sanity.io/images/xerhtqd5/production/3605de91704fd23b91cd90352db077bd8aa27d75-3024x1693.jpg',
     otherProjects: [
       {
         title: 'Gucci | Marie Claire',
@@ -941,7 +967,7 @@ export const projects = [
         brand: 'Burberry / Sorbet Magazine',
         url: '/projects/burberry-sorbet-magazine-this-red-rock',
         previewUrl:
-          'https://cdn.sanity.io/files/xerhtqd5/production/79397636e29b834e4fb57ecf3ed8ffd779738314.webm',
+          'https://cdn.sanity.io/files/xerhtqd5/production/85ed3235c309f88da1306adeddd751ff18e97611.mp4',
       },
     ],
   },
@@ -958,14 +984,14 @@ export const projects = [
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/fd636fb8e66e21e8fb59f765617ead285549708c.webm',
     previewPoster:
-      'https://cdn.sanity.io/images/xerhtqd5/production/b2fa2e14a35d8fdbd46f65c6f9ff2a1609f3ef6b-3024x1964.png',
+      'https://cdn.sanity.io/images/xerhtqd5/production/9b1037e5dee41ab7919b274dd1d1e0bf8713a03f-3024x1687.jpg',
     otherProjects: [
       {
         title: 'Grandma Artsakh',
         directors: ['Chris Kousouros'],
         url: '/projects/grandma-artsakh',
         previewUrl:
-          'https://cdn.sanity.io/files/xerhtqd5/production/85d11ee6a168134b1fd95a5f28b0c08820bf77e3.webm',
+          'https://cdn.sanity.io/files/xerhtqd5/production/732d0525dc8e2b41ddc9b72407136506ff5e692c.mp4',
       },
       {
         title: 'Leading the way',
@@ -1026,7 +1052,7 @@ export const projects = [
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/fd126729dd013e66d0bf888d81b534a06aa94e91.mp4',
     previewPoster:
-      'https://cdn.sanity.io/images/xerhtqd5/production/edddac63afd9bbfe0cf8e1d7d013fc0a97d1051d-3024x1964.png',
+      'https://cdn.sanity.io/images/xerhtqd5/production/b9c67d73293c6f6c67b74ed86a7d4738c77d1e64-3024x1579.jpg',
     otherProjects: [
       {
         title: 'Arrogance',
@@ -1120,7 +1146,7 @@ export const projects = [
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/42a969d616fadeb6654b143e770e39fc48921795.webm',
     previewPoster:
-      'https://cdn.sanity.io/images/xerhtqd5/production/b2fa2e14a35d8fdbd46f65c6f9ff2a1609f3ef6b-3024x1964.png',
+      'https://cdn.sanity.io/images/xerhtqd5/production/3b0a7d1eb48c824533ba66323dfc712a4a005be6-3012x1692.jpg',
     otherProjects: [
       {
         title: 'Island Island Island',
@@ -1186,7 +1212,7 @@ export const projects = [
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/7708e07c785880c13392463c35a517505dfc99e7.mp4',
     previewPoster:
-      'https://cdn.sanity.io/images/xerhtqd5/production/b2fa2e14a35d8fdbd46f65c6f9ff2a1609f3ef6b-3024x1964.png',
+      'https://cdn.sanity.io/images/xerhtqd5/production/a89f0a645e7b153ce7a1c226367794017072f298-5120x2880.webp',
     otherProjects: [
       {
         title: 'Island Island Island',
@@ -1264,7 +1290,7 @@ export const projects = [
   },
 ]
 
-export const directors = [
+const directorsData = [
   {
     name: 'Sam Mulvey',
     slug: 'sam-mulvey',
@@ -1274,7 +1300,7 @@ export const directors = [
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/c74d289e1c9327576dd6e710730550ee045221c4.webm',
     previewPoster:
-      'https://cdn.sanity.io/images/xerhtqd5/production/8f694e9509da50146838bfb0954e25f73a91afe0-3024x1964.png',
+      'https://cdn.sanity.io/images/xerhtqd5/production/388b3b5495d0eae6d7d0eed4c33fafbfa117c58a-3024x1964.jpg',
     specialization: 'Director',
     description:
       'Sam Mulvey is an award-winning filmmaker with over a decade of experience working across documentary, commercial, and music video projects. His films try to push visual language to its limits - transforming raw human stories into imaginative and emotionally resonant visual expressions. A graduate of Bristol film school, where he focused on documentary filmmaking, Sam has since broadened his horizons to encompass a wide range of cinematic forms. His recent nomination at the Berlin Commercial Film Awards and multiple features on the world-renowned platform Lens Addiction highlight his commitment to bold storytelling and visual innovation.',
@@ -1284,7 +1310,7 @@ export const directors = [
         directors: ['Sam Mulvey'],
         brand: 'Brooklyn Pilsner',
         previewUrl:
-          'https://cdn.sanity.io/files/xerhtqd5/production/530325e24bae5b2ebc9b5008751797b24e7c6352.mp4',
+          'https://cdn.sanity.io/files/xerhtqd5/production/39307a58130a77d181ee0f7a126b45175917e9f7.mp4',
         url: '/projects/joy-anonymous',
       },
       {
@@ -1313,7 +1339,7 @@ export const directors = [
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/3d80959f29a369a32503313968e9af53f14f6bae.webm',
     previewPoster:
-      'https://cdn.sanity.io/images/xerhtqd5/production/bb0046f12a3b6f7ab12eca1bdb390e5965071c02-3024x1964.png',
+      'https://cdn.sanity.io/images/xerhtqd5/production/aefe4cdb8816b2c5d82eec75cca90045b581c4a6-3011x1602.jpg',
     specialization: 'Director | Visual Artist',
     description:
       'Mohamad Abdouni is an artist, filmmaker, photographer, and the Editor-in-Chief of COLD CUTS, the photo journal exploring queer cultures in the SWANA region. His work has been shown at the Brooklyn Museum, FOAM Amsterdam, Institut du Monde Arabe, Art Basel (Paris+), and the Lyon Biennale, and he received the 2023 Lafayette Anticipations Prize. Mohamad directs narrative fashion films and music videos for clients such as Gucci, Vogue US & Italia, Burberry, Puma, The New York Times, Fendi, Farfetch, GQ, Dazed, Another, Nowness, and L’Officiel. His personal work centers on queer histories in the Arab region, including the long-term archival project Treat Me Like Your Mother, now housed at the Arab Image Foundation. He is currently exploring themes of masculinity, family, and inherited identities.',
@@ -1347,7 +1373,7 @@ export const directors = [
         directors: ['Mohammad Abdouni'],
         brand: 'Burberry / Sorbet Magazine',
         previewUrl:
-          'https://cdn.sanity.io/files/xerhtqd5/production/5068305fa81bd755e7c0dd4f119c8e2b995a8813.mp4',
+          'https://cdn.sanity.io/files/xerhtqd5/production/85ed3235c309f88da1306adeddd751ff18e97611.mp4',
         url: '/projects/burberry-sorbet-magazine-this-red-rock',
       },
     ],
@@ -1361,7 +1387,7 @@ export const directors = [
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/4d3df752ed60996dbcb945a2b5f14d26198f1a73.mp4',
     previewPoster:
-      'https://cdn.sanity.io/images/xerhtqd5/production/99945ce01a04899a2742da8865740039d7513b57-3024x1964.png',
+      'https://cdn.sanity.io/images/xerhtqd5/production/e44aaf0bd3677dcf945f8d9ca083990bdff9ccd8-3016x1689.jpg',
     specialization: 'Music Videos | Sport | Lifestyle',
     description:
       'Jamal fuses rhythmic camera moves with graphic color to shape punchy, performance-led films for sport and music clients.',
@@ -1400,7 +1426,7 @@ export const directors = [
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/7708e07c785880c13392463c35a517505dfc99e7.mp4',
     previewPoster:
-      'https://cdn.sanity.io/images/xerhtqd5/production/edddac63afd9bbfe0cf8e1d7d013fc0a97d1051d-3024x1964.png',
+      'https://cdn.sanity.io/images/xerhtqd5/production/a89f0a645e7b153ce7a1c226367794017072f298-5120x2880.webp',
     specialization: 'Art Direction | Experimental Film',
     description:
       'Clara explores texture and space with a tactile visual language—sculptural light, negative space, and meticulous color stories.',
@@ -1437,7 +1463,7 @@ export const directors = [
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/b77f6282b701f9170c4e312b4c2e0c6091f3592d.mp4',
     previewPoster:
-      'https://cdn.sanity.io/images/xerhtqd5/production/b2fa2e14a35d8fdbd46f65c6f9ff2a1609f3ef6b-3024x1964.png',
+      'https://cdn.sanity.io/images/xerhtqd5/production/9b1037e5dee41ab7919b274dd1d1e0bf8713a03f-3024x1687.jpg',
     specialization: 'Automotive | Tech | Performance',
     description:
       'Marcus pairs precision-engineered camera work with sleek CG accents to highlight craft, speed, and innovation.',
@@ -1454,7 +1480,7 @@ export const directors = [
         directors: ['Chris Kousouros'],
         url: '/projects/grandma-artsakh',
         previewUrl:
-          'https://cdn.sanity.io/files/xerhtqd5/production/85d11ee6a168134b1fd95a5f28b0c08820bf77e3.webm',
+          'https://cdn.sanity.io/files/xerhtqd5/production/732d0525dc8e2b41ddc9b72407136506ff5e692c.mp4',
       },
       {
         title: 'Leading the way',
@@ -1518,3 +1544,15 @@ export const galleryImages = [
     alt: 'VOX IMAGE 12',
   },
 ]
+
+// Export projects with auto-generated LQIP URLs
+export const projects = projectsData.map(project => ({
+  ...project,
+  previewPosterLQIP: project.previewPoster ? getLQIP(project.previewPoster) : undefined,
+}))
+
+// Export directors with auto-generated LQIP URLs
+export const directors = directorsData.map(director => ({
+  ...director,
+  previewPosterLQIP: director.previewPoster ? getLQIP(director.previewPoster) : undefined,
+}))

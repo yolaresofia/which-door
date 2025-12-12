@@ -1,10 +1,12 @@
 // MediaSurface.tsx
 import { useEffect, useRef } from "react";
 import VimeoVideo from "./surfaces/VimeoVideo";
+import HLSVideo from "./surfaces/HLSVideo";
 
 type Props = {
   vimeoSrc?: string;
   previewSrc?: string;
+  hlsSrc?: string;
   controls: boolean;
   autoPlay: boolean;
   iframeRef: React.RefObject<HTMLIFrameElement | null>;
@@ -15,13 +17,17 @@ type Props = {
 export default function MediaSurface({
   vimeoSrc,
   previewSrc,
+  hlsSrc,
   controls,
   autoPlay,
   iframeRef,
   variant,
   onNativePlaybackStart,
 }: Props) {
-  const usingNative = Boolean(previewSrc) && (!controls || !vimeoSrc);
+  // Priority: HLS > native video > Vimeo
+  // HLS is best for adaptive streaming, especially on mobile
+  const usingHLS = Boolean(hlsSrc) && !controls
+  const usingNative = !usingHLS && Boolean(previewSrc) && (!controls || !vimeoSrc);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -38,17 +44,37 @@ export default function MediaSurface({
       : "w-full aspect-video md:aspect-auto md:w-full md:h-full lg:!w-full lg:!h-full";
 
   useEffect(() => {
+    // Skip autoplay handling for HLS (HLSVideo component handles it)
+    if (usingHLS) return;
     if (!usingNative) return;
     const video = videoRef.current;
     if (!video) return;
-    if (!autoPlay) return;
-    const playPromise = video.play();
-    if (typeof playPromise?.catch === "function") {
-      playPromise.catch(() => {
-        // Autoplay might be blocked; ignore to avoid console noise.
-      });
+
+    // Wait for video to be ready before attempting autoplay
+    const attemptPlay = () => {
+      if (!autoPlay) return;
+      const playPromise = video.play();
+      if (typeof playPromise?.catch === "function") {
+        playPromise.catch(() => {
+          // Autoplay might be blocked; ignore to avoid console noise.
+        });
+      }
+    };
+
+    // If video is already loaded, play immediately
+    if (video.readyState >= 3) {
+      attemptPlay();
+    } else {
+      // Otherwise wait for canplay event
+      const handleCanPlay = () => {
+        attemptPlay();
+      };
+      video.addEventListener("canplay", handleCanPlay, { once: true });
+      return () => {
+        video.removeEventListener("canplay", handleCanPlay);
+      };
     }
-  }, [usingNative, previewSrc, autoPlay]);
+  }, [usingHLS, usingNative, previewSrc, autoPlay]);
 
   const handleNativeStart = () => {
     onNativePlaybackStart?.();
@@ -59,9 +85,21 @@ export default function MediaSurface({
       ref={containerRef}
       className={containerClass}
       data-variant={variant}
-      data-source={usingNative ? "native" : "vimeo"}
+      data-source={usingHLS ? "hls" : usingNative ? "native" : "vimeo"}
     >
-      {usingNative ? (
+      {usingHLS ? (
+        <HLSVideo
+          key={hlsSrc}
+          hlsSrc={hlsSrc!}
+          fallbackSrc={previewSrc}
+          autoPlay={autoPlay}
+          muted={true}
+          loop={true}
+          className={mediaClass}
+          onPlay={handleNativeStart}
+          onPlaying={handleNativeStart}
+        />
+      ) : usingNative ? (
         <video
           key={previewSrc}
           ref={videoRef}

@@ -15,7 +15,9 @@ const CONTROLS_IDLE_HIDE_MS = 900;
 export type BackgroundMediaProps = {
   vimeoUrl?: string;
   previewUrl?: string;
+  hlsUrl?: string; // HLS (.m3u8) URL for adaptive streaming
   previewPoster?: string;
+  previewPosterLQIP?: string; // Low Quality Image Placeholder (base64 or URL)
   variant?: "full" | "preview";
   bgColor?: string;
   className?: string;
@@ -29,7 +31,9 @@ export type BackgroundMediaProps = {
 export default function BackgroundMedia({
   vimeoUrl,
   previewUrl,
+  hlsUrl,
   previewPoster,
+  previewPosterLQIP,
   variant = "full",
   bgColor,
   className = "",
@@ -48,7 +52,12 @@ export default function BackgroundMedia({
   const activeVimeoSrc = usingNativeVideo ? undefined : vimeoUrl || previewUrl;
   const activePreviewSrc = usingNativeVideo ? previewUrl : undefined;
   const activeSourceKey = usingNativeVideo ? activePreviewSrc : activeVimeoSrc;
-  const shouldUsePoster = Boolean(previewPoster) && effectiveControls && !usingNativeVideo;
+  // Show poster for preview variants (until video loads) OR when controls are enabled
+  // For native video (mobile), also show poster until video starts
+  const shouldUsePoster = Boolean(previewPoster) && (
+    (variant === "preview") || // Always show for preview variant until video loads
+    (effectiveControls && !usingNativeVideo) // Show for controlled Vimeo
+  );
   const resolvedAutoPlay =
     typeof autoPlayProp === "boolean" ? autoPlayProp : !effectiveControls;
 
@@ -106,7 +115,9 @@ export default function BackgroundMedia({
     if (videoHasStarted) return;
     const progressed = current > 0.05;
     if (variant === "preview") {
-      if ((ready && progressed) || playing) {
+      // For preview variant, wait until video is truly ready AND playing
+      // This ensures we show the blurred poster until the video loads
+      if (ready && progressed && playing) {
         setVideoHasStarted(true);
       }
       return;
@@ -185,6 +196,7 @@ export default function BackgroundMedia({
         <MediaSurface
           vimeoSrc={activeVimeoSrc}
           previewSrc={activePreviewSrc}
+          hlsSrc={hlsUrl}
           controls={effectiveControls}
           autoPlay={resolvedAutoPlay}
           iframeRef={iframeRef}
@@ -198,14 +210,30 @@ export default function BackgroundMedia({
           className="pointer-events-none absolute inset-0 z-10 overflow-hidden transition-opacity ease-in-out"
           style={{ opacity: posterOpacity, transitionDuration: `${POSTER_FADE_MS}ms` }}
         >
+          {/* LQIP base64 placeholder - loads instantly */}
+          {previewPosterLQIP && (
+            <Image
+              src={previewPosterLQIP}
+              alt=""
+              fill
+              className="object-cover transform"
+              style={{ filter: "blur(40px)", transform: "scale(1.12)" }}
+              sizes="100vw"
+              priority={true}
+              quality={20}
+            />
+          )}
+          {/* Full quality poster - loads progressively */}
           <Image
             src={previewPoster as string}
             alt=""
             fill
             className="object-cover transform"
-            style={{ filter: "blur(10px)", transform: "scale(1.05)" }}
+            style={{ filter: "blur(22px)", transform: "scale(1.1)" }}
             sizes="100vw"
             priority={variant === "preview"}
+            placeholder={previewPosterLQIP ? "blur" : "empty"}
+            blurDataURL={previewPosterLQIP}
           />
           <div className="absolute inset-0 bg-black/10" />
         </div>
