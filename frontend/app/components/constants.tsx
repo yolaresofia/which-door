@@ -35,6 +35,7 @@ const projectsData = [
       'From London\'s Southbank to Brooklyn, New York this is a story which captures how our community came along when it was needed most. An example of how the dance music industry has opened up with inclusivity and spontaneity as top priorities. Filmed between London and Brooklyn this short film spreads collective joy between the cities, diving deep into capturing Joy\'s growing community and its wonderful details',
     bgColor: '#477AA1',
     director: 'Sam Mulvey',
+    hlsUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/fdc8fa7fcb9da95b58fab24517f247e0a6c2dc29.m3u8', // PUBLIC TEST STREAM - Replace with your own after encoding!
     vimeoUrl:
       'https://player.vimeo.com/video/1142353483?h=a2f71faa3d&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewUrl:
@@ -125,6 +126,7 @@ const projectsData = [
     name: 'Inside José Andrés’ Mini Bar',
     slug: 'inside-jose-andres-mini-bar',
     isInHomePage: true,
+    hlsUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/45641aa9e7544d104515a91d96bb25f60a9a9121.m3u8',
     description:
       'A peek inside Minibar, the two-Michelin-star restaurant by legendary chef José Andrés – one of the world’s most imaginative dining experiences. In this intimate space, art meets science, and tradition meets technique, creating dishes that feel like stories coming to life. After geeking out with José for hours about food and chemistry, we decided to make something that captures that same spark – a piece you can watch on your big screen or in the restaurant itself. Something that leaves you hooked, relaxed, and maybe a little bit hungry.',
     director: 'Alicia Sully',
@@ -287,6 +289,7 @@ const projectsData = [
     name: 'Grandma Artsakh',
     slug: 'grandma-artsakh',
     isInHomePage: true,
+    hlsUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/246b3ce411b77de6c52fc0095d2c4e4174a6bd94.m3u8',
     description:
       'Have you ever thought about what a grandma born into a land of constant conflict has lived through? This short film is a letter of love, comfort, and apology from a young Armenian woman to a grandmother from Artsakh. We made it in 2024, after more than 100,000 people fled their homes – drained from a year-long blockade by Azerbaijan.',
     bgColor: '#477AA1',
@@ -1050,7 +1053,7 @@ const projectsData = [
     director: 'Johan Eriksson',
     vimeoUrl: 'https://player.vimeo.com/video/1129973979?h=e6cfedbeaa',
     previewUrl:
-      'https://cdn.sanity.io/files/xerhtqd5/production/fd126729dd013e66d0bf888d81b534a06aa94e91.mp4',
+      'https://cdn.sanity.io/files/xerhtqd5/production/4e3a2ab2513bcef4499141387fd2f3f59ccf4d00.mp4',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/b9c67d73293c6f6c67b74ed86a7d4738c77d1e64-3024x1579.jpg',
     otherProjects: [
@@ -1059,7 +1062,7 @@ const projectsData = [
         directors: ['Johan Eriksson'],
         url: '/projects/arrogance',
         previewUrl:
-          'https://cdn.sanity.io/files/xerhtqd5/production/530325e24bae5b2ebc9b5008751797b24e7c6352.mp4',
+          'https://cdn.sanity.io/files/xerhtqd5/production/9b85daf7d3376be55af8608f287d59f1f8ac1837.mp4',
       },
       {
         title: 'Is the world getting better?',
@@ -1067,7 +1070,7 @@ const projectsData = [
         url: '/projects/is-the-world-getting-better',
         brand: 'UNDP Sweden',
         previewUrl:
-          'https://cdn.sanity.io/files/xerhtqd5/production/e723f5af4ae111bb4df2ed754b9a55d8d9758c30.mp4',
+          'https://cdn.sanity.io/files/xerhtqd5/production/7708e07c785880c13392463c35a517505dfc99e7.mp4',
       },
     ],
     galleryImages: [
@@ -1144,7 +1147,7 @@ const projectsData = [
     vimeoUrl:
       'https://player.vimeo.com/video/1131302044?h=5cf217a4d2&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewUrl:
-      'https://cdn.sanity.io/files/xerhtqd5/production/42a969d616fadeb6654b143e770e39fc48921795.webm',
+      'https://cdn.sanity.io/files/xerhtqd5/production/9b85daf7d3376be55af8608f287d59f1f8ac1837.mp4',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/3b0a7d1eb48c824533ba66323dfc712a4a005be6-3012x1692.jpg',
     otherProjects: [
@@ -1153,7 +1156,7 @@ const projectsData = [
         directors: ['Johan Eriksson'],
         url: '/projects/island-island-island',
         previewUrl:
-          'https://cdn.sanity.io/files/xerhtqd5/production/fd126729dd013e66d0bf888d81b534a06aa94e91.mp4',
+          'https://cdn.sanity.io/files/xerhtqd5/production/4e3a2ab2513bcef4499141387fd2f3f59ccf4d00.mp4',
       },
       {
         title: 'Is the world getting better?',
@@ -1161,7 +1164,7 @@ const projectsData = [
         brand: 'UNDP Sweden',
         url: '/projects/is-the-world-getting-better',
         previewUrl:
-          'https://cdn.sanity.io/files/xerhtqd5/production/e723f5af4ae111bb4df2ed754b9a55d8d9758c30.mp4',
+          'https://cdn.sanity.io/files/xerhtqd5/production/7708e07c785880c13392463c35a517505dfc99e7.mp4',
       },
     ],
     galleryImages: [
@@ -1219,14 +1222,14 @@ const projectsData = [
         directors: ['Johan Eriksson'],
         url: '/projects/island-island-island',
         previewUrl:
-          'https://cdn.sanity.io/files/xerhtqd5/production/fd126729dd013e66d0bf888d81b534a06aa94e91.mp4',
+          'https://cdn.sanity.io/files/xerhtqd5/production/4e3a2ab2513bcef4499141387fd2f3f59ccf4d00.mp4',
       },
       {
         title: 'Arrogance',
         directors: ['Johan Eriksson'],
         url: '/projects/arrogance',
         previewUrl:
-          'https://cdn.sanity.io/files/xerhtqd5/production/42a969d616fadeb6654b143e770e39fc48921795.webm',
+          'https://cdn.sanity.io/files/xerhtqd5/production/9b85daf7d3376be55af8608f287d59f1f8ac1837.mp4',
       },
     ],
     galleryImages: [
@@ -1435,7 +1438,7 @@ const directorsData = [
         title: 'Island Island Island',
         directors: ['Johan Eriksson'],
         previewUrl:
-          'https://cdn.sanity.io/files/xerhtqd5/production/fd126729dd013e66d0bf888d81b534a06aa94e91.mp4',
+          'https://cdn.sanity.io/files/xerhtqd5/production/4e3a2ab2513bcef4499141387fd2f3f59ccf4d00.mp4',
         url: '/projects/island-island-island',
       },
       {
@@ -1443,7 +1446,7 @@ const directorsData = [
         directors: ['Johan Eriksson'],
         url: '/projects/arrogance',
         previewUrl:
-          'https://cdn.sanity.io/files/xerhtqd5/production/530325e24bae5b2ebc9b5008751797b24e7c6352.mp4',
+          'https://cdn.sanity.io/files/xerhtqd5/production/9b85daf7d3376be55af8608f287d59f1f8ac1837.mp4',
       },
       {
         title: 'Is the world getting better?',
@@ -1451,7 +1454,7 @@ const directorsData = [
         url: '/projects/is-the-world-getting-better',
         brand: 'UNDP Sweden',
         previewUrl:
-          'https://cdn.sanity.io/files/xerhtqd5/production/e723f5af4ae111bb4df2ed754b9a55d8d9758c30.mp4',
+          'https://cdn.sanity.io/files/xerhtqd5/production/7708e07c785880c13392463c35a517505dfc99e7.mp4',
       },
     ],
   },

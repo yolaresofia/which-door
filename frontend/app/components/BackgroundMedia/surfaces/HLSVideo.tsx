@@ -121,7 +121,14 @@ export default function HLSVideo({
       })
 
       hls.on(Hls.Events.ERROR, (event, data) => {
-        console.error('HLS Error:', data)
+        console.error('HLS Error Details:', {
+          type: data.type,
+          details: data.details,
+          fatal: data.fatal,
+          url: data.url,
+          response: data.response,
+          reason: data.reason,
+        })
 
         if (data.fatal) {
           switch (data.type) {

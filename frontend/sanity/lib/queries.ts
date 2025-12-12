@@ -41,13 +41,31 @@ export const getPageQuery = defineQuery(`
         ${linkFields},
       },
       _type == "infoSection" => {
+        heading,
+        subheading,
         content[]{
           ...,
           markDefs[]{
             ...,
             ${linkReference}
           }
-        }
+        },
+        image{
+          ...,
+          "url": asset->url
+        },
+        video{
+          ...,
+          "url": asset->url
+        },
+        hlsPlaylist{
+          ...,
+          "url": asset->url
+        },
+        hlsSegment{
+          ...,
+          "url": asset->url
+        },
       },
     },
   }

@@ -34,6 +34,20 @@ export const infoSection = defineType({
       type: 'file',
       options: { accept: 'video/*' },
     }),
+    defineField({
+      name: 'hlsPlaylist',
+      title: 'HLS playlist (.m3u8)',
+      type: 'file',
+      description: 'Upload a HLS manifest for this section',
+      options: { accept: '.m3u8,application/vnd.apple.mpegurl,application/x-mpegURL' },
+    }),
+    defineField({
+      name: 'hlsSegment',
+      title: 'HLS segment (.ts)',
+      type: 'file',
+      description: 'Upload a transport stream segment if you need to store a .ts with this section',
+      options: { accept: '.ts,video/mp2t,video/MP2T' },
+    }),
   ],
   preview: {
     select: {
