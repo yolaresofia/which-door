@@ -1,12 +1,10 @@
 // MediaSurface.tsx
 import { useEffect, useRef } from "react";
 import VimeoVideo from "./surfaces/VimeoVideo";
-import HLSVideo from "./surfaces/HLSVideo";
 
 type Props = {
   vimeoSrc?: string;
   previewSrc?: string;
-  hlsSrc?: string;
   controls: boolean;
   autoPlay: boolean;
   iframeRef: React.RefObject<HTMLIFrameElement | null>;
@@ -17,21 +15,17 @@ type Props = {
 export default function MediaSurface({
   vimeoSrc,
   previewSrc,
-  hlsSrc,
   controls,
   autoPlay,
   iframeRef,
   variant,
   onNativePlaybackStart,
 }: Props) {
-  // Priority: HLS > native video > Vimeo
-  // HLS provides adaptive quality - perfect for mobile (will auto-select lower quality)
-  const usingHLS = Boolean(hlsSrc) && !controls
-  const usingNative = !usingHLS && Boolean(previewSrc) && (!controls || !vimeoSrc);
+  // Use native video for previews, Vimeo for full with controls
+  const usingNative = Boolean(previewSrc) && (!controls || !vimeoSrc);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const name = `MediaSurface(${variant})`;
 
   // Shared centering
   const containerClass =
@@ -44,8 +38,6 @@ export default function MediaSurface({
       : "w-full aspect-video md:aspect-auto md:w-full md:h-full lg:!w-full lg:!h-full";
 
   useEffect(() => {
-    // Skip autoplay handling for HLS (HLSVideo component handles it)
-    if (usingHLS) return;
     if (!usingNative) return;
     const video = videoRef.current;
     if (!video) return;
@@ -74,7 +66,7 @@ export default function MediaSurface({
         video.removeEventListener("canplay", handleCanPlay);
       };
     }
-  }, [usingHLS, usingNative, previewSrc, autoPlay]);
+  }, [usingNative, previewSrc, autoPlay]);
 
   const handleNativeStart = () => {
     onNativePlaybackStart?.();
@@ -85,20 +77,9 @@ export default function MediaSurface({
       ref={containerRef}
       className={containerClass}
       data-variant={variant}
-      data-source={usingHLS ? "hls" : usingNative ? "native" : "vimeo"}
+      data-source={usingNative ? "native" : "vimeo"}
     >
-      {usingHLS ? (
-        <HLSVideo
-          hlsSrc={hlsSrc!}
-          fallbackSrc={previewSrc}
-          autoPlay={autoPlay}
-          muted={true}
-          loop={true}
-          className={mediaClass}
-          onPlay={handleNativeStart}
-          onPlaying={handleNativeStart}
-        />
-      ) : usingNative ? (
+      {usingNative ? (
         <video
           ref={videoRef}
           className={`${mediaClass} object-cover`}

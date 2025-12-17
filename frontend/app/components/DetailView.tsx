@@ -4,7 +4,7 @@ import Link from 'next/link'
 import {usePathname} from 'next/navigation'
 import BackgroundMedia from './BackgroundMedia/BackgroundMedia'
 
-type RelatedItem = {title: string; directors: string[]; brand?: string; previewUrl?: string; url?: string}
+type RelatedItem = {title: string; directors: string[]; brand?: string; previewUrl?: string; previewPoster?: string; url?: string}
 
 export type DetailItem = {
   name: string
@@ -24,10 +24,12 @@ export default function DetailView({
   item,
   backgroundStrategy = 'auto',
   enableAnimations = false,
+  onHoverProject,
 }: {
   item: DetailItem
   backgroundStrategy?: BackgroundStrategy
   enableAnimations?: boolean
+  onHoverProject?: (project: RelatedItem | null) => void
 }) {
   const pathname = usePathname()
   const [hoveredProjectUrl, setHoveredProjectUrl] = useState<string | null>(null)
@@ -53,7 +55,8 @@ export default function DetailView({
   }, [activePreviewSrc])
 
   const mainStyle = color ? {backgroundColor: color} : undefined
-  const showBackgroundMedia = Boolean(activePreviewSrc)
+  // Don't show internal background if parent handles hover via callback
+  const showBackgroundMedia = !onHoverProject && Boolean(activePreviewSrc)
 
   return (
     <main className="relative min-h-dvh w-full overflow-hidden text-white" style={mainStyle}>
@@ -79,12 +82,34 @@ export default function DetailView({
               {item.otherProjects.map((proj) => (
                 <li
                   key={proj.url ?? `${proj.title}-${proj.brand ?? 'related'}`}
-                  onMouseEnter={() =>
-                    allowPreview && proj.previewUrl && setHoveredProjectUrl(proj.previewUrl)
-                  }
-                  onMouseLeave={() => allowPreview && setHoveredProjectUrl(null)}
-                  onFocus={() => allowPreview && proj.previewUrl && setHoveredProjectUrl(proj.previewUrl)}
-                  onBlur={() => allowPreview && setHoveredProjectUrl(null)}
+                  onMouseEnter={() => {
+                    if (onHoverProject && proj.previewUrl) {
+                      onHoverProject(proj)
+                    } else if (allowPreview && proj.previewUrl) {
+                      setHoveredProjectUrl(proj.previewUrl)
+                    }
+                  }}
+                  onMouseLeave={() => {
+                    if (onHoverProject) {
+                      onHoverProject(null)
+                    } else if (allowPreview) {
+                      setHoveredProjectUrl(null)
+                    }
+                  }}
+                  onFocus={() => {
+                    if (onHoverProject && proj.previewUrl) {
+                      onHoverProject(proj)
+                    } else if (allowPreview && proj.previewUrl) {
+                      setHoveredProjectUrl(proj.previewUrl)
+                    }
+                  }}
+                  onBlur={() => {
+                    if (onHoverProject) {
+                      onHoverProject(null)
+                    } else if (allowPreview) {
+                      setHoveredProjectUrl(null)
+                    }
+                  }}
                   className={`transition-opacity hover:opacity-100 opacity-90 ${proj.url ? 'cursor-pointer' : ''}`}
                 >
                   {proj.url ? (

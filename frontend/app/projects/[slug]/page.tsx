@@ -159,6 +159,8 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
       <GalleryGrid
         images={gallery}
         onImageClick={(i: number) => {
+          // Only open lightbox on large screens (lg breakpoint and up)
+          if (isMobile) return
           setStartIndex(i)
           setOpen(true)
         }}

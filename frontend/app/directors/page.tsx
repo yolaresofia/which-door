@@ -15,7 +15,6 @@ const getMedia = (d: any, i: number) => ({
   id: d?.slug ?? i,
   videoSrc: d?.previewUrl ?? d?.vimeoUrl ?? '',
   previewUrl: d?.previewUrl ?? '',
-  hlsUrl: d?.hlsUrl ?? '', // HLS adaptive streaming URL
   vimeoUrl: d?.vimeoUrl ?? '',
   previewPoster: d?.previewPoster ?? '',
   previewPosterLQIP: d?.previewPosterLQIP ?? '',
@@ -298,7 +297,6 @@ export default function DirectorsIndexPage() {
             {slotMedia[0] && (
               <BackgroundMedia
                 variant="preview"
-                hlsUrl={slotMedia[0].hlsUrl}
                 previewUrl={slotMedia[0].previewUrl ?? slotMedia[0].videoSrc}
                 vimeoUrl={slotMedia[0].vimeoUrl ?? slotMedia[0].videoSrc}
                 previewPoster={slotMedia[0].previewPoster}
@@ -315,7 +313,6 @@ export default function DirectorsIndexPage() {
             {slotMedia[1] && (
               <BackgroundMedia
                 variant="preview"
-                hlsUrl={slotMedia[1].hlsUrl}
                 previewUrl={slotMedia[1].previewUrl ?? slotMedia[1].videoSrc}
                 vimeoUrl={slotMedia[1].vimeoUrl ?? slotMedia[1].videoSrc}
                 previewPoster={slotMedia[1].previewPoster}
@@ -390,7 +387,6 @@ export default function DirectorsIndexPage() {
             {isMobile && slotMedia[0] && (
               <BackgroundMedia
                 variant="preview"
-                hlsUrl={slotMedia[0].hlsUrl}
                 previewUrl={slotMedia[0].previewUrl ?? slotMedia[0].videoSrc}
                 vimeoUrl={slotMedia[0].vimeoUrl ?? slotMedia[0].videoSrc}
                 previewPoster={slotMedia[0].previewPoster}
@@ -410,7 +406,6 @@ export default function DirectorsIndexPage() {
             {isMobile && slotMedia[1] && (
               <BackgroundMedia
                 variant="preview"
-                hlsUrl={slotMedia[1].hlsUrl}
                 previewUrl={slotMedia[1].previewUrl ?? slotMedia[1].videoSrc}
                 vimeoUrl={slotMedia[1].vimeoUrl ?? slotMedia[1].videoSrc}
                 previewPoster={slotMedia[1].previewPoster}

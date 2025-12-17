@@ -16,7 +16,6 @@ const CONTROLS_IDLE_HIDE_MS = 900;
 export type BackgroundMediaProps = {
   vimeoUrl?: string;
   previewUrl?: string;
-  hlsUrl?: string; // HLS (.m3u8) URL for adaptive streaming
   previewPoster?: string;
   previewPosterLQIP?: string; // Low Quality Image Placeholder (base64 or URL)
   variant?: "full" | "preview";
@@ -32,7 +31,6 @@ export type BackgroundMediaProps = {
 export default function BackgroundMedia({
   vimeoUrl,
   previewUrl,
-  hlsUrl,
   previewPoster,
   previewPosterLQIP,
   variant = "full",
@@ -214,7 +212,6 @@ export default function BackgroundMedia({
         <MediaSurface
           vimeoSrc={activeVimeoSrc}
           previewSrc={activePreviewSrc}
-          hlsSrc={hlsUrl}
           controls={effectiveControls}
           autoPlay={resolvedAutoPlay}
           iframeRef={iframeRef}

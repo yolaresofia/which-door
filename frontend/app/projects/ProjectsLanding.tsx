@@ -13,7 +13,6 @@ import { useGSAP } from '@gsap/react'
 const getTitle = (p: any) => p?.name ?? p?.title ?? 'Untitled'
 const getPreview = (p: any) => p?.previewUrl ?? ''
 const getVimeo = (p: any) => p?.vimeoUrl ?? ''
-const getHLS = (p: any) => p?.hlsUrl ?? ''
 const getPoster = (p: any) => p?.previewPoster ?? ''
 const getPosterLQIP = (p: any) => p?.previewPosterLQIP ?? ''
 const getBgColor = (p: any) => p?.bgColor ?? '#000'
@@ -32,7 +31,6 @@ export default function ProjectsLanding() {
     id: first?.slug ?? 0,
     videoSrc: getPreview(first) || getVimeo(first),
     previewUrl: getPreview(first),
-    hlsUrl: getHLS(first),
     vimeoUrl: getVimeo(first),
     previewPoster: getPoster(first),
     previewPosterLQIP: getPosterLQIP(first),
@@ -72,7 +70,6 @@ export default function ProjectsLanding() {
       id: project?.slug ?? i,
       videoSrc: getPreview(project) || getVimeo(project),
       previewUrl: getPreview(project),
-      hlsUrl: getHLS(project),
       vimeoUrl: getVimeo(project),
       previewPoster: getPoster(project),
       previewPosterLQIP: getPosterLQIP(project),
@@ -321,7 +318,6 @@ export default function ProjectsLanding() {
             {slotMedia[0] && (
               <BackgroundMedia
                 variant="preview"
-                hlsUrl={slotMedia[0].hlsUrl}
                 previewUrl={slotMedia[0].previewUrl ?? slotMedia[0].videoSrc}
                 vimeoUrl={slotMedia[0].vimeoUrl ?? slotMedia[0].videoSrc}
                 previewPoster={slotMedia[0].previewPoster}
@@ -340,7 +336,6 @@ export default function ProjectsLanding() {
             {slotMedia[1] && (
               <BackgroundMedia
                 variant="preview"
-                hlsUrl={slotMedia[1].hlsUrl}
                 previewUrl={slotMedia[1].previewUrl ?? slotMedia[1].videoSrc}
                 vimeoUrl={slotMedia[1].vimeoUrl ?? slotMedia[1].videoSrc}
                 previewPoster={slotMedia[1].previewPoster}
@@ -424,7 +419,6 @@ export default function ProjectsLanding() {
             {isMobile && slotMedia[0] && (
               <BackgroundMedia
                 variant="preview"
-                hlsUrl={slotMedia[0].hlsUrl}
                 previewUrl={slotMedia[0].previewUrl ?? slotMedia[0].videoSrc}
                 vimeoUrl={slotMedia[0].vimeoUrl ?? slotMedia[0].videoSrc}
                 previewPoster={slotMedia[0].previewPoster}
@@ -444,7 +438,6 @@ export default function ProjectsLanding() {
             {isMobile && slotMedia[1] && (
               <BackgroundMedia
                 variant="preview"
-                hlsUrl={slotMedia[1].hlsUrl}
                 previewUrl={slotMedia[1].previewUrl ?? slotMedia[1].videoSrc}
                 vimeoUrl={slotMedia[1].vimeoUrl ?? slotMedia[1].videoSrc}
                 previewPoster={slotMedia[1].previewPoster}

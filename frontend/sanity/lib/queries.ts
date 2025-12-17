@@ -58,14 +58,6 @@ export const getPageQuery = defineQuery(`
           ...,
           "url": asset->url
         },
-        hlsPlaylist{
-          ...,
-          "url": asset->url
-        },
-        hlsSegment{
-          ...,
-          "url": asset->url
-        },
       },
     },
   }

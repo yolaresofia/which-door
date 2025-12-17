@@ -9,7 +9,6 @@ export type Media = {
   imageSrc?: string;
   videoSrc?: string;
   previewUrl?: string;
-  hlsUrl?: string; // HLS (.m3u8) URL for adaptive streaming
   vimeoUrl?: string;
   bgColor?: string;
   previewPoster?: string;
@@ -139,7 +138,7 @@ export function useCrossfadeMedia(initial: Media, opts?: { duration?: number, wa
           return
         }
 
-        const tl = gsap.timeline({ defaults: { overwrite: 'auto', ease: 'power2.out' } })
+        const tl = gsap.timeline({ defaults: { overwrite: 'auto', ease: 'power2.inOut' } })
         tl.to(toEl,   { autoAlpha: 1, scale: 1, duration: D }, 0)
           .to(fromEl, { autoAlpha: 0,           duration: D }, 0)
           .add(() => {

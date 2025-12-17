@@ -27,7 +27,6 @@ const projectsData = [
       'From London\'s Southbank to Brooklyn, New York this is a story which captures how our community came along when it was needed most. An example of how the dance music industry has opened up with inclusivity and spontaneity as top priorities. Filmed between London and Brooklyn this short film spreads collective joy between the cities, diving deep into capturing Joy\'s growing community and its wonderful details',
     bgColor: '#477AA1',
     director: 'Sam Mulvey',
-    hlsUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/fdc8fa7fcb9da95b58fab24517f247e0a6c2dc29.m3u8',
     vimeoUrl:
       'https://player.vimeo.com/video/1142353483?h=a2f71faa3d&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewUrl:
@@ -118,7 +117,6 @@ const projectsData = [
     name: 'Inside José Andrés’ Mini Bar',
     slug: 'inside-jose-andres-mini-bar',
     isInHomePage: true,
-    hlsUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/45641aa9e7544d104515a91d96bb25f60a9a9121.m3u8',
     description:
       'A peek inside Minibar, the two-Michelin-star restaurant by legendary chef José Andrés – one of the world’s most imaginative dining experiences. In this intimate space, art meets science, and tradition meets technique, creating dishes that feel like stories coming to life. After geeking out with José for hours about food and chemistry, we decided to make something that captures that same spark – a piece you can watch on your big screen or in the restaurant itself. Something that leaves you hooked, relaxed, and maybe a little bit hungry.',
     director: 'Alicia Sully',
@@ -282,7 +280,6 @@ const projectsData = [
     name: 'Grandma Artsakh',
     slug: 'grandma-artsakh',
     isInHomePage: true,
-    hlsUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/246b3ce411b77de6c52fc0095d2c4e4174a6bd94.m3u8',
     description:
       'Have you ever thought about what a grandma born into a land of constant conflict has lived through? This short film is a letter of love, comfort, and apology from a young Armenian woman to a grandmother from Artsakh. We made it in 2024, after more than 100,000 people fled their homes – drained from a year-long blockade by Azerbaijan.',
     bgColor: '#477AA1',
@@ -1330,7 +1327,7 @@ const directorsData = [
         directors: ['Sam Mulvey'],
         brand: 'UFC',
         previewUrl:
-          'https://cdn.sanity.io/files/xerhtqd5/production/e723f5af4ae111bb4df2ed754b9a55d8d9758c30.mp4',
+          'https://cdn.sanity.io/files/xerhtqd5/production/b49bd1325f9de47f66f65fe691b257bbdd209de4.mp4',
         url: '/projects/ufc-return-to-london-ft-kojey-radical',
       },
     ],

@@ -1,7 +1,7 @@
 // app/directors/[slug]/page.tsx
 'use client'
 
-import { use, useEffect, useRef, useState, useMemo } from 'react'
+import { use, useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import { notFound } from 'next/navigation'
 import DetailView from '@/app/components/DetailView'
 import { directors, projects } from '@/app/components/constants'
@@ -43,12 +43,15 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
         .replace(/^-+|-+$/g, '')
 
     const otherProjects = item.otherProjects?.map((proj) => {
-      if (proj.url) return proj
       const match =
         projects.find((p) => p.name.toLowerCase() === proj.title.toLowerCase()) ||
         projects.find((p) => p.slug === slugify(proj.title))
 
-      return {...proj, url: match ? `/projects/${match.slug}` : undefined}
+      return {
+        ...proj,
+        url: proj.url ?? (match ? `/projects/${match.slug}` : undefined),
+        previewPoster: match?.previewPoster ?? undefined,
+      }
     })
 
     return {...item, otherProjects}
@@ -67,6 +70,24 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
   const initialVideo = previousVideo || targetVideo
 
   const { setSlotRef, slotMedia, crossfadeTo } = useCrossfadeMedia(initialVideo, { duration: 0.6 })
+
+  // Handle hover on other projects - crossfade to show their preview with poster
+  const handleHoverProject = useCallback((project: { previewUrl?: string; previewPoster?: string; title?: string } | null) => {
+    if (isMobile) return
+
+    if (project && project.previewUrl) {
+      crossfadeTo({
+        id: project.title ?? 'hover-project',
+        videoSrc: project.previewUrl,
+        previewUrl: project.previewUrl,
+        previewPoster: project.previewPoster,
+        bgColor: '#477AA1',
+      })
+    } else {
+      // Return to director's video
+      crossfadeTo(targetVideo)
+    }
+  }, [isMobile, crossfadeTo, targetVideo])
 
   // Enter animation
   const { start } = useSequencedReveal(contentRef, {
@@ -263,7 +284,7 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
       ref={contentRef}
       className="relative z-10"
     >
-      <DetailView item={itemWithLinks} enableAnimations={true} />
+      <DetailView item={itemWithLinks} enableAnimations={true} onHoverProject={handleHoverProject} />
     </section>
   </main>
 )

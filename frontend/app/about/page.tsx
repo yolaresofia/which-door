@@ -10,9 +10,9 @@ import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
 
 const bg =
-  'https://cdn.sanity.io/files/xerhtqd5/production/b1fb3f7027236bb169f9a5a32741e6e71b9c7652.mp4'
+  'https://cdn.sanity.io/files/xerhtqd5/production/9ce80b5352088be725d88e32fb43c3fbada3a478.mp4'
 const previewPoster =
-  'https://cdn.sanity.io/images/xerhtqd5/production/99945ce01a04899a2742da8865740039d7513b57-3024x1964.png'
+  'https://cdn.sanity.io/images/xerhtqd5/production/5545ae57d11b58790ec87eecc368987ef1d095ac-3024x1596.jpg'
 
 export default function AboutPage() {
   const { getPreviousVideoState } = usePageTransitionVideo()
