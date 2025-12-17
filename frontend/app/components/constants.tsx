@@ -31,6 +31,7 @@ const projectsData = [
       'https://player.vimeo.com/video/1142353483?h=a2f71faa3d&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/39307a58130a77d181ee0f7a126b45175917e9f7.mp4',
+    mobilePreviewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/11ea3e5ca01ad5ab685f95d89185ac1b616919d3.mp4',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/56e1c08338bae02337d4eb3156b2c81b31cfd118-3015x1694.jpg',
     otherProjects: [
@@ -40,14 +41,16 @@ const projectsData = [
         brand: 'Creative Futures',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/c74d289e1c9327576dd6e710730550ee045221c4.webm',
+          mobilePreviewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/f392072a332063ccd968ed8b6580fe1ca2c97c81.mp4',
       },
       {
         title: 'UFC Return To London (Ft Kojey Radical)',
         directors: ['Sam Mulvey'],
         brand: 'UFC',
+        url: '/projects/ufc-return-to-london-ft-kojey-radical',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/e723f5af4ae111bb4df2ed754b9a55d8d9758c30.mp4',
-        url: '/projects/ufc-return-to-london-ft-kojey-radical',
+            mobilePreviewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/6c9032d6f4846a73f48cf61fefcda8d9559b9504.mp4',
       },
     ],
     galleryImages: [
@@ -124,7 +127,8 @@ const projectsData = [
       'https://player.vimeo.com/video/1129967137?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/4d3df752ed60996dbcb945a2b5f14d26198f1a73.mp4',
-    previewPoster:
+    mobilePreviewUrl:'https://cdn.sanity.io/files/xerhtqd5/production/883ef4c334412ca633b92c0df255243f907dac4b.mp4',
+      previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/e44aaf0bd3677dcf945f8d9ca083990bdff9ccd8-3016x1689.jpg',
     bgColor: '#477AA1',
     otherProjects: [
@@ -135,6 +139,7 @@ const projectsData = [
         url: '/projects/idris-elba-x-king-charles-creative-futures',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/c74d289e1c9327576dd6e710730550ee045221c4.webm',
+          mobilePreviewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/f392072a332063ccd968ed8b6580fe1ca2c97c81.mp4',
       },
       {
         title: 'Dreams of Blue Lagoon',
@@ -143,6 +148,7 @@ const projectsData = [
         url: '/projects/dreams-of-blue-lagoon',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/fd636fb8e66e21e8fb59f765617ead285549708c.webm',
+              mobilePreviewUrl:'https://cdn.sanity.io/files/xerhtqd5/production/2d7b3a759fdbcfaa3de8d3aca9f1b713f4bfd9f3.mp4',
       },
       {
         title: 'La Magicienne Film V.1 | Bridal Couture Collection',
@@ -287,6 +293,7 @@ const projectsData = [
     vimeoUrl: 'https://player.vimeo.com/video/1129969216?h=69f4878882',
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/732d0525dc8e2b41ddc9b72407136506ff5e692c.mp4',
+    mobilePreviewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/26e45aea976feb252faf0de744b8b40b2ca69096.mp4',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/beb4465767e968074e7dfc2143fff5a2a311e36c-3024x1664.jpg',
     otherProjects: [
@@ -297,6 +304,7 @@ const projectsData = [
         url: '/projects/dreams-of-blue-lagoon',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/fd636fb8e66e21e8fb59f765617ead285549708c.webm',
+              mobilePreviewUrl:'https://cdn.sanity.io/files/xerhtqd5/production/2d7b3a759fdbcfaa3de8d3aca9f1b713f4bfd9f3.mp4',
       },
       {
         title: 'Leading the way',
@@ -378,6 +386,7 @@ const projectsData = [
       'https://player.vimeo.com/video/1143139608?h=b98afc1413&amp;title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/c7268f59042501a370ea496db9008bc6cbdc5a06.webm',
+    mobilePreviewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/7d15f97b0bf5626dbe5776167e25e4c977b6b6e9.mp4',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/f196a8938544a45832fe78b5aeec74199b5a9c5a-3017x1690.jpg',
     otherProjects: [
@@ -388,6 +397,7 @@ const projectsData = [
         url: '/projects/dreams-of-blue-lagoon',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/fd636fb8e66e21e8fb59f765617ead285549708c.webm',
+              mobilePreviewUrl:'https://cdn.sanity.io/files/xerhtqd5/production/2d7b3a759fdbcfaa3de8d3aca9f1b713f4bfd9f3.mp4',
       },
     ],
     galleryImages: [
@@ -452,7 +462,8 @@ const projectsData = [
     vimeoUrl: 'https://player.vimeo.com/video/1142245174?h=b7f577754f',
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/b49bd1325f9de47f66f65fe691b257bbdd209de4.mp4',
-    previewPoster:
+    mobilePreviewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/6c9032d6f4846a73f48cf61fefcda8d9559b9504.mp4',
+      previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/2a639663763e4e484e1c77f4026a7b0e94ba4ef0-3020x1705.jpg',
     otherProjects: [
       {
@@ -461,14 +472,16 @@ const projectsData = [
         brand: 'Creative Futures',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/c74d289e1c9327576dd6e710730550ee045221c4.webm',
+          mobilePreviewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/f392072a332063ccd968ed8b6580fe1ca2c97c81.mp4',
       },
       {
         title: 'Joy Anonymous',
         directors: ['Sam Mulvey'],
         brand: 'Brooklyn Pilsner',
+        url: '/projects/joy-anonymous',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/39307a58130a77d181ee0f7a126b45175917e9f7.mp4',
-        url: '/projects/joy-anonymous',
+         mobilePreviewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/11ea3e5ca01ad5ab685f95d89185ac1b616919d3.mp4',
       },
     ],
     galleryImages: [
@@ -538,24 +551,27 @@ const projectsData = [
       'https://player.vimeo.com/video/1142244722?h=fa3ef8a83d&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/530325e24bae5b2ebc9b5008751797b24e7c6352.mp4',
-    previewPoster:
+    mobilePreviewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/f392072a332063ccd968ed8b6580fe1ca2c97c81.mp4',
+      previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/388b3b5495d0eae6d7d0eed4c33fafbfa117c58a-3024x1964.jpg',
     otherProjects: [
       {
         title: 'Joy Anonymous',
         directors: ['Sam Mulvey'],
         brand: 'Brooklyn Pilsner',
+        url: '/projects/joy-anonymous',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/39307a58130a77d181ee0f7a126b45175917e9f7.mp4',
-        url: '/projects/joy-anonymous',
+         mobilePreviewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/11ea3e5ca01ad5ab685f95d89185ac1b616919d3.mp4',
       },
       {
         title: 'UFC Return To London (Ft Kojey Radical)',
         directors: ['Sam Mulvey'],
         brand: 'UFC',
+         url: '/projects/ufc-return-to-london-ft-kojey-radical',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/e723f5af4ae111bb4df2ed754b9a55d8d9758c30.mp4',
-        url: '/projects/ufc-return-to-london-ft-kojey-radical',
+            mobilePreviewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/6c9032d6f4846a73f48cf61fefcda8d9559b9504.mp4',
       },
     ],
     galleryImages: [
@@ -645,6 +661,8 @@ const projectsData = [
       'https://player.vimeo.com/video/1144229044?h=10c18eed0f&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/85ed3235c309f88da1306adeddd751ff18e97611.mp4',
+    mobilePreviewUrl:
+      'https://cdn.sanity.io/files/xerhtqd5/production/27d6a737f14c75ff690d97083175518858d4800c.mp4',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/f86b5d94fe9adba777fe4a4f484417dd36279095-2651x1517.jpg',
     otherProjects: [
@@ -655,6 +673,7 @@ const projectsData = [
         brand: 'Gucci/Marie Claire',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/3d80959f29a369a32503313968e9af53f14f6bae.webm',
+          mobilePreviewUrl: "https://cdn.sanity.io/files/xerhtqd5/production/d13ee1aea6dc96293036caa11930e1a6eaf31c53.mp4",
       },
       {
         title: 'Trance - A Road Trip With Burberry',
@@ -663,6 +682,8 @@ const projectsData = [
         url: '/projects/trance-a-road-trip-with-burberry',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/d4a3e53ff00dc9154d5709d1689039fbcd6dd6d3.webm',
+              mobilePreviewUrl:
+      'https://cdn.sanity.io/files/xerhtqd5/production/bf9bf272be024a6120406527a14caf2bf52b864e.mp4',
       },
       {
         title: 'La Magicienne Film V.1 | Bridal Couture Collection',
@@ -671,6 +692,8 @@ const projectsData = [
         url: '/projects/la-magicienne-film-v1-bridal-couture-collection',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/79397636e29b834e4fb57ecf3ed8ffd779738314.webm',
+              mobilePreviewUrl:
+      'https://cdn.sanity.io/files/xerhtqd5/production/e4a099d54ecd2035f622f181cd78a223612d638e.mp4',
       },
     ],
     galleryImages: [
@@ -736,6 +759,8 @@ const projectsData = [
       'https://player.vimeo.com/video/1142355792?h=dc4b970af2&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/79397636e29b834e4fb57ecf3ed8ffd779738314.webm',
+    mobilePreviewUrl:
+      'https://cdn.sanity.io/files/xerhtqd5/production/e4a099d54ecd2035f622f181cd78a223612d638e.mp4',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/4a6208aa627527b1cc6bc14d81ca9be0d8aaab51-2515x1704.jpg',
     otherProjects: [
@@ -746,6 +771,7 @@ const projectsData = [
         url: '/projects/gucci-marie-claire',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/3d80959f29a369a32503313968e9af53f14f6bae.webm',
+          mobilePreviewUrl: "https://cdn.sanity.io/files/xerhtqd5/production/d13ee1aea6dc96293036caa11930e1a6eaf31c53.mp4",
       },
       {
         title: 'Trance - A Road Trip With Burberry',
@@ -754,6 +780,8 @@ const projectsData = [
         url: '/projects/trance-a-road-trip-with-burberry',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/d4a3e53ff00dc9154d5709d1689039fbcd6dd6d3.webm',
+              mobilePreviewUrl:
+      'https://cdn.sanity.io/files/xerhtqd5/production/bf9bf272be024a6120406527a14caf2bf52b864e.mp4',
       },
       {
         title: 'Burberry x Sorbet Magazine • This Red Rock',
@@ -762,6 +790,8 @@ const projectsData = [
         url: '/projects/burberry-sorbet-magazine-this-red-rock',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/85ed3235c309f88da1306adeddd751ff18e97611.mp4',
+              mobilePreviewUrl:
+      'https://cdn.sanity.io/files/xerhtqd5/production/27d6a737f14c75ff690d97083175518858d4800c.mp4',
       },
     ],
     galleryImages: [
@@ -823,7 +853,9 @@ const projectsData = [
       'https://player.vimeo.com/video/1142353634?h=7833d4515d&amp;title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/3d80959f29a369a32503313968e9af53f14f6bae.webm',
-    previewPoster:
+    mobilePreviewUrl:
+      'https://cdn.sanity.io/files/xerhtqd5/production/c234b24c3ec6efc3ad38add28419d09b25562649.mp4',
+      previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/aefe4cdb8816b2c5d82eec75cca90045b581c4a6-3011x1602.jpg',
     otherProjects: [
       {
@@ -833,6 +865,8 @@ const projectsData = [
         url: '/projects/trance-a-road-trip-with-burberry',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/d4a3e53ff00dc9154d5709d1689039fbcd6dd6d3.webm',
+              mobilePreviewUrl:
+      'https://cdn.sanity.io/files/xerhtqd5/production/bf9bf272be024a6120406527a14caf2bf52b864e.mp4',
       },
       {
         title: 'La Magicienne Film V.1 | Bridal Couture Collection',
@@ -841,6 +875,8 @@ const projectsData = [
         url: '/projects/la-magicienne-film-v1-bridal-couture-collection',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/79397636e29b834e4fb57ecf3ed8ffd779738314.webm',
+              mobilePreviewUrl:
+      'https://cdn.sanity.io/files/xerhtqd5/production/e4a099d54ecd2035f622f181cd78a223612d638e.mp4',
       },
       {
         title: 'Burberry x Sorbet Magazine • This Red Rock',
@@ -849,6 +885,8 @@ const projectsData = [
         url: '/projects/burberry-sorbet-magazine-this-red-rock',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/85ed3235c309f88da1306adeddd751ff18e97611.mp4',
+              mobilePreviewUrl:
+      'https://cdn.sanity.io/files/xerhtqd5/production/27d6a737f14c75ff690d97083175518858d4800c.mp4',
       },
     ],
     galleryImages: [
@@ -938,7 +976,9 @@ const projectsData = [
       'https://player.vimeo.com/video/1142357356?h=7b779aa10b&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/d4a3e53ff00dc9154d5709d1689039fbcd6dd6d3.webm',
-    previewPoster:
+    mobilePreviewUrl:
+      'https://cdn.sanity.io/files/xerhtqd5/production/bf9bf272be024a6120406527a14caf2bf52b864e.mp4',
+      previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/3605de91704fd23b91cd90352db077bd8aa27d75-3024x1693.jpg',
     otherProjects: [
       {
@@ -948,6 +988,7 @@ const projectsData = [
         url: '/projects/gucci-marie-claire',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/3d80959f29a369a32503313968e9af53f14f6bae.webm',
+          mobilePreviewUrl: "https://cdn.sanity.io/files/xerhtqd5/production/d13ee1aea6dc96293036caa11930e1a6eaf31c53.mp4",
       },
       {
         title: 'La Magicienne Film V.1 | Bridal Couture Collection',
@@ -956,6 +997,8 @@ const projectsData = [
         url: '/projects/la-magicienne-film-v1-bridal-couture-collection',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/79397636e29b834e4fb57ecf3ed8ffd779738314.webm',
+              mobilePreviewUrl:
+      'https://cdn.sanity.io/files/xerhtqd5/production/e4a099d54ecd2035f622f181cd78a223612d638e.mp4',
       },
       {
         title: 'Burberry x Sorbet Magazine • This Red Rock',
@@ -964,6 +1007,8 @@ const projectsData = [
         url: '/projects/burberry-sorbet-magazine-this-red-rock',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/85ed3235c309f88da1306adeddd751ff18e97611.mp4',
+              mobilePreviewUrl:
+      'https://cdn.sanity.io/files/xerhtqd5/production/27d6a737f14c75ff690d97083175518858d4800c.mp4',
       },
     ],
   },
@@ -979,7 +1024,8 @@ const projectsData = [
       'https://player.vimeo.com/video/1129975862?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/fd636fb8e66e21e8fb59f765617ead285549708c.webm',
-    previewPoster:
+    mobilePreviewUrl:'https://cdn.sanity.io/files/xerhtqd5/production/2d7b3a759fdbcfaa3de8d3aca9f1b713f4bfd9f3.mp4',
+      previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/9b1037e5dee41ab7919b274dd1d1e0bf8713a03f-3024x1687.jpg',
     otherProjects: [
       {
@@ -989,6 +1035,7 @@ const projectsData = [
         url: '/projects/grandma-artsakh',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/732d0525dc8e2b41ddc9b72407136506ff5e692c.mp4',
+              mobilePreviewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/26e45aea976feb252faf0de744b8b40b2ca69096.mp4',
       },
       {
         title: 'Leading the way',
@@ -997,6 +1044,7 @@ const projectsData = [
         url: '/projects/leading-the-way',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/c7268f59042501a370ea496db9008bc6cbdc5a06.webm',
+          mobilePreviewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/7d15f97b0bf5626dbe5776167e25e4c977b6b6e9.mp4',
       },
     ],
     galleryImages: [
@@ -1047,6 +1095,7 @@ const projectsData = [
     bgColor: '#477AA1',
     director: 'Johan Eriksson',
     vimeoUrl: 'https://player.vimeo.com/video/1129973979?h=e6cfedbeaa',
+    mobilePreviewUrl: "https://cdn.sanity.io/files/xerhtqd5/production/d13ee1aea6dc96293036caa11930e1a6eaf31c53.mp4",
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/4e3a2ab2513bcef4499141387fd2f3f59ccf4d00.mp4',
     previewPoster:
@@ -1059,6 +1108,7 @@ const projectsData = [
         url: '/projects/arrogance',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/9b85daf7d3376be55af8608f287d59f1f8ac1837.mp4',
+          mobilePreviewUrl: "https://cdn.sanity.io/files/xerhtqd5/production/104da249c91513bdcaea188fd8d0ed1dee0b237a.mp4",
       },
       {
         title: 'Is the world getting better?',
@@ -1067,6 +1117,7 @@ const projectsData = [
         brand: 'UNDP Sweden',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/7708e07c785880c13392463c35a517505dfc99e7.mp4',
+          mobilePreviewUrl: "https://cdn.sanity.io/files/xerhtqd5/production/c35944578a46ad9904e922dc172cd2020d460097.mp4", 
       },
     ],
     galleryImages: [
@@ -1144,6 +1195,7 @@ const projectsData = [
       'https://player.vimeo.com/video/1131302044?h=5cf217a4d2&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/9b85daf7d3376be55af8608f287d59f1f8ac1837.mp4',
+    mobilePreviewUrl: "https://cdn.sanity.io/files/xerhtqd5/production/104da249c91513bdcaea188fd8d0ed1dee0b237a.mp4",
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/3b0a7d1eb48c824533ba66323dfc712a4a005be6-3012x1692.jpg',
     otherProjects: [
@@ -1154,6 +1206,7 @@ const projectsData = [
         url: '/projects/island-island-island',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/4e3a2ab2513bcef4499141387fd2f3f59ccf4d00.mp4',
+              mobilePreviewUrl: "https://cdn.sanity.io/files/xerhtqd5/production/d13ee1aea6dc96293036caa11930e1a6eaf31c53.mp4",
       },
       {
         title: 'Is the world getting better?',
@@ -1162,6 +1215,7 @@ const projectsData = [
         url: '/projects/is-the-world-getting-better',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/7708e07c785880c13392463c35a517505dfc99e7.mp4',
+        mobilePreviewUrl: "https://cdn.sanity.io/files/xerhtqd5/production/c35944578a46ad9904e922dc172cd2020d460097.mp4", 
       },
     ],
     galleryImages: [
@@ -1211,6 +1265,7 @@ const projectsData = [
       'https://player.vimeo.com/video/1135745104?h=7b19ad56d5&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479',
     previewUrl:
       'https://cdn.sanity.io/files/xerhtqd5/production/7708e07c785880c13392463c35a517505dfc99e7.mp4',
+    mobilePreviewUrl: "https://cdn.sanity.io/files/xerhtqd5/production/c35944578a46ad9904e922dc172cd2020d460097.mp4", 
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/a89f0a645e7b153ce7a1c226367794017072f298-5120x2880.webp',
     otherProjects: [
@@ -1221,6 +1276,7 @@ const projectsData = [
         url: '/projects/island-island-island',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/4e3a2ab2513bcef4499141387fd2f3f59ccf4d00.mp4',
+              mobilePreviewUrl: "https://cdn.sanity.io/files/xerhtqd5/production/d13ee1aea6dc96293036caa11930e1a6eaf31c53.mp4",
       },
       {
         title: 'Arrogance',
@@ -1229,6 +1285,7 @@ const projectsData = [
         url: '/projects/arrogance',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/9b85daf7d3376be55af8608f287d59f1f8ac1837.mp4',
+          mobilePreviewUrl: "https://cdn.sanity.io/files/xerhtqd5/production/104da249c91513bdcaea188fd8d0ed1dee0b237a.mp4",
       },
     ],
     galleryImages: [
@@ -1303,6 +1360,7 @@ const directorsData = [
       'https://cdn.sanity.io/files/xerhtqd5/production/c74d289e1c9327576dd6e710730550ee045221c4.webm',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/388b3b5495d0eae6d7d0eed4c33fafbfa117c58a-3024x1964.jpg',
+    mobilePreviewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/f392072a332063ccd968ed8b6580fe1ca2c97c81.mp4',
     specialization: 'Director | DOP',
     description:
       'Sam Mulvey is an award-winning filmmaker with over a decade of experience working across documentary, commercial, and music video projects. His films try to push visual language to its limits - transforming raw human stories into imaginative and emotionally resonant visual expressions. A graduate of Bristol film school, where he focused on documentary filmmaking, Sam has since broadened his horizons to encompass a wide range of cinematic forms. His recent nomination at the Berlin Commercial Film Awards and multiple features on the world-renowned platform Lens Addiction highlight his commitment to bold storytelling and visual innovation.',
@@ -1311,9 +1369,10 @@ const directorsData = [
         title: 'Joy Anonymous',
         directors: ['Sam Mulvey'],
         brand: 'Brooklyn Pilsner',
+         url: '/projects/joy-anonymous',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/39307a58130a77d181ee0f7a126b45175917e9f7.mp4',
-        url: '/projects/joy-anonymous',
+         mobilePreviewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/11ea3e5ca01ad5ab685f95d89185ac1b616919d3.mp4',
       },
       {
         title: 'Idris Elba x King Charles | Creative Futures',
@@ -1321,14 +1380,16 @@ const directorsData = [
         brand: 'Creative Futures',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/c74d289e1c9327576dd6e710730550ee045221c4.webm',
+          mobilePreviewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/f392072a332063ccd968ed8b6580fe1ca2c97c81.mp4',
       },
       {
         title: 'UFC Return To London (Ft Kojey Radical)',
         directors: ['Sam Mulvey'],
         brand: 'UFC',
+         url: '/projects/ufc-return-to-london-ft-kojey-radical',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/b49bd1325f9de47f66f65fe691b257bbdd209de4.mp4',
-        url: '/projects/ufc-return-to-london-ft-kojey-radical',
+            mobilePreviewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/6c9032d6f4846a73f48cf61fefcda8d9559b9504.mp4',
       },
     ],
   },
@@ -1342,6 +1403,7 @@ const directorsData = [
       'https://cdn.sanity.io/files/xerhtqd5/production/3d80959f29a369a32503313968e9af53f14f6bae.webm',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/aefe4cdb8816b2c5d82eec75cca90045b581c4a6-3011x1602.jpg',
+    mobilePreviewUrl: "https://cdn.sanity.io/files/xerhtqd5/production/d13ee1aea6dc96293036caa11930e1a6eaf31c53.mp4",
     specialization: 'Director | Visual Artist',
     description:
       'Mohamad Abdouni is an artist, filmmaker, photographer, and the Editor-in-Chief of COLD CUTS, the photo journal exploring queer cultures in the SWANA region. His work has been shown at the Brooklyn Museum, FOAM Amsterdam, Institut du Monde Arabe, Art Basel (Paris+), and the Lyon Biennale, and he received the 2023 Lafayette Anticipations Prize. Mohamad directs narrative fashion films and music videos for clients such as Gucci, Vogue US & Italia, Burberry, Puma, The New York Times, Fendi, Farfetch, GQ, Dazed, Another, Nowness, and L’Officiel. His personal work centers on queer histories in the Arab region, including the long-term archival project Treat Me Like Your Mother, now housed at the Arab Image Foundation. He is currently exploring themes of masculinity, family, and inherited identities.',
@@ -1358,17 +1420,20 @@ const directorsData = [
         title: 'Gucci | Marie Claire',
         directors: ['Mohamad Abdouni'],
         brand: 'Gucci/Marie Claire',
+        url: '/projects/gucci-marie-claire',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/3d80959f29a369a32503313968e9af53f14f6bae.webm',
-        url: '/projects/gucci-marie-claire',
+        mobilePreviewUrl: "https://cdn.sanity.io/files/xerhtqd5/production/d13ee1aea6dc96293036caa11930e1a6eaf31c53.mp4",
       },
       {
         title: 'TRANCE - A Road Trip With Burberry',
         directors: ['Mohamad Abdouni'],
         brand: 'BURBERRY',
+        url: '/projects/trance-a-road-trip-with-burberry',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/d4a3e53ff00dc9154d5709d1689039fbcd6dd6d3.webm',
-        url: '/projects/trance-a-road-trip-with-burberry',
+            mobilePreviewUrl:
+      'https://cdn.sanity.io/files/xerhtqd5/production/bf9bf272be024a6120406527a14caf2bf52b864e.mp4',
       },
       {
         title: 'BURBERRY x Sorbet Magazine • This Red Rock',
@@ -1376,7 +1441,8 @@ const directorsData = [
         brand: 'Burberry / Sorbet Magazine',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/85ed3235c309f88da1306adeddd751ff18e97611.mp4',
-        url: '/projects/burberry-sorbet-magazine-this-red-rock',
+           mobilePreviewUrl:
+      'https://cdn.sanity.io/files/xerhtqd5/production/27d6a737f14c75ff690d97083175518858d4800c.mp4',
       },
     ],
   },
@@ -1390,6 +1456,7 @@ const directorsData = [
       'https://cdn.sanity.io/files/xerhtqd5/production/4d3df752ed60996dbcb945a2b5f14d26198f1a73.mp4',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/e44aaf0bd3677dcf945f8d9ca083990bdff9ccd8-3016x1689.jpg',
+      mobilePreviewUrl:'https://cdn.sanity.io/files/xerhtqd5/production/883ef4c334412ca633b92c0df255243f907dac4b.mp4',
     specialization: 'Director | Cinematographer',
     description:
       'Alicia is an Emmy-nominated cinematographer who has 17 years of experience working in remote areas, conflict and disaster zones. Alicia studied at SUNY Purchase Film Conservatory in New York and cinematography at FAMU in the Czech Republic. She co-founded What Took You So Long after spending several formative years in Northern Ghana which resulted in a lifelong passion for participatory filmmaking. She has worked in more than 80 countries as Director of Photography, Producer, and Editor on hundreds of projects for a variety of clients and collaborators. She lead our team to several projects in Somalia including the production of a local TV series in collaboration with Hargeisa based Bulsho TV. She is born and raised in the US - her mother tongue is English. ',
@@ -1398,17 +1465,20 @@ const directorsData = [
         title: 'Dreams of Blue Lagoon',
         directors: ['Chris Kousouros'],
         brand:"Which Door original",
+        url: '/projects/dreams-of-blue-lagoon',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/fd636fb8e66e21e8fb59f765617ead285549708c.webm',
-        url: '/projects/dreams-of-blue-lagoon',
+            mobilePreviewUrl:'https://cdn.sanity.io/files/xerhtqd5/production/2d7b3a759fdbcfaa3de8d3aca9f1b713f4bfd9f3.mp4',
       },
       {
         title: 'TRANCE - A Road Trip With Burberry',
         directors: ['Mohamad Abdouni'],
         brand: 'BURBERRY',
+        url: '/projects/trance-a-road-trip-with-burberry',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/d4a3e53ff00dc9154d5709d1689039fbcd6dd6d3.webm',
-        url: '/projects/trance-a-road-trip-with-burberry',
+           mobilePreviewUrl:
+      'https://cdn.sanity.io/files/xerhtqd5/production/bf9bf272be024a6120406527a14caf2bf52b864e.mp4',
       },
       {
         title: "'La Magicienne' Film V.1 | Bridal Couture Collection",
@@ -1430,6 +1500,7 @@ const directorsData = [
       'https://cdn.sanity.io/files/xerhtqd5/production/7708e07c785880c13392463c35a517505dfc99e7.mp4',
     previewPoster:
       'https://cdn.sanity.io/images/xerhtqd5/production/a89f0a645e7b153ce7a1c226367794017072f298-5120x2880.webp',
+    mobilePreviewUrl: "https://cdn.sanity.io/files/xerhtqd5/production/c35944578a46ad9904e922dc172cd2020d460097.mp4", 
     specialization: 'Director | Editor',
     description:
       'Johan is an experienced award winning producer and filmmaker with a background in Development Studies from Uppsala University. He’s currently running the Swedish department of the international production house What Took You So Long?. His experience ranges from directing, project lead, director of photography to editing. He has worked in over 20 countries, many of which are complex low resource environments, which has moulded him into the agile and creative filmmaker he is today. Johan is passionate about telling stories mainstream media neglects and present a more nuanced picture of the world. Johan has led large projects with global UN entities and the H&M Group to small scale farmers in sub Saharan Africa.',
@@ -1449,6 +1520,7 @@ const directorsData = [
         url: '/projects/arrogance',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/9b85daf7d3376be55af8608f287d59f1f8ac1837.mp4',
+          mobilePreviewUrl: "https://cdn.sanity.io/files/xerhtqd5/production/104da249c91513bdcaea188fd8d0ed1dee0b237a.mp4",
       },
       {
         title: 'Is the world getting better?',
@@ -1457,6 +1529,7 @@ const directorsData = [
         brand: 'UNDP Sweden',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/7708e07c785880c13392463c35a517505dfc99e7.mp4',
+          mobilePreviewUrl: "https://cdn.sanity.io/files/xerhtqd5/production/c35944578a46ad9904e922dc172cd2020d460097.mp4", 
       },
     ],
   },
@@ -1480,6 +1553,7 @@ const directorsData = [
         url: '/projects/dreams-of-blue-lagoon',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/fd636fb8e66e21e8fb59f765617ead285549708c.webm',
+              mobilePreviewUrl:'https://cdn.sanity.io/files/xerhtqd5/production/2d7b3a759fdbcfaa3de8d3aca9f1b713f4bfd9f3.mp4',
       },
       {
         title: 'Grandma Artsakh',
@@ -1488,6 +1562,7 @@ const directorsData = [
         url: '/projects/grandma-artsakh',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/732d0525dc8e2b41ddc9b72407136506ff5e692c.mp4',
+              mobilePreviewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/26e45aea976feb252faf0de744b8b40b2ca69096.mp4',
       },
       {
         title: 'Leading the way',
@@ -1496,6 +1571,7 @@ const directorsData = [
         url: '/projects/leading-the-way',
         previewUrl:
           'https://cdn.sanity.io/files/xerhtqd5/production/c7268f59042501a370ea496db9008bc6cbdc5a06.webm',
+          mobilePreviewUrl: 'https://cdn.sanity.io/files/xerhtqd5/production/7d15f97b0bf5626dbe5776167e25e4c977b6b6e9.mp4',
       },
     ],
   },

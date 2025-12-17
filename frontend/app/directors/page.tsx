@@ -15,6 +15,7 @@ const getMedia = (d: any, i: number) => ({
   id: d?.slug ?? i,
   videoSrc: d?.previewUrl ?? d?.vimeoUrl ?? '',
   previewUrl: d?.previewUrl ?? '',
+  mobilePreviewUrl: d?.mobilePreviewUrl ?? '',
   vimeoUrl: d?.vimeoUrl ?? '',
   previewPoster: d?.previewPoster ?? '',
   previewPosterLQIP: d?.previewPosterLQIP ?? '',
@@ -298,6 +299,7 @@ export default function DirectorsIndexPage() {
               <BackgroundMedia
                 variant="preview"
                 previewUrl={slotMedia[0].previewUrl ?? slotMedia[0].videoSrc}
+                mobilePreviewUrl={slotMedia[0].mobilePreviewUrl}
                 vimeoUrl={slotMedia[0].vimeoUrl ?? slotMedia[0].videoSrc}
                 previewPoster={slotMedia[0].previewPoster}
                 previewPosterLQIP={slotMedia[0].previewPosterLQIP}
@@ -314,6 +316,7 @@ export default function DirectorsIndexPage() {
               <BackgroundMedia
                 variant="preview"
                 previewUrl={slotMedia[1].previewUrl ?? slotMedia[1].videoSrc}
+                mobilePreviewUrl={slotMedia[1].mobilePreviewUrl}
                 vimeoUrl={slotMedia[1].vimeoUrl ?? slotMedia[1].videoSrc}
                 previewPoster={slotMedia[1].previewPoster}
                 previewPosterLQIP={slotMedia[1].previewPosterLQIP}
@@ -388,6 +391,7 @@ export default function DirectorsIndexPage() {
               <BackgroundMedia
                 variant="preview"
                 previewUrl={slotMedia[0].previewUrl ?? slotMedia[0].videoSrc}
+                mobilePreviewUrl={slotMedia[0].mobilePreviewUrl}
                 vimeoUrl={slotMedia[0].vimeoUrl ?? slotMedia[0].videoSrc}
                 previewPoster={slotMedia[0].previewPoster}
                 previewPosterLQIP={slotMedia[0].previewPosterLQIP}
@@ -407,6 +411,7 @@ export default function DirectorsIndexPage() {
               <BackgroundMedia
                 variant="preview"
                 previewUrl={slotMedia[1].previewUrl ?? slotMedia[1].videoSrc}
+                mobilePreviewUrl={slotMedia[1].mobilePreviewUrl}
                 vimeoUrl={slotMedia[1].vimeoUrl ?? slotMedia[1].videoSrc}
                 previewPoster={slotMedia[1].previewPoster}
                 previewPosterLQIP={slotMedia[1].previewPosterLQIP}

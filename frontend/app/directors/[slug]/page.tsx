@@ -61,6 +61,7 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
     id: itemWithLinks?.slug ?? slug,
     videoSrc: itemWithLinks?.previewUrl ?? '',
     previewUrl: itemWithLinks?.previewUrl ?? '',
+    mobilePreviewUrl: (itemWithLinks as any)?.mobilePreviewUrl ?? '',
     previewPoster: itemWithLinks?.previewPoster,
     bgColor: '#477AA1',
   }), [itemWithLinks, slug])
@@ -72,7 +73,7 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
   const { setSlotRef, slotMedia, crossfadeTo } = useCrossfadeMedia(initialVideo, { duration: 0.6 })
 
   // Handle hover on other projects - crossfade to show their preview with poster
-  const handleHoverProject = useCallback((project: { previewUrl?: string; previewPoster?: string; title?: string } | null) => {
+  const handleHoverProject = useCallback((project: { previewUrl?: string; mobilePreviewUrl?: string; previewPoster?: string; title?: string } | null) => {
     if (isMobile) return
 
     if (project && project.previewUrl) {
@@ -80,6 +81,7 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
         id: project.title ?? 'hover-project',
         videoSrc: project.previewUrl,
         previewUrl: project.previewUrl,
+        mobilePreviewUrl: project.mobilePreviewUrl,
         previewPoster: project.previewPoster,
         bgColor: '#477AA1',
       })
@@ -254,6 +256,7 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
             <BackgroundMedia
               variant="preview"
               previewUrl={slotMedia[0].previewUrl ?? slotMedia[0].videoSrc}
+              mobilePreviewUrl={slotMedia[0].mobilePreviewUrl}
               vimeoUrl={slotMedia[0].vimeoUrl}
               previewPoster={slotMedia[0].previewPoster}
               bgColor={slotMedia[0].bgColor}
@@ -271,6 +274,7 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
             <BackgroundMedia
               variant="preview"
               previewUrl={slotMedia[1].previewUrl ?? slotMedia[1].videoSrc}
+              mobilePreviewUrl={slotMedia[1].mobilePreviewUrl}
               vimeoUrl={slotMedia[1].vimeoUrl}
               previewPoster={slotMedia[1].previewPoster}
               bgColor={slotMedia[1].bgColor}

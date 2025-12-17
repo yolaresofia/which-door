@@ -12,6 +12,7 @@ import { useGSAP } from '@gsap/react'
 
 const getTitle = (p: any) => p?.name ?? p?.title ?? 'Untitled'
 const getPreview = (p: any) => p?.previewUrl ?? ''
+const getMobilePreview = (p: any) => p?.mobilePreviewUrl ?? ''
 const getVimeo = (p: any) => p?.vimeoUrl ?? ''
 const getPoster = (p: any) => p?.previewPoster ?? ''
 const getPosterLQIP = (p: any) => p?.previewPosterLQIP ?? ''
@@ -31,6 +32,7 @@ export default function ProjectsLanding() {
     id: first?.slug ?? 0,
     videoSrc: getPreview(first) || getVimeo(first),
     previewUrl: getPreview(first),
+    mobilePreviewUrl: getMobilePreview(first),
     vimeoUrl: getVimeo(first),
     previewPoster: getPoster(first),
     previewPosterLQIP: getPosterLQIP(first),
@@ -70,6 +72,7 @@ export default function ProjectsLanding() {
       id: project?.slug ?? i,
       videoSrc: getPreview(project) || getVimeo(project),
       previewUrl: getPreview(project),
+      mobilePreviewUrl: getMobilePreview(project),
       vimeoUrl: getVimeo(project),
       previewPoster: getPoster(project),
       previewPosterLQIP: getPosterLQIP(project),
@@ -319,6 +322,7 @@ export default function ProjectsLanding() {
               <BackgroundMedia
                 variant="preview"
                 previewUrl={slotMedia[0].previewUrl ?? slotMedia[0].videoSrc}
+                mobilePreviewUrl={slotMedia[0].mobilePreviewUrl}
                 vimeoUrl={slotMedia[0].vimeoUrl ?? slotMedia[0].videoSrc}
                 previewPoster={slotMedia[0].previewPoster}
                 previewPosterLQIP={slotMedia[0].previewPosterLQIP}
@@ -337,6 +341,7 @@ export default function ProjectsLanding() {
               <BackgroundMedia
                 variant="preview"
                 previewUrl={slotMedia[1].previewUrl ?? slotMedia[1].videoSrc}
+                mobilePreviewUrl={slotMedia[1].mobilePreviewUrl}
                 vimeoUrl={slotMedia[1].vimeoUrl ?? slotMedia[1].videoSrc}
                 previewPoster={slotMedia[1].previewPoster}
                 previewPosterLQIP={slotMedia[1].previewPosterLQIP}
@@ -420,6 +425,7 @@ export default function ProjectsLanding() {
               <BackgroundMedia
                 variant="preview"
                 previewUrl={slotMedia[0].previewUrl ?? slotMedia[0].videoSrc}
+                mobilePreviewUrl={slotMedia[0].mobilePreviewUrl}
                 vimeoUrl={slotMedia[0].vimeoUrl ?? slotMedia[0].videoSrc}
                 previewPoster={slotMedia[0].previewPoster}
                 previewPosterLQIP={slotMedia[0].previewPosterLQIP}
@@ -439,6 +445,7 @@ export default function ProjectsLanding() {
               <BackgroundMedia
                 variant="preview"
                 previewUrl={slotMedia[1].previewUrl ?? slotMedia[1].videoSrc}
+                mobilePreviewUrl={slotMedia[1].mobilePreviewUrl}
                 vimeoUrl={slotMedia[1].vimeoUrl ?? slotMedia[1].videoSrc}
                 previewPoster={slotMedia[1].previewPoster}
                 previewPosterLQIP={slotMedia[1].previewPosterLQIP}

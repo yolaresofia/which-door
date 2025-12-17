@@ -16,6 +16,7 @@ const CONTROLS_IDLE_HIDE_MS = 900;
 export type BackgroundMediaProps = {
   vimeoUrl?: string;
   previewUrl?: string;
+  mobilePreviewUrl?: string; // Lower quality video for tablet and smaller devices
   previewPoster?: string;
   previewPosterLQIP?: string; // Low Quality Image Placeholder (base64 or URL)
   variant?: "full" | "preview";
@@ -31,6 +32,7 @@ export type BackgroundMediaProps = {
 export default function BackgroundMedia({
   vimeoUrl,
   previewUrl,
+  mobilePreviewUrl,
   previewPoster,
   previewPosterLQIP,
   variant = "full",
@@ -43,13 +45,26 @@ export default function BackgroundMedia({
   onShare,
 }: BackgroundMediaProps) {
   const containerEl = useRef<HTMLDivElement | null>(null);
-  const hasPreview = Boolean(previewUrl);
+
+  // Detect mobile/tablet (< 1024px) for using lower quality video
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => setIsMobileDevice(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Use mobile video URL when available and on mobile/tablet
+  const effectivePreviewUrl = (isMobileDevice && mobilePreviewUrl) ? mobilePreviewUrl : previewUrl;
+
+  const hasPreview = Boolean(effectivePreviewUrl);
   const hasVimeo = Boolean(vimeoUrl);
   const usingNativeVideo = hasPreview && (!controls || !hasVimeo);
   const baseControls = variant === "preview" ? false : controls;
   const effectiveControls = baseControls && !usingNativeVideo;
-  const activeVimeoSrc = usingNativeVideo ? undefined : vimeoUrl || previewUrl;
-  const activePreviewSrc = usingNativeVideo ? previewUrl : undefined;
+  const activeVimeoSrc = usingNativeVideo ? undefined : vimeoUrl || effectivePreviewUrl;
+  const activePreviewSrc = usingNativeVideo ? effectivePreviewUrl : undefined;
   const activeSourceKey = usingNativeVideo ? activePreviewSrc : activeVimeoSrc;
   // Show poster for preview variants (until video loads) OR when controls are enabled
   // For native video (mobile), also show poster until video starts

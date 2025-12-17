@@ -9,6 +9,7 @@ export type Media = {
   imageSrc?: string;
   videoSrc?: string;
   previewUrl?: string;
+  mobilePreviewUrl?: string; // Lower quality video for tablet and smaller
   vimeoUrl?: string;
   bgColor?: string;
   previewPoster?: string;
