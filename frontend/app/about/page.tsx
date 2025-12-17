@@ -13,6 +13,7 @@ const bg =
   'https://cdn.sanity.io/files/xerhtqd5/production/9ce80b5352088be725d88e32fb43c3fbada3a478.mp4'
 const previewPoster =
   'https://cdn.sanity.io/images/xerhtqd5/production/5545ae57d11b58790ec87eecc368987ef1d095ac-3024x1596.jpg'
+const mobilePreviewUrl = 'https://cdn.sanity.io/files/xerhtqd5/production/fd65929092659391a7ab01598986142c310343da.mp4'
 
 export default function AboutPage() {
   const { getPreviousVideoState } = usePageTransitionVideo()
@@ -35,6 +36,7 @@ export default function AboutPage() {
     id: 'about',
     videoSrc: bg,
     previewUrl: bg,
+    mobilePreviewUrl: mobilePreviewUrl,
     previewPoster: previewPoster,
     bgColor: '#000',
   }), [])
@@ -181,6 +183,7 @@ export default function AboutPage() {
             <BackgroundMedia
               variant="preview"
               previewUrl={slotMedia[0].previewUrl ?? slotMedia[0].videoSrc}
+              mobilePreviewUrl={slotMedia[0].mobilePreviewUrl}
               vimeoUrl={slotMedia[0].vimeoUrl}
               previewPoster={slotMedia[0].previewPoster}
               bgColor={slotMedia[0].bgColor}
@@ -198,6 +201,7 @@ export default function AboutPage() {
             <BackgroundMedia
               variant="preview"
               previewUrl={slotMedia[1].previewUrl ?? slotMedia[1].videoSrc}
+              mobilePreviewUrl={slotMedia[1].mobilePreviewUrl}
               vimeoUrl={slotMedia[1].vimeoUrl}
               previewPoster={slotMedia[1].previewPoster}
               bgColor={slotMedia[1].bgColor}

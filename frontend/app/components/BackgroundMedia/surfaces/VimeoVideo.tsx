@@ -27,7 +27,7 @@ export default function VimeoVideo({
   const localRef = useRef<HTMLIFrameElement | null>(null);
   // Always use object-cover on large screens (lg and above) to ensure full coverage without black bars
   const fitClass = fillMode === "cover" ? "object-cover" : "object-contain lg:object-cover";
-  const finalClass = `${fitClass} ${className || "h-full w-full"}`;
+  const finalClass = `${fitClass} transition-opacity duration-700 ease-in-out ${className || "h-full w-full"}`;
 
   if (!src) {
     return null;

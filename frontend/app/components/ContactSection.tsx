@@ -10,6 +10,7 @@ import { useSequencedReveal } from "@/app/utils/useSequencedReveal";
 type ContactSectionProps = {
   bgColor?: string;
   previewUrl?: string;
+  mobilePreviewUrl?: string;
   showScrim?: boolean;
   showLeftGradient?: boolean;
   previewPoster?: string;
@@ -19,6 +20,7 @@ type ContactSectionProps = {
 export default function ContactSection({
   bgColor,
   previewUrl,
+  mobilePreviewUrl,
   showScrim = false,
   showLeftGradient = false,
   previewPoster,
@@ -131,8 +133,9 @@ export default function ContactSection({
           <div className="h-full w-full" style={{ backgroundColor: bgColor }} />
         ) : (
           <BackgroundMedia
-          variant="preview"
+            variant="preview"
             previewUrl={previewUrl}
+            mobilePreviewUrl={mobilePreviewUrl}
             previewPoster={previewPoster}
             className="absolute inset-0"
           />

@@ -82,7 +82,7 @@ export default function MediaSurface({
       {usingNative ? (
         <video
           ref={videoRef}
-          className={`${mediaClass} object-cover`}
+          className={`${mediaClass} object-cover transition-opacity duration-700 ease-in-out`}
           src={previewSrc}
           muted
           loop

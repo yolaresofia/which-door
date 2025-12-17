@@ -46,7 +46,7 @@ export default function BackgroundMedia({
 }: BackgroundMediaProps) {
   const containerEl = useRef<HTMLDivElement | null>(null);
 
-  // Detect mobile/tablet (< 1024px) for using lower quality video
+  // Detect mobile/tablet (< 1024px) for using lower quality video and posters
   const [isMobileDevice, setIsMobileDevice] = useState(false);
   useEffect(() => {
     const checkMobile = () => setIsMobileDevice(window.innerWidth < 1024);
@@ -66,10 +66,10 @@ export default function BackgroundMedia({
   const activeVimeoSrc = usingNativeVideo ? undefined : vimeoUrl || effectivePreviewUrl;
   const activePreviewSrc = usingNativeVideo ? effectivePreviewUrl : undefined;
   const activeSourceKey = usingNativeVideo ? activePreviewSrc : activeVimeoSrc;
-  // Show poster for preview variants (until video loads) OR when controls are enabled
-  // For native video (mobile), also show poster until video starts
+  // Show poster for preview variants on MOBILE only (until video loads) OR when controls are enabled
+  // On desktop, videos are light enough to load quickly without posters
   const shouldUsePoster = Boolean(previewPoster) && (
-    (variant === "preview") || // Always show for preview variant until video loads
+    (variant === "preview" && isMobileDevice) || // Only show for preview variant on mobile
     (effectiveControls && !usingNativeVideo) // Show for controlled Vimeo
   );
   const resolvedAutoPlay =
