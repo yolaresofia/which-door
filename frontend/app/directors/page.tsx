@@ -328,12 +328,13 @@ export default function DirectorsIndexPage() {
 
         {/* FOREGROUND LIST */}
         <section className="relative min-h-dvh w-full pt-32">
-          <ul
-            ref={listRef}
-            className="md:pl-12 max-w-none md:space-y-2 space-y-6 px-6"
-            onMouseLeave={resetToDefault}
-            onTouchEnd={resetToDefault}
-          >
+          <div className="max-w-[1600px] mx-auto px-6 md:px-12">
+            <ul
+              ref={listRef}
+              className="md:space-y-2 space-y-6"
+              onMouseLeave={resetToDefault}
+              onTouchEnd={resetToDefault}
+            >
             {directors.map((d, i) => {
               const isActive = i === activeIndex
               return (
@@ -369,7 +370,8 @@ export default function DirectorsIndexPage() {
                 </li>
               )
             })}
-          </ul>
+            </ul>
+          </div>
         </section>
       </main>
 

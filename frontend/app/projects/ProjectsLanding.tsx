@@ -355,7 +355,7 @@ export default function ProjectsLanding() {
         <section className="relative z-10 flex min-h-screen w-full md:px-12 px-4 items-center justify-center">
           <ul
             ref={listRef}
-            className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-12 gap-y-10"
+            className="w-full max-w-[1600px] grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-12 gap-y-10"
           >
             {visibleProjects.map((project, index) => {
               const title = getTitle(project)

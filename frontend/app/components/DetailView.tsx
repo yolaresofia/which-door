@@ -61,7 +61,7 @@ export default function DetailView({
   return (
     <main className="relative min-h-dvh w-full overflow-hidden text-white" style={mainStyle}>
       {showBackgroundMedia && <BackgroundMedia variant="preview" previewUrl={activePreviewSrc} bgColor={color} />}
-      <section className="relative z-10 pt-32 pb-16 md:px-12 px-6 max-w-6xl">
+      <section className="relative z-10 pt-32 pb-16 md:px-12 px-6 max-w-[1600px] mx-auto">
         <header className="mb-8" data-reveal={enableAnimations ? true : undefined}>
           <h1 className="md:text-6xl text-2xl leading-[1.05] tracking-tight">{item.name}</h1>
           {item.specialization ? (

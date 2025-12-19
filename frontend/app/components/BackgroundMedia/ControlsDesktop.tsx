@@ -84,10 +84,10 @@ export default function ControlsDesktop(props: Props) {
   return (
     <div
       ref={containerRef}
-      className="absolute inset-x-0 top-1/2 -translate-y-1/2 z-10 hidden px-6 md:px-12 text-white sm:p-6 md:block"
+      className="absolute inset-x-0 top-1/2 -translate-y-1/2 z-10 hidden text-white md:block"
       data-touch-toggle-ignore
     >
-      <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="max-w-[1600px] mx-auto px-6 md:px-12 flex flex-wrap items-start justify-between gap-4">
         <div
           className="mr-4 min-w-0"
           data-reveal

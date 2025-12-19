@@ -148,7 +148,7 @@ export default function ContactSection({
       </div>
 
       {/* FOREGROUND CONTENT */}
-      <div ref={contentRef} className="relative min-h-screen flex flex-col pt-20">
+      <div ref={contentRef} className="relative min-h-screen flex flex-col pt-20 max-w-[1600px] mx-auto w-full">
         <div className="flex-1 grid items-center justify-items-start px-6 md:justify-items-center">
           {/* Tablet & smaller: show BOTH lines stacked, no hover */}
           <a

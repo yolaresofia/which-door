@@ -10,10 +10,10 @@ import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
 
 const bg =
-  'https://cdn.sanity.io/files/xerhtqd5/production/9ce80b5352088be725d88e32fb43c3fbada3a478.mp4'
+  'https://cdn.sanity.io/files/xerhtqd5/production/9cc8bf80015193aee2f4b09680e07288927485b5.mp4'
 const previewPoster =
   'https://cdn.sanity.io/images/xerhtqd5/production/5545ae57d11b58790ec87eecc368987ef1d095ac-3024x1596.jpg'
-const mobilePreviewUrl = 'https://cdn.sanity.io/files/xerhtqd5/production/fd65929092659391a7ab01598986142c310343da.mp4'
+const mobilePreviewUrl = 'https://cdn.sanity.io/files/xerhtqd5/production/d59f0315a8db5be8c20c2521611e0be34a34c5a1.mp4'
 
 export default function AboutPage() {
   const { getPreviousVideoState } = usePageTransitionVideo()
@@ -211,9 +211,9 @@ export default function AboutPage() {
       </div>
       
       {/* Content with animation - EXACT SAME structure as ProjectsLanding */}
-      <section 
+      <section
         ref={contentRef}
-        className="relative z-10 mx-auto w-full px-6 md:px-12 pt-0 md:pt-32"
+        className="relative z-10 mx-auto w-full max-w-[1600px] px-6 md:px-12 pt-0 md:pt-32"
       >
         <div
           data-reveal

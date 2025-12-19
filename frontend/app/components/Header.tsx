@@ -87,7 +87,7 @@ export default function Header() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 h-28">
-      <div className="h-full px-6 md:px-12">
+      <div className="h-full px-6 md:px-12 max-w-[1600px] mx-auto">
         <div className="h-full flex items-center justify-between lg:grid lg:grid-cols-3">
           {/* Logo */}
           <div className="lg:justify-self-start">
