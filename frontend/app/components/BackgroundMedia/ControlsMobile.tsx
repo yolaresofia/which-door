@@ -1,10 +1,6 @@
-import { fmt } from "./utils";
-
 type Props = {
   title?: string;
   subtitle?: string;
-  current: number;
-  remaining: number;
   progressPct: number;
   muted: boolean;
   onSeekRatio: (ratio: number) => void;
@@ -15,7 +11,7 @@ type Props = {
 
 export default function ControlsMobile(props: Props) {
   const {
-    title, subtitle, current, remaining, progressPct,
+    title, subtitle, progressPct,
     muted, onSeekRatio, onToggleMute, isFullscreen, onToggleFullscreen
   } = props;
 
@@ -29,15 +25,14 @@ export default function ControlsMobile(props: Props) {
       className="absolute inset-x-0 bottom-0 z-10 space-y-4 px-6 pb-6 text-white md:hidden"
       data-touch-toggle-ignore
     >
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-3">
         {(title || subtitle) && (
-          <div className="flex-1 text-left">
-            {title && <div className="text-xl font-semibold leading-snug break-words">{title}</div>}
-            {subtitle && <div className="text-sm text-white/80 break-words">{subtitle}</div>}
+          <div className="flex-1 text-left min-w-0">
+            {title && <div className="text-base font-semibold leading-snug break-words">{title}</div>}
+            {subtitle && <div className="text-xs text-white/80 break-words">{subtitle}</div>}
           </div>
         )}
-        <div className="flex flex-none items-center gap-4 text-sm whitespace-nowrap">
-          <span className="tabular-nums text-xs opacity-80">{fmt(current)} / {fmt(remaining)}</span>
+        <div className="flex flex-none items-center gap-3 text-base whitespace-nowrap">
           <button onClick={onToggleMute} className="underline-offset-4 decoration-white/60 hover:underline">
             {muted ? "Sound OFF" : "Sound ON"}
           </button>

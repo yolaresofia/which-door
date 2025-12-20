@@ -233,6 +233,16 @@ export default function BackgroundMedia({
           variant={variant}
           onNativePlaybackStart={handleNativePlaybackStart}
         />
+        {/* Click/tap overlay to toggle play/pause */}
+        {effectiveControls && (
+          <button
+            type="button"
+            className="absolute inset-0 z-[5] cursor-pointer"
+            onClick={togglePlay}
+            aria-label={playing ? "Pause video" : "Play video"}
+            data-touch-toggle-ignore
+          />
+        )}
       </div>
 
       {posterVisible && (
@@ -308,8 +318,6 @@ export default function BackgroundMedia({
             <ControlsMobile
               title={title}
               subtitle={subtitle}
-              current={current}
-              remaining={remaining}
               progressPct={progressPct}
               muted={muted}
               onSeekRatio={seekToRatio}
