@@ -66,12 +66,9 @@ export default function BackgroundMedia({
   const activeVimeoSrc = usingNativeVideo ? undefined : vimeoUrl || effectivePreviewUrl;
   const activePreviewSrc = usingNativeVideo ? effectivePreviewUrl : undefined;
   const activeSourceKey = usingNativeVideo ? activePreviewSrc : activeVimeoSrc;
-  // Show poster for preview variants on MOBILE only (until video loads) OR when controls are enabled
-  // On desktop, videos are light enough to load quickly without posters
-  const shouldUsePoster = Boolean(previewPoster) && (
-    (variant === "preview" && isMobileDevice) || // Only show for preview variant on mobile
-    (effectiveControls && !usingNativeVideo) // Show for controlled Vimeo
-  );
+  // Show poster while Vimeo video is loading (until video starts playing)
+  // This provides a nice blurred placeholder while the video loads in the background
+  const shouldUsePoster = Boolean(previewPoster) && !usingNativeVideo && hasVimeo;
   const resolvedAutoPlay =
     typeof autoPlayProp === "boolean" ? autoPlayProp : !effectiveControls;
 
@@ -129,19 +126,13 @@ export default function BackgroundMedia({
   useEffect(() => {
     if (usingNativeVideo) return;
     if (videoHasStarted) return;
+    // Wait until video is truly ready AND has progressed slightly
+    // This ensures we show the blurred poster until the video actually loads
     const progressed = current > 0.05;
-    if (variant === "preview") {
-      // For preview variant, wait until video is truly ready AND playing
-      // This ensures we show the blurred poster until the video loads
-      if (ready && progressed && playing) {
-        setVideoHasStarted(true);
-      }
-      return;
-    }
-    if (playing) {
+    if (ready && progressed && playing) {
       setVideoHasStarted(true);
     }
-  }, [usingNativeVideo, variant, ready, playing, current, videoHasStarted]);
+  }, [usingNativeVideo, ready, playing, current, videoHasStarted]);
 
   useEffect(() => {
     setPosterPhase((phase) => {
@@ -222,7 +213,11 @@ export default function BackgroundMedia({
     >
       <div
         className="absolute inset-0 transition-opacity ease-in-out"
-        style={{ opacity: videoVisible ? 1 : 0, transitionDuration: `${POSTER_FADE_MS}ms` }}
+        style={{
+          opacity: videoVisible ? 1 : 0,
+          visibility: videoVisible ? "visible" : "hidden",
+          transitionDuration: `${POSTER_FADE_MS}ms`,
+        }}
       >
         <MediaSurface
           vimeoSrc={activeVimeoSrc}
@@ -232,6 +227,7 @@ export default function BackgroundMedia({
           iframeRef={iframeRef}
           variant={variant}
           onNativePlaybackStart={handleNativePlaybackStart}
+          hideUntilReady={shouldUsePoster && !videoHasStarted}
         />
         {/* Click/tap overlay to toggle play/pause */}
         {effectiveControls && (
@@ -247,7 +243,7 @@ export default function BackgroundMedia({
 
       {posterVisible && (
         <div
-          className="pointer-events-none absolute inset-0 z-10 overflow-hidden transition-opacity ease-in-out"
+          className="pointer-events-none absolute inset-0 z-10 overflow-hidden bg-black transition-opacity ease-in-out"
           style={{ opacity: posterOpacity, transitionDuration: `${POSTER_FADE_MS}ms` }}
         >
           {/* LQIP base64 placeholder - loads instantly */}
@@ -276,6 +272,16 @@ export default function BackgroundMedia({
             blurDataURL={previewPosterLQIP}
           />
           <div className="absolute inset-0 bg-black/10" />
+          {/* Pulse overlay to indicate loading */}
+          {posterPhase === "shown" && (
+            <div
+              className="absolute inset-0"
+              style={{
+                background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)",
+                animation: "shimmer 2s infinite",
+              }}
+            />
+          )}
         </div>
       )}
 

@@ -10,6 +10,7 @@ type Props = {
   iframeRef: React.RefObject<HTMLIFrameElement | null>;
   variant: "full" | "preview";
   onNativePlaybackStart?: () => void;
+  hideUntilReady?: boolean;
 };
 
 export default function MediaSurface({
@@ -20,6 +21,7 @@ export default function MediaSurface({
   iframeRef,
   variant,
   onNativePlaybackStart,
+  hideUntilReady = false,
 }: Props) {
   // Use native video for previews, Vimeo for full with controls
   const usingNative = Boolean(previewSrc) && (!controls || !vimeoSrc);
@@ -100,6 +102,7 @@ export default function MediaSurface({
           muted={!controls}
           fillMode={variant === "preview" ? "contain" : "cover"}
           className={mediaClass}
+          hidden={hideUntilReady}
         />
       )}
     </div>

@@ -1485,7 +1485,7 @@ const directorsData = [
         directors: ['Mohamad Abdouni'],
         brand: 'HASSIDRISS',
         previewUrl:
-          'https://cdn.sanity.io/files/xerhtqd5/production/530325e24bae5b2ebc9b5008751797b24e7c6352.mp4',
+          'https://cdn.sanity.io/files/xerhtqd5/production/79397636e29b834e4fb57ecf3ed8ffd779738314.webm',
         url: '/projects/la-magicienne-film-v1-bridal-couture-collection',
       },
     ],

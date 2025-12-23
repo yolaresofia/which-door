@@ -17,7 +17,7 @@ export default function ContactPage() {
     saveVideo: false, // Contact page doesn't use video state
   })
 
-  const bg = 'https://cdn.sanity.io/files/xerhtqd5/production/78d70e32a4a4f64cba2402c34c50367d1b045f30.mp4'
+  const bg = 'https://cdn.sanity.io/files/xerhtqd5/production/9cc8bf80015193aee2f4b09680e07288927485b5.mp4'
   const previewPoster = 'https://cdn.sanity.io/images/xerhtqd5/production/8e56015f1f0daa6cb7dfaeee8a476dde49013404-2832x1576.jpg'
 const mobilePreviewUrl = 'https://cdn.sanity.io/files/xerhtqd5/production/d239a71d8aa67fb9958528cf01e29451e3787e47.mp4'
   // Detect mobile

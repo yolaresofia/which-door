@@ -9,6 +9,7 @@ type Props = {
   muted: boolean;
   fillMode?: "cover" | "contain";
   className?: string;
+  hidden?: boolean;
 };
 
 export default function VimeoVideo({
@@ -18,6 +19,7 @@ export default function VimeoVideo({
   muted,
   fillMode = "cover",
   className = "",
+  hidden = false,
 }: Props) {
   // Build base URL with only allowed flags
   const base = buildVimeoEmbedUrl(vimeoSrc, { autoplay: autoPlay, muted });
@@ -33,6 +35,11 @@ export default function VimeoVideo({
     return null;
   }
 
+  // When hidden, position iframe off-screen so it loads but spinner is not visible
+  const hiddenStyle: React.CSSProperties = hidden
+    ? { position: "absolute", left: "-9999px", top: "-9999px", opacity: 0, pointerEvents: "none" }
+    : {};
+
   return (
     <iframe
       ref={(node) => {
@@ -40,6 +47,7 @@ export default function VimeoVideo({
         localRef.current = node;
       }}
       className={finalClass}
+      style={hiddenStyle}
       src={src}
       allow="autoplay; fullscreen; picture-in-picture;"
       allowFullScreen

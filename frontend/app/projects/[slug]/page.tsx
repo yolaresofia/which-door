@@ -146,6 +146,7 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
       <section className="relative h-dvh w-screen overflow-hidden isolate">
         <BackgroundMedia
           vimeoUrl={videoSrc}
+          previewPoster={(project as any).previewPoster}
           controls
           autoPlay
           title={(project as any).name}
