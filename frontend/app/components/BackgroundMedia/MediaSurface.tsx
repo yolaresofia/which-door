@@ -39,35 +39,45 @@ export default function MediaSurface({
       ? "w-full h-full"
       : "w-full aspect-video md:aspect-auto md:w-full md:h-full lg:!w-full lg:!h-full";
 
+  // Force autoplay when video source changes or component mounts
   useEffect(() => {
-    if (!usingNative) return;
+    if (!usingNative || !autoPlay) return;
     const video = videoRef.current;
     if (!video) return;
 
-    // Wait for video to be ready before attempting autoplay
+    // Attempt to play the video
     const attemptPlay = () => {
-      if (!autoPlay) return;
-      const playPromise = video.play();
-      if (typeof playPromise?.catch === "function") {
-        playPromise.catch(() => {
-          // Autoplay might be blocked; ignore to avoid console noise.
-        });
+      // Only try to play if video is paused
+      if (video.paused) {
+        const playPromise = video.play();
+        if (typeof playPromise?.catch === "function") {
+          playPromise.catch(() => {
+            // Autoplay might be blocked; ignore to avoid console noise.
+          });
+        }
       }
     };
 
-    // If video is already loaded, play immediately
-    if (video.readyState >= 3) {
+    // If video is already loaded enough, play immediately
+    if (video.readyState >= 2) {
       attemptPlay();
-    } else {
-      // Otherwise wait for canplay event
-      const handleCanPlay = () => {
-        attemptPlay();
-      };
-      video.addEventListener("canplay", handleCanPlay, { once: true });
-      return () => {
-        video.removeEventListener("canplay", handleCanPlay);
-      };
     }
+
+    // Also listen for various ready events to catch all cases
+    const handleCanPlay = () => attemptPlay();
+    const handleLoadedData = () => attemptPlay();
+
+    video.addEventListener("canplay", handleCanPlay);
+    video.addEventListener("loadeddata", handleLoadedData);
+
+    // For mobile Safari, sometimes we need to wait a tick
+    const timeoutId = setTimeout(attemptPlay, 100);
+
+    return () => {
+      video.removeEventListener("canplay", handleCanPlay);
+      video.removeEventListener("loadeddata", handleLoadedData);
+      clearTimeout(timeoutId);
+    };
   }, [usingNative, previewSrc, autoPlay]);
 
   const handleNativeStart = () => {
