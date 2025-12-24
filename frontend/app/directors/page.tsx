@@ -29,6 +29,7 @@ export default function DirectorsIndexPage() {
   const [selectedIndex, setSelectedIndex] = useState(DEFAULT_INDEX) // For mobile
   const [fontLoaded, setFontLoaded] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [mobileAnimationPhase, setMobileAnimationPhase] = useState<'hidden' | 'animating' | 'done'>('hidden')
 
   const listRef = useRef<HTMLUListElement | null>(null)
   const mainRef = useRef<HTMLElement | null>(null)
@@ -105,9 +106,9 @@ export default function DirectorsIndexPage() {
     gsap.set(items, { opacity: 0, y: 20, scale: 0.98 })
   }, { dependencies: [isMobile], scope: listRef })
 
-  // Mobile enter animation
+  // Mobile enter animation - reveal items smoothly
   useGSAP(() => {
-    if (!isMobile || !scrollContainerRef.current || mobileAnimationDoneRef.current) return
+    if (!isMobile || !scrollContainerRef.current || mobileAnimationPhase !== 'hidden') return
 
     try {
       const listElement = scrollContainerRef.current.querySelector('ul')
@@ -116,28 +117,33 @@ export default function DirectorsIndexPage() {
       const items = listElement.querySelectorAll('li')
       if (!items || items.length === 0) return
 
-      // Set initial hidden state
-      gsap.set(items, { opacity: 0, scale: 0.95 })
+      // Mark as animating so GSAP takes control
+      setMobileAnimationPhase('animating')
 
-      // Simplified animate in - faster, more reliable
-      gsap.to(items, {
-        opacity: 1,
-        scale: 1,
-        duration: 0.4,
-        ease: 'power2.out',
-        stagger: {
-          each: 0.05,
-          from: 'start' as const,
-        },
-        delay: 0.05,
-        onComplete: () => {
-          mobileAnimationDoneRef.current = true
+      // Animate in from opacity 0 (set via inline style) to full visibility
+      gsap.fromTo(items,
+        { opacity: 0, scale: 0.95 },
+        {
+          opacity: 1,
+          scale: 1,
+          duration: 0.5,
+          ease: 'power2.out',
+          stagger: {
+            each: 0.06,
+            from: 'start' as const,
+          },
+          delay: 0.1,
+          onComplete: () => {
+            setMobileAnimationPhase('done')
+            mobileAnimationDoneRef.current = true
+          }
         }
-      })
+      )
     } catch (error) {
       console.error('Mobile enter animation error:', error)
+      setMobileAnimationPhase('done') // Ensure items become visible even on error
     }
-  }, { dependencies: [isMobile], scope: scrollContainerRef })
+  }, { dependencies: [isMobile, mobileAnimationPhase], scope: scrollContainerRef })
 
   // Font loading + trigger enter animation
   useEffect(() => {
@@ -194,37 +200,71 @@ export default function DirectorsIndexPage() {
     }
   }, [start, fontLoaded, isMobile])
 
-  // Mobile: Intersection Observer for scroll detection
+  // Mobile: Track visible items and find center item on scroll
   useGSAP(() => {
     if (!isMobile || !scrollContainerRef.current) return
 
     try {
-      const listElement = scrollContainerRef.current.querySelector('ul')
+      const container = scrollContainerRef.current
+      const listElement = container.querySelector('ul')
       if (!listElement) return
 
       const items = listElement.querySelectorAll('li')
       if (!items || items.length === 0) return
 
+      // Track which items are currently visible
+      const visibleItems = new Set<number>()
+
+      // Function to find and select the item closest to center
+      const selectCenterItem = () => {
+        if (visibleItems.size === 0) return
+
+        const containerRect = container.getBoundingClientRect()
+        const containerCenter = containerRect.top + containerRect.height / 2
+
+        let bestIndex = -1
+        let bestDistance = Infinity
+
+        visibleItems.forEach((index) => {
+          const item = items[index]
+          if (!item) return
+
+          const rect = item.getBoundingClientRect()
+          const itemCenter = rect.top + rect.height / 2
+          const distance = Math.abs(itemCenter - containerCenter)
+
+          if (distance < bestDistance) {
+            bestDistance = distance
+            bestIndex = index
+          }
+        })
+
+        if (bestIndex >= 0 && bestIndex !== selectedIndex) {
+          setSelectedIndex(bestIndex)
+          const d = directors[bestIndex]
+          if (d) {
+            crossfadeTo(getMedia(d, bestIndex))
+          }
+        }
+      }
+
+      // Intersection Observer to track which items are visible
       observerRef.current = new IntersectionObserver(
         (entries) => {
-          try {
-            entries.forEach((entry) => {
-              if (entry.isIntersecting) {
-                const index = parseInt(entry.target.getAttribute('data-index') || '0', 10)
-                setSelectedIndex(index)
-                const d = directors[index]
-                if (d) {
-                  crossfadeTo(getMedia(d, index))
-                }
-              }
-            })
-          } catch (error) {
-            console.error('Intersection observer callback error:', error)
-          }
+          entries.forEach((entry) => {
+            const index = parseInt((entry.target as HTMLElement).getAttribute('data-index') || '0', 10)
+            if (entry.isIntersecting) {
+              visibleItems.add(index)
+            } else {
+              visibleItems.delete(index)
+            }
+          })
+          // After updating visible items, select the center one
+          selectCenterItem()
         },
         {
-          root: scrollContainerRef.current,
-          threshold: 0.5,
+          root: container,
+          threshold: 0.1,
           rootMargin: '0px'
         }
       )
@@ -233,13 +273,20 @@ export default function DirectorsIndexPage() {
         observerRef.current?.observe(item)
       })
 
+      // Also listen for scroll events to catch fast scrolling
+      const handleScroll = () => {
+        requestAnimationFrame(selectCenterItem)
+      }
+      container.addEventListener('scroll', handleScroll, { passive: true })
+
       return () => {
         observerRef.current?.disconnect()
+        container.removeEventListener('scroll', handleScroll)
       }
     } catch (error) {
       console.error('Intersection observer setup error:', error)
     }
-  }, { dependencies: [isMobile], scope: scrollContainerRef })
+  }, { dependencies: [isMobile, selectedIndex, crossfadeTo], scope: scrollContainerRef })
 
   // Handlers to request a crossfade (desktop only)
   const select = (i: number) => {
@@ -439,17 +486,33 @@ export default function DirectorsIndexPage() {
             {directors.map((d, index) => {
               const isActive = selectedIndex === index
 
+              // Calculate styles based on animation phase
+              const getItemStyles = () => {
+                if (mobileAnimationPhase === 'hidden') {
+                  // Before animation: completely invisible
+                  return { opacity: 0, transform: 'scale(0.95)' }
+                }
+                if (mobileAnimationPhase === 'animating') {
+                  // During animation: let GSAP control (no inline styles)
+                  return {}
+                }
+                // After animation: normal interactive state
+                return {
+                  opacity: isActive ? 1 : 0.25,
+                  transform: `scale(${isActive ? 1 : 0.92})`,
+                  transition: 'opacity 0.5s ease-out, transform 0.5s ease-out'
+                }
+              }
+
               return (
                 <li
                   key={d.slug}
                   data-index={index}
                   data-reveal
-                  className="snap-center snap-always h-screen flex items-center px-6 transition-all duration-500 ease-out"
+                  className="snap-center snap-always h-screen flex items-center px-6"
                   style={{
-                    opacity: isActive ? 1 : 0.25,
-                    transform: `scale(${isActive ? 1 : 0.92})`,
+                    ...getItemStyles(),
                     willChange: 'opacity, transform',
-                    transition: 'opacity 0.5s ease-out, transform 0.5s ease-out'
                   }}
                 >
                   <a

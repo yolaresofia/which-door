@@ -13,7 +13,7 @@ const bg =
   'https://cdn.sanity.io/files/xerhtqd5/production/fd65929092659391a7ab01598986142c310343da.mp4'
 const previewPoster =
   'https://cdn.sanity.io/images/xerhtqd5/production/5545ae57d11b58790ec87eecc368987ef1d095ac-3024x1596.jpg'
-const mobilePreviewUrl = 'https://cdn.sanity.io/files/xerhtqd5/production/d59f0315a8db5be8c20c2521611e0be34a34c5a1.mp4'
+const mobilePreviewUrl = 'https://cdn.sanity.io/files/xerhtqd5/production/fd65929092659391a7ab01598986142c310343da.mp4'
 
 export default function AboutPage() {
   const { getPreviousVideoState } = usePageTransitionVideo()

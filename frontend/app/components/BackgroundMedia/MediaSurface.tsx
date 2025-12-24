@@ -74,6 +74,18 @@ export default function MediaSurface({
     onNativePlaybackStart?.();
   };
 
+  // Check if video is already playing when component mounts (cached videos)
+  useEffect(() => {
+    if (!usingNative) return;
+    const video = videoRef.current;
+    if (!video) return;
+
+    // If video is already playing (e.g., from cache), signal immediately
+    if (!video.paused && video.readyState >= 3) {
+      onNativePlaybackStart?.();
+    }
+  }, [usingNative, previewSrc, onNativePlaybackStart]);
+
   return (
     <div
       ref={containerRef}
@@ -93,6 +105,7 @@ export default function MediaSurface({
           autoPlay={autoPlay}
           onPlay={handleNativeStart}
           onPlaying={handleNativeStart}
+          onCanPlayThrough={handleNativeStart}
         />
       ) : (
         <VimeoVideo

@@ -18,7 +18,9 @@ export type Media = {
 
 export function useCrossfadeMedia(initial: Media, opts?: { duration?: number, waitForLoad?: boolean }) {
   const D = opts?.duration ?? 0.45
-  const waitForLoad = opts?.waitForLoad ?? true // Wait for video load by default
+  // NEVER wait for video load - BackgroundMedia handles showing poster until video plays
+  // This prevents any black screen during transitions
+  const waitForLoad = opts?.waitForLoad ?? false
   const prefersReduced =
     typeof window !== 'undefined' &&
     window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
@@ -28,6 +30,8 @@ export function useCrossfadeMedia(initial: Media, opts?: { duration?: number, wa
 
   const slotRefs = useRef<[HTMLDivElement | null, HTMLDivElement | null]>([null, null])
   const tlRef = useRef<gsap.core.Timeline | null>(null)
+  // Track the target slot during transition (to know which slot will be visible after animation)
+  const targetSlotRef = useRef<0 | 1>(0)
 
   /**
    * Wait for video element in the target slot to be ready to play
@@ -92,17 +96,29 @@ export function useCrossfadeMedia(initial: Media, opts?: { duration?: number, wa
 
   const crossfadeTo = useCallback(
     (next: Media) => {
-      const shown = slots[currentSlot]
-      if (shown && (shown.id ?? shown.videoSrc ?? shown.imageSrc) === (next.id ?? next.videoSrc ?? next.imageSrc)) return
+      const nextId = next.id ?? next.videoSrc ?? next.imageSrc
 
-      const from = currentSlot
-      const to = (currentSlot === 0 ? 1 : 0) as 0 | 1
+      // Check what's currently showing or being transitioned to
+      // Use targetSlotRef to get the actual target (may differ from currentSlot during animation)
+      const targetSlot = targetSlotRef.current
+      const targetMedia = slots[targetSlot]
+      const targetId = targetMedia ? (targetMedia.id ?? targetMedia.videoSrc ?? targetMedia.imageSrc) : null
+
+      // If we're already showing or transitioning to this media, skip
+      if (targetId === nextId) return
+
+      // The new target is the opposite slot
+      const from = targetSlot
+      const to = (targetSlot === 0 ? 1 : 0) as 0 | 1
 
       // CRITICAL: Cancel any in-flight animations before starting new transition
       if (tlRef.current) {
         tlRef.current.kill()
         tlRef.current = null
       }
+
+      // Update target slot ref immediately
+      targetSlotRef.current = to
 
       // Put next media into the hidden slot (no remount of visible slot)
       setSlots((prev) => {
@@ -155,7 +171,7 @@ export function useCrossfadeMedia(initial: Media, opts?: { duration?: number, wa
         tlRef.current = tl
       })
     },
-    [currentSlot, slots, D, prefersReduced, waitForLoad, waitForVideoReady]
+    [slots, D, prefersReduced, waitForLoad, waitForVideoReady]
   )
 
   useGSAP(() => {

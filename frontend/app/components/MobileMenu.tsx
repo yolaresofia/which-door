@@ -235,7 +235,13 @@ export default function MobileMenu({
         <nav ref={navRef} className="px-6 md:px-12 pt-6">
           <ul className="space-y-4">
             {navItems.map(({href, label}) => {
-              const isActive = currentPath === href
+              // For Projects (/) and Directors (/directors), also match their detail pages
+              const isActive =
+                href === '/'
+                  ? currentPath === '/' || currentPath === '/projects' || currentPath?.startsWith('/projects/')
+                  : href === '/directors'
+                    ? currentPath === '/directors' || currentPath?.startsWith('/directors/')
+                    : currentPath === href
               return (
                 <li key={href}>
                   <Link

@@ -66,9 +66,14 @@ export default function BackgroundMedia({
   const activeVimeoSrc = usingNativeVideo ? undefined : vimeoUrl || effectivePreviewUrl;
   const activePreviewSrc = usingNativeVideo ? effectivePreviewUrl : undefined;
   const activeSourceKey = usingNativeVideo ? activePreviewSrc : activeVimeoSrc;
-  // Show poster while Vimeo video is loading (until video starts playing)
+  // Show poster while video is loading (until video starts playing)
   // This provides a nice blurred placeholder while the video loads in the background
-  const shouldUsePoster = Boolean(previewPoster) && !usingNativeVideo && hasVimeo;
+  // Works for both Vimeo embeds and native HTML5 video (for mobile previews)
+  // CRITICAL: Always show poster on mobile for preview variant to prevent black screens
+  const shouldUsePoster = Boolean(previewPoster) && (
+    (!usingNativeVideo && hasVimeo) || // Vimeo videos
+    (isMobileDevice && variant === "preview") // ALL mobile preview videos (native or Vimeo)
+  );
   const resolvedAutoPlay =
     typeof autoPlayProp === "boolean" ? autoPlayProp : !effectiveControls;
 
@@ -119,9 +124,22 @@ export default function BackgroundMedia({
     scheduleControlsHide();
   }, [scheduleControlsHide]);
 
+  // Reset video and poster state when source changes or mobile status changes
+  // This ensures poster shows immediately for new videos, preventing black screens
   useEffect(() => {
     setVideoHasStarted(false);
-  }, [activeSourceKey]);
+    if (shouldUsePoster) {
+      setPosterPhase("shown");
+    }
+  }, [activeSourceKey, shouldUsePoster]);
+
+  // Reset poster state when mobile device status changes
+  useEffect(() => {
+    if (shouldUsePoster) {
+      setPosterPhase("shown");
+      setVideoHasStarted(false);
+    }
+  }, [isMobileDevice]);
 
   useEffect(() => {
     if (usingNativeVideo) return;

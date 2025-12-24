@@ -121,7 +121,13 @@ export default function Header() {
               className="flex items-center gap-8 text-white text-sm font-medium tracking-wide uppercase"
             >
               {navItems.map(({ href, label }) => {
-                const isActive = pathname === href
+                // For Projects (/) and Directors (/directors), also match their detail pages
+                const isActive =
+                  href === '/'
+                    ? pathname === '/' || pathname === '/projects' || pathname?.startsWith('/projects/')
+                    : href === '/directors'
+                      ? pathname === '/directors' || pathname?.startsWith('/directors/')
+                      : pathname === href
                 return (
                   <li key={href}>
                     <Link
