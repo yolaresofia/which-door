@@ -217,7 +217,10 @@ export default function BackgroundMedia({
 
   const posterVisible = shouldUsePoster && posterPhase !== "hidden";
   const posterOpacity = posterPhase === "shown" ? 1 : 0;
-  const videoVisible = !shouldUsePoster || videoHasStarted;
+  // CRITICAL: Video must ALWAYS be visible so it can load and play in the background
+  // The poster (z-10) covers it until video starts, then fades out
+  // Previously we hid the video which prevented it from loading at all
+  const videoVisible = true;
   const pointerTrapActive = effectiveControls && isFullscreen && !controlsVisible;
 
   return (
@@ -229,14 +232,8 @@ export default function BackgroundMedia({
       data-has-poster={!!previewPoster}
       data-visible={videoVisible}
     >
-      <div
-        className="absolute inset-0 transition-opacity ease-in-out"
-        style={{
-          opacity: videoVisible ? 1 : 0,
-          visibility: videoVisible ? "visible" : "hidden",
-          transitionDuration: `${POSTER_FADE_MS}ms`,
-        }}
-      >
+      {/* Video container - always visible so video can load, poster covers it */}
+      <div className="absolute inset-0">
         <MediaSurface
           vimeoSrc={activeVimeoSrc}
           previewSrc={activePreviewSrc}
@@ -245,7 +242,6 @@ export default function BackgroundMedia({
           iframeRef={iframeRef}
           variant={variant}
           onNativePlaybackStart={handleNativePlaybackStart}
-          hideUntilReady={shouldUsePoster && !videoHasStarted}
         />
         {/* Click/tap overlay to toggle play/pause */}
         {effectiveControls && (
