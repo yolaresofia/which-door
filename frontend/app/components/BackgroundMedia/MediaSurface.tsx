@@ -1,5 +1,5 @@
 // MediaSurface.tsx
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import VimeoVideo from "./surfaces/VimeoVideo";
 
 type Props = {
@@ -26,6 +26,8 @@ export default function MediaSurface({
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const playAttemptRef = useRef<number>(0);
+  const cleanupRef = useRef<(() => void) | null>(null);
 
   // Shared centering
   const containerClass =
@@ -37,50 +39,94 @@ export default function MediaSurface({
       ? "w-full h-full"
       : "w-full aspect-video md:aspect-auto md:w-full md:h-full lg:!w-full lg:!h-full";
 
-  // Force autoplay when video source changes or component mounts
-  useEffect(() => {
-    if (!usingNative || !autoPlay) return;
-    const video = videoRef.current;
-    if (!video) return;
+  const handleNativeStart = useCallback(() => {
+    onNativePlaybackStart?.();
+  }, [onNativePlaybackStart]);
+
+  // Ref callback that sets up autoplay when video element is mounted
+  const videoRefCallback = useCallback((video: HTMLVideoElement | null) => {
+    // Cleanup previous listeners if any
+    if (cleanupRef.current) {
+      cleanupRef.current();
+      cleanupRef.current = null;
+    }
+
+    videoRef.current = video;
+
+    if (!video || !autoPlay) return;
+
+    // Reset play attempt counter
+    playAttemptRef.current = 0;
 
     // Attempt to play the video
     const attemptPlay = () => {
-      // Only try to play if video is paused
-      if (video.paused) {
-        const playPromise = video.play();
-        if (typeof playPromise?.catch === "function") {
-          playPromise.catch(() => {
-            // Autoplay might be blocked; ignore to avoid console noise.
+      if (!video || !video.paused) return;
+
+      // For iOS: ensure video attributes are set correctly before playing
+      video.muted = true;
+      video.playsInline = true;
+
+      const playPromise = video.play();
+      if (typeof playPromise?.then === "function") {
+        playPromise
+          .then(() => {
+            // Successfully started playing
+            handleNativeStart();
+          })
+          .catch(() => {
+            // Autoplay might be blocked; try again after a short delay
+            // iOS sometimes needs multiple attempts
+            const currentAttempt = ++playAttemptRef.current;
+            if (currentAttempt <= 3) {
+              setTimeout(() => {
+                if (playAttemptRef.current === currentAttempt && video.paused) {
+                  attemptPlay();
+                }
+              }, 200 * currentAttempt);
+            }
           });
-        }
       }
     };
+
+    // Event handlers
+    const handleCanPlay = () => attemptPlay();
+    const handleLoadedData = () => attemptPlay();
+    const handleLoadedMetadata = () => attemptPlay();
+
+    // Add event listeners
+    video.addEventListener("canplay", handleCanPlay);
+    video.addEventListener("loadeddata", handleLoadedData);
+    video.addEventListener("loadedmetadata", handleLoadedMetadata);
 
     // If video is already loaded enough, play immediately
     if (video.readyState >= 2) {
       attemptPlay();
     }
 
-    // Also listen for various ready events to catch all cases
-    const handleCanPlay = () => attemptPlay();
-    const handleLoadedData = () => attemptPlay();
-
-    video.addEventListener("canplay", handleCanPlay);
-    video.addEventListener("loadeddata", handleLoadedData);
-
     // For mobile Safari, sometimes we need to wait a tick
     const timeoutId = setTimeout(attemptPlay, 100);
+    // Additional delayed attempt for iOS
+    const iosTimeoutId = setTimeout(attemptPlay, 500);
 
-    return () => {
+    // Store cleanup function
+    cleanupRef.current = () => {
       video.removeEventListener("canplay", handleCanPlay);
       video.removeEventListener("loadeddata", handleLoadedData);
+      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
       clearTimeout(timeoutId);
+      clearTimeout(iosTimeoutId);
     };
-  }, [usingNative, previewSrc, autoPlay]);
+  }, [autoPlay, handleNativeStart]);
 
-  const handleNativeStart = () => {
-    onNativePlaybackStart?.();
-  };
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (cleanupRef.current) {
+        cleanupRef.current();
+        cleanupRef.current = null;
+      }
+    };
+  }, []);
 
   // Check if video is already playing when component mounts (cached videos)
   useEffect(() => {
@@ -103,7 +149,8 @@ export default function MediaSurface({
     >
       {usingNative ? (
         <video
-          ref={videoRef}
+          key={previewSrc} // Force remount on source change for iOS
+          ref={videoRefCallback}
           className={`${mediaClass} object-cover transition-opacity duration-700 ease-in-out`}
           src={previewSrc}
           muted
