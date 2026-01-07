@@ -49,10 +49,16 @@ export default function BackgroundMedia({
   const containerEl = useRef<HTMLDivElement | null>(null);
 
   // Detect mobile/tablet (< 1024px) for using lower quality video and posters
-  const [isMobileDevice, setIsMobileDevice] = useState(false);
+  // Initialize with actual value if available (client-side), or false for SSR
+  const getInitialMobileState = () => {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth < 1024;
+  };
+  const [isMobileDevice, setIsMobileDevice] = useState(getInitialMobileState);
+
   useEffect(() => {
     const checkMobile = () => setIsMobileDevice(window.innerWidth < 1024);
-    checkMobile();
+    // Only add listener, don't re-check (useState already has correct value)
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
@@ -133,22 +139,41 @@ export default function BackgroundMedia({
     scheduleControlsHide();
   }, [scheduleControlsHide]);
 
-  // Reset video and poster state when source changes or mobile status changes
+  // Reset video and poster state when source changes (but NOT on initial mount)
   // This ensures poster shows immediately for new videos, preventing black screens
+  const prevSourceKeyRef = useRef<string | undefined>(undefined);
+  const isInitialSourceRef = useRef(true);
   useEffect(() => {
-    setVideoHasStarted(false);
-    if (shouldUsePoster) {
-      setPosterPhase("shown");
+    // Skip reset on initial mount - we want to let the video play through
+    if (isInitialSourceRef.current) {
+      isInitialSourceRef.current = false;
+      prevSourceKeyRef.current = activeSourceKey;
+      return;
+    }
+
+    // Only reset if the source actually changed (e.g., navigating to different video)
+    if (prevSourceKeyRef.current !== activeSourceKey) {
+      prevSourceKeyRef.current = activeSourceKey;
+      setVideoHasStarted(false);
+      if (shouldUsePoster) {
+        setPosterPhase("shown");
+      }
     }
   }, [activeSourceKey, shouldUsePoster]);
 
-  // Reset poster state when mobile device status changes
+  // Handle resize changes (when switching between mobile/desktop)
+  // Reset video state when screen size changes to load appropriate video
+  const prevMobileRef = useRef<boolean>(isMobileDevice);
   useEffect(() => {
-    if (shouldUsePoster) {
-      setPosterPhase("shown");
-      setVideoHasStarted(false);
+    // Only reset if the mobile state actually changed (e.g., resize from desktop to mobile)
+    if (prevMobileRef.current !== isMobileDevice) {
+      prevMobileRef.current = isMobileDevice;
+      if (shouldUsePoster) {
+        setPosterPhase("shown");
+        setVideoHasStarted(false);
+      }
     }
-  }, [isMobileDevice]);
+  }, [isMobileDevice, shouldUsePoster]);
 
   useEffect(() => {
     if (usingNativeVideo) return;
@@ -160,6 +185,35 @@ export default function BackgroundMedia({
       setVideoHasStarted(true);
     }
   }, [usingNativeVideo, ready, playing, current, videoHasStarted]);
+
+  // Fallback: If Vimeo player is ready but video hasn't started playing after timeout,
+  // mark as ready anyway so controls animate in (autoplay might be blocked by browser)
+  useEffect(() => {
+    if (usingNativeVideo) return;
+    if (videoHasStarted) return;
+    if (!ready) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setVideoHasStarted(true);
+    }, 2000); // 2 second fallback
+
+    return () => window.clearTimeout(timeoutId);
+  }, [usingNativeVideo, videoHasStarted, ready]);
+
+  // Fallback for native video: If poster is showing but video hasn't triggered ready after timeout,
+  // mark as ready anyway. This handles the race condition where mobile detection kicks in
+  // AFTER the video already started playing (so we miss the onPlay event).
+  useEffect(() => {
+    if (!usingNativeVideo) return;
+    if (videoHasStarted) return;
+    if (!shouldUsePoster) return; // Only needed when poster is covering the video
+
+    const timeoutId = window.setTimeout(() => {
+      setVideoHasStarted(true);
+    }, 1500); // 1.5 second fallback for native video
+
+    return () => window.clearTimeout(timeoutId);
+  }, [usingNativeVideo, videoHasStarted, shouldUsePoster]);
 
   useEffect(() => {
     setPosterPhase((phase) => {
@@ -235,7 +289,7 @@ export default function BackgroundMedia({
   return (
     <div
       ref={containerEl}
-      className={`absolute inset-0 ${effectiveControls ? "" : "-z-10"} ${className}`}
+      className={`absolute inset-0 ${className}`}
       style={bgColor ? { backgroundColor: bgColor } : undefined}
       data-variant={variant}
       data-has-poster={!!previewPoster}
@@ -337,6 +391,7 @@ export default function BackgroundMedia({
               onShare={handleShare}
               isFullscreen={isFullscreen}
               onToggleFullscreen={toggleFullscreen}
+              isVideoReady={videoHasStarted}
             />
           </div>
           <div

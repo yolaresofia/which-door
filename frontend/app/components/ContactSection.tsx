@@ -146,7 +146,7 @@ export default function ContactSection({
   const reverseSwap = () => tlRef.current?.reverse();
 
   return (
-    <main className="relative min-h-screen w-full overflow-hidden text-white">
+    <main className="relative min-h-screen w-full overflow-hidden text-white isolate">
       {/* BACKGROUND LAYER */}
       <div className="absolute inset-0 -z-10">
         {useColorOnly ? (

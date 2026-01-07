@@ -86,6 +86,7 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
   }, [])
 
   // Fade-out animation function - animates controls exit before navigation
+  // Exit animation: right-to-left stagger (from: 'end') to reverse the enter order
   const fadeOutAndNavigate = useCallback((url: string) => {
     if (isNavigating || isMobile) return
 
@@ -111,22 +112,32 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
       return
     }
 
-    // Create the animation
+    // GPU acceleration hints for smoother animation
+    gsap.set(allRevealItems, {
+      willChange: 'transform, opacity',
+      backfaceVisibility: 'hidden',
+      force3D: true
+    })
+
+    // Create the exit animation
+    // IMPORTANT: 'from: end' reverses the stagger order (last element animates first)
+    // This creates a right-to-left exit that mirrors the left-to-right enter
     gsap.to(allRevealItems, {
       opacity: 0,
-      y: -30,
-      scale: 0.92,
-      duration: 0.7,
+      y: -20,
+      scale: 0.95,
+      duration: 0.5,
       ease: 'power2.in',
       stagger: {
         each: 0.05,
-        from: 'start'
+        from: 'end', // Exit from last to first (right-to-left)
+        ease: 'power2.inOut'
       },
       onComplete: () => {
-        // Small safety delay to ensure animation is fully visible
-        setTimeout(() => {
-          router.push(url)
-        }, 50)
+        // Clean up will-change for performance
+        gsap.set(allRevealItems, { willChange: 'auto', clearProps: 'backfaceVisibility' })
+        // Navigate immediately - animation is complete
+        router.push(url)
       }
     })
   }, [isNavigating, isMobile, router])

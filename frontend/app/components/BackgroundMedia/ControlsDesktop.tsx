@@ -1,6 +1,7 @@
 'use client'
 
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState, useLayoutEffect } from 'react'
+import { gsap } from 'gsap'
 import { fmt } from "./utils";
 import { useSequencedReveal } from '@/app/utils/useSequencedReveal'
 
@@ -18,20 +19,21 @@ type Props = {
   onShare?: () => void;
   isFullscreen: boolean;
   onToggleFullscreen: () => void;
+  isVideoReady?: boolean; // New prop to wait for video before animating
 };
 
 export default function ControlsDesktop(props: Props) {
   const {
     title, subtitle, playing, current, remaining, progressPct,
     muted, onTogglePlay, onSeekRatio, onToggleMute, onShare,
-    isFullscreen, onToggleFullscreen
+    isFullscreen, onToggleFullscreen, isVideoReady = false
   } = props;
 
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [shareState, setShareState] = useState<'share' | 'copied'>('share')
   const shareResetRef = useRef<number | null>(null)
 
-  // Desktop animation - EXACT SAME as ProjectsLanding
+  // Desktop animation - matches ProjectsLanding style
   const { start } = useSequencedReveal(containerRef, {
     target: '[data-reveal]',
     duration: 0.8,
@@ -46,13 +48,25 @@ export default function ControlsDesktop(props: Props) {
     },
   })
 
-  // Trigger animation on mount
+  // CRITICAL: Hide elements immediately on mount BEFORE paint to prevent FOUC
+  // useLayoutEffect runs synchronously before browser paint
+  useLayoutEffect(() => {
+    if (!containerRef.current) return
+    const items = containerRef.current.querySelectorAll('[data-reveal]')
+    gsap.set(items, { opacity: 0, y: 20, scale: 0.98 })
+  }, [])
+
+  // Start animation when video is ready
   useEffect(() => {
-    // Start with RAF to ensure DOM is ready
-    requestAnimationFrame(() => {
+    if (!isVideoReady) return
+
+    // Use RAF to ensure DOM is fully ready after state update
+    const rafId = requestAnimationFrame(() => {
       start()
     })
-  }, [start])
+
+    return () => cancelAnimationFrame(rafId)
+  }, [isVideoReady, start])
 
   useEffect(() => {
     return () => {

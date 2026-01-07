@@ -87,7 +87,8 @@ export function useFadeOutNavigation(
           clearTimeout(navigationTimeoutRef.current)
         }
 
-        // Simplified animation configuration
+        // Animation configuration - consistent with project detail page
+        // Exit animations use 'from: end' for right-to-left stagger (reverse of enter)
         const animationConfig = isMobile ? {
           opacity: 0,
           scale: 0.95,
@@ -99,7 +100,19 @@ export function useFadeOutNavigation(
           scale: 0.95,
           duration: 0.5,
           ease: 'power2.in',
+          stagger: {
+            each: 0.05,
+            from: 'end' as const, // Exit from last to first (right-to-left)
+            ease: 'power2.inOut',
+          },
         }
+
+        // GPU acceleration hints for smoother animation
+        gsap.set(items, {
+          willChange: 'transform, opacity',
+          backfaceVisibility: 'hidden',
+          force3D: true
+        })
 
         // Create the fade-out animation with error handling
         try {
@@ -110,6 +123,8 @@ export function useFadeOutNavigation(
             },
             onComplete: () => {
               console.log('✅ Fade-out animation complete, navigating...')
+              // Clean up will-change for performance
+              gsap.set(items, { willChange: 'auto', clearProps: 'backfaceVisibility' })
               router.push(url)
             },
           })
