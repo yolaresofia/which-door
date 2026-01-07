@@ -1,12 +1,10 @@
 // app/components/ContactSection.tsx
 "use client";
 
-import { useRef, useEffect, useLayoutEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import BackgroundMedia from "./BackgroundMedia/BackgroundMedia";
-import { useSequencedReveal } from "@/app/utils/useSequencedReveal";
-import { useVideoReady } from "@/app/utils/useVideoReady";
 
 type ContactSectionProps = {
   bgColor?: string;
@@ -15,7 +13,6 @@ type ContactSectionProps = {
   showScrim?: boolean;
   showLeftGradient?: boolean;
   previewPoster?: string;
-  enableAnimations?: boolean;
 };
 
 export default function ContactSection({
@@ -25,125 +22,106 @@ export default function ContactSection({
   showScrim = false,
   showLeftGradient = false,
   previewPoster,
-  enableAnimations = false,
 }: ContactSectionProps) {
-  const useColorOnly = !!bgColor; // color takes priority
+  const useColorOnly = !!bgColor;
   const desktopLinkRef = useRef<HTMLAnchorElement | null>(null);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
+  const hasAnimatedRef = useRef(false);
 
-  // Track if video is ready - skip waiting if using color only or animations disabled
-  const { isReady: videoReady, markReady } = useVideoReady({
-    skip: useColorOnly || !enableAnimations,
-    timeout: 2500, // Don't wait too long
-  });
+  const [isMounted, setIsMounted] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
 
-  // Desktop animation - only when enableAnimations is true
-  const { start } = useSequencedReveal(contentRef, {
-    target: '[data-reveal]',
-    duration: 0.8,
-    ease: 'power2.out',
-    from: { opacity: 0, y: 20, scale: 0.98 },
-    to: { opacity: 1, y: 0, scale: 1 },
-    autoStart: false,
-    stagger: {
-      each: 0.08,
-      from: 'start',
-      ease: 'power2.inOut'
-    },
-  });
-
-  // Hide content initially when animations are enabled
-  // useLayoutEffect runs synchronously before browser paint to prevent FOUC
-  useLayoutEffect(() => {
-    if (!enableAnimations || !contentRef.current) return;
-
-    // Set initial hidden state with GSAP
-    const items = contentRef.current.querySelectorAll('[data-reveal]');
-    gsap.set(items, { opacity: 0, y: 20, scale: 0.98 });
-  }, [enableAnimations]);
-
-  // Start animation when video is ready
+  // Mark as mounted after hydration
   useEffect(() => {
-    if (!enableAnimations) return;
-    if (!videoReady) return;
+    setIsMounted(true);
+  }, []);
 
-    // Use RAF to ensure DOM is fully ready
-    const rafId = requestAnimationFrame(() => {
-      start();
-    });
+  // Run stagger animation once mounted (or when video is ready on desktop)
+  useGSAP(() => {
+    if (!isMounted || !contentRef.current || hasAnimatedRef.current) return;
 
-    return () => cancelAnimationFrame(rafId);
-  }, [enableAnimations, videoReady, start]);
+    const items = contentRef.current.querySelectorAll('[data-reveal]');
+    if (items.length === 0) return;
 
+    // On mobile or when using color only, animate immediately
+    // On desktop with video, wait for video ready
+    const isMobile = window.innerWidth < 1024;
+    const shouldWaitForVideo = !isMobile && !useColorOnly && !videoReady;
+
+    if (shouldWaitForVideo) {
+      // Hide content while waiting for video
+      gsap.set(items, { opacity: 0, y: 20 });
+      return;
+    }
+
+    hasAnimatedRef.current = true;
+
+    // Animate in with stagger
+    gsap.fromTo(
+      items,
+      { opacity: 0, y: 20 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: "power2.out",
+        stagger: {
+          each: 0.08,
+          from: "start",
+        },
+      }
+    );
+  }, { dependencies: [isMounted, videoReady, useColorOnly] });
+
+  // Desktop hover animation for the "Have an idea?" / "Get in touch." swap
   useGSAP(() => {
     const el = desktopLinkRef.current;
     if (!el) return;
 
-    // Respect reduced motion
     const prefersReduced =
       typeof window !== "undefined" &&
-      window.matchMedia &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-    const ctx = gsap.context(() => {
-      const idea = el.querySelector(".line-idea");
-      const touch = el.querySelector(".line-touch");
-      if (!idea || !touch) return;
+    const idea = el.querySelector(".line-idea");
+    const touch = el.querySelector(".line-touch");
+    if (!idea || !touch) return;
 
-      // ensure no CSS transitions fight the timeline
-      gsap.set([idea, touch], { clearProps: "transition" });
+    gsap.set([idea, touch], { clearProps: "transition" });
 
-      // initial states
-      gsap.set(idea, {
-        autoAlpha: 1,
-        yPercent: 0,
-        filter: "blur(0px)",
-        willChange: "transform, opacity, filter",
-        backfaceVisibility: "hidden",
-      });
-      gsap.set(touch, {
-        autoAlpha: 0,
-        yPercent: 0,
-        filter: "blur(6px)",
-        willChange: "transform, opacity, filter",
-        backfaceVisibility: "hidden",
-      });
+    gsap.set(idea, {
+      autoAlpha: 1,
+      yPercent: 0,
+      filter: "blur(0px)",
+      willChange: "transform, opacity, filter",
+    });
+    gsap.set(touch, {
+      autoAlpha: 0,
+      yPercent: 0,
+      filter: "blur(6px)",
+      willChange: "transform, opacity, filter",
+    });
 
-      // timeline
-      tlRef.current = gsap
-        .timeline({
-          paused: true,
-          defaults: { duration: prefersReduced ? 0.001 : 0.45, ease: "power3.inOut" },
-        })
-        .to(
-          idea,
-          {
-            autoAlpha: 0,
-            yPercent: -6,
-            filter: "blur(6px)",
-          },
-          0
-        )
-        .to(
-          touch,
-          {
-            autoAlpha: 1,
-            yPercent: 0,
-            filter: "blur(0px)",
-          },
-          0
-        );
-    }, desktopLinkRef);
+    tlRef.current = gsap
+      .timeline({
+        paused: true,
+        defaults: { duration: prefersReduced ? 0.001 : 0.45, ease: "power3.inOut" },
+      })
+      .to(idea, { autoAlpha: 0, yPercent: -6, filter: "blur(6px)" }, 0)
+      .to(touch, { autoAlpha: 1, yPercent: 0, filter: "blur(0px)" }, 0);
 
     return () => {
-      ctx.revert();
+      tlRef.current?.kill();
       tlRef.current = null;
     };
   }, []);
 
   const playSwap = () => tlRef.current?.play();
   const reverseSwap = () => tlRef.current?.reverse();
+
+  const handleVideoReady = () => {
+    setVideoReady(true);
+  };
 
   return (
     <main className="relative min-h-screen w-full overflow-hidden text-white isolate">
@@ -158,7 +136,7 @@ export default function ContactSection({
             mobilePreviewUrl={mobilePreviewUrl}
             previewPoster={previewPoster}
             className="absolute inset-0"
-            onVideoReady={markReady}
+            onVideoReady={handleVideoReady}
           />
         )}
 
@@ -177,7 +155,7 @@ export default function ContactSection({
             className="block lg:hidden text-left leading-tight text-3xl md:text-6xl md:text-center"
             aria-label="Get in touch via email"
             title="Get in touch"
-            data-reveal={enableAnimations ? true : undefined}
+            data-reveal
           >
             <span className="block">Have an idea?</span>
             <span className="block mt-1 md:mt-2 opacity-90">Get in touch.</span>
@@ -190,14 +168,12 @@ export default function ContactSection({
             className="hidden lg:inline-grid text-left lg:text-center leading-tight text-3xl lg:text-7xl whitespace-nowrap place-items-start lg:place-items-center"
             aria-label="Get in touch via email"
             title="Get in touch"
-            // trigger the timeline
             onMouseEnter={playSwap}
             onMouseLeave={reverseSwap}
             onFocus={playSwap}
             onBlur={reverseSwap}
-            data-reveal={enableAnimations ? true : undefined}
+            data-reveal
           >
-            {/* NOTE: removed transition classes to avoid fighting GSAP */}
             <span className="line-idea col-start-1 row-start-1">
               Have an idea?
             </span>
@@ -209,18 +185,12 @@ export default function ContactSection({
 
         <footer className="w-full px-6 md:px-12 pb-8">
           <div className="mx-auto grid gap-8 md:grid-cols-3 text-sm md:text-base">
-            <p
-              className="leading-tight"
-              data-reveal={enableAnimations ? true : undefined}
-            >
+            <p className="leading-tight" data-reveal>
               We exist on 5 continents, with bases in Stockholm, Barcelona, Baltimore/DC, Beirut,
               Berlin, Buenos Aires, NYC, Nairobi and Iceland.
             </p>
 
-            <div
-              className="leading-tight"
-              data-reveal={enableAnimations ? true : undefined}
-            >
+            <div className="leading-tight" data-reveal>
               <p>
                 For Inquiries &amp; Commissions{" "}
                 <a href="mailto:info@whichdoor.com">info@whichdoor.com</a>
@@ -231,10 +201,7 @@ export default function ContactSection({
               </p>
             </div>
 
-            <nav
-              className="leading-relaxed"
-              data-reveal={enableAnimations ? true : undefined}
-            >
+            <nav className="leading-relaxed" data-reveal>
               <ul className="flex gap-4 md:justify-end">
                 <li>
                   <a href="https://vimeo.com/" target="_blank" rel="noopener noreferrer">
