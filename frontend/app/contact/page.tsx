@@ -7,12 +7,9 @@ import ContactSection from '../components/ContactSection'
 import { useFadeOutNavigation } from '../utils/useFadeOutNavigation'
 
 export default function ContactPage() {
-  // Initialize with actual value on client, false on server (will update after hydration)
-  const getInitialMobileState = () => {
-    if (typeof window === 'undefined') return false
-    return window.innerWidth < 1024
-  }
-  const [isMobile, setIsMobile] = useState(getInitialMobileState)
+  // CRITICAL: Always initialize to false to prevent hydration mismatch
+  // The useEffect will update this on the client after hydration completes
+  const [isMobile, setIsMobile] = useState(false)
   const mainRef = useRef<HTMLDivElement | null>(null)
 
   // Use the reusable fade-out navigation hook

@@ -130,13 +130,20 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Hide content initially to prevent FOUC
+  // Hide content initially to prevent FOUC (desktop only)
+  // On mobile, ensure content is visible
   useGSAP(() => {
-    if (!contentRef.current || isMobile) return
+    if (!contentRef.current) return
 
-    // Set initial hidden state before animation
     const items = contentRef.current.querySelectorAll('[data-reveal]')
-    gsap.set(items, { opacity: 0, y: 20, scale: 0.98 })
+
+    if (isMobile) {
+      // On mobile, ensure content is visible (reset any hidden state from initial render)
+      gsap.set(items, { opacity: 1, y: 0, scale: 1 })
+    } else {
+      // On desktop, hide for animation reveal
+      gsap.set(items, { opacity: 0, y: 20, scale: 0.98 })
+    }
   }, { dependencies: [isMobile], scope: contentRef })
 
   // Font loading + trigger enter animation

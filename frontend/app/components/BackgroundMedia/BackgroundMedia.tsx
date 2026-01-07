@@ -49,16 +49,14 @@ export default function BackgroundMedia({
   const containerEl = useRef<HTMLDivElement | null>(null);
 
   // Detect mobile/tablet (< 1024px) for using lower quality video and posters
-  // Initialize with actual value if available (client-side), or false for SSR
-  const getInitialMobileState = () => {
-    if (typeof window === 'undefined') return false;
-    return window.innerWidth < 1024;
-  };
-  const [isMobileDevice, setIsMobileDevice] = useState(getInitialMobileState);
+  // CRITICAL: Always initialize to false to prevent hydration mismatch
+  // The useEffect will update this on the client after hydration completes
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => setIsMobileDevice(window.innerWidth < 1024);
-    // Only add listener, don't re-check (useState already has correct value)
+    // Check immediately after mount, then listen for resize
+    checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
