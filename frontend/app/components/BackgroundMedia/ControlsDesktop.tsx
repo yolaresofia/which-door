@@ -110,23 +110,24 @@ export default function ControlsDesktop(props: Props) {
           {subtitle && <div className="text-white/85 truncate text-base">{subtitle}</div>}
         </div>
         <div className="ml-auto flex min-w-0 items-center gap-6">
-          <button
-            data-reveal
-            onClick={onTogglePlay}
-            aria-label={playing ? "Pause" : "Play"}
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/10 transition hover:bg-white/20"
-          >
-            {playing ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <rect x="6" y="5" width="4" height="14" rx="1" />
-                <rect x="14" y="5" width="4" height="14" rx="1" />
-              </svg>
-            ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            )}
-          </button>
+          <div data-reveal className="shrink-0">
+            <button
+              onClick={onTogglePlay}
+              aria-label={playing ? "Pause" : "Play"}
+              className="grid h-8 w-8 place-items-center rounded-full bg-white/10 transition hover:bg-white/20"
+            >
+              {playing ? (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <rect x="6" y="5" width="4" height="14" rx="1" />
+                  <rect x="14" y="5" width="4" height="14" rx="1" />
+                </svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              )}
+            </button>
+          </div>
           <div
             data-reveal
             className="tabular-nums shrink-0 text-sm"
@@ -146,43 +147,46 @@ export default function ControlsDesktop(props: Props) {
             data-reveal
             className="tabular-nums shrink-0 text-sm"
           >{fmt(remaining)}</div>
-          <button
-            data-reveal
-            onClick={onToggleMute}
-            className="shrink-0 text-sm underline-offset-4 decoration-white/60 hover:underline"
-          >
-            {muted ? "Sound OFF" : "Sound ON"}
-          </button>
-          <button
-            data-reveal
-            onClick={handleShareClick}
-            className="shrink-0 text-sm underline-offset-4 decoration-white/60 hover:underline relative"
-          >
-            <span className="relative inline-block h-5 min-w-[3.5rem] overflow-hidden">
-              <span
-                className={`absolute inset-0 transition-all duration-200 ease-out ${
-                  shareState === 'share' ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1.5'
-                }`}
-              >
-                Share
+          <div data-reveal className="shrink-0">
+            <button
+              onClick={onToggleMute}
+              className="text-sm underline-offset-4 decoration-white/60 hover:underline"
+            >
+              {muted ? "Sound OFF" : "Sound ON"}
+            </button>
+          </div>
+          <div data-reveal className="shrink-0">
+            <button
+              onClick={handleShareClick}
+              className="text-sm underline-offset-4 decoration-white/60 hover:underline relative"
+            >
+              <span className="relative inline-block h-5 min-w-[3.5rem] overflow-hidden">
+                <span
+                  className={`absolute inset-0 transition-all duration-200 ease-out ${
+                    shareState === 'share' ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1.5'
+                  }`}
+                >
+                  Share
+                </span>
+                <span
+                  className={`absolute inset-0 transition-all duration-200 ease-out ${
+                    shareState === 'copied' ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1.5'
+                  }`}
+                >
+                  Copied!
+                </span>
+                <span className="opacity-0">Share</span>
               </span>
-              <span
-                className={`absolute inset-0 transition-all duration-200 ease-out ${
-                  shareState === 'copied' ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1.5'
-                }`}
-              >
-                Copied!
-              </span>
-              <span className="opacity-0">Share</span>
-            </span>
-          </button>
-          <button
-            data-reveal
-            onClick={onToggleFullscreen}
-            className="shrink-0 text-sm underline-offset-4 decoration-white/60 hover:underline"
-          >
-            {isFullscreen ? "Close" : "Fullscreen"}
-          </button>
+            </button>
+          </div>
+          <div data-reveal className="shrink-0">
+            <button
+              onClick={onToggleFullscreen}
+              className="text-sm underline-offset-4 decoration-white/60 hover:underline"
+            >
+              {isFullscreen ? "Close" : "Fullscreen"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

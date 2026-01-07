@@ -260,7 +260,7 @@ export default function DirectorsIndexPage() {
               onTouchEnd={resetToDefault}
             >
             {directors.map((d, i) => {
-              const isActive = i === activeIndex
+              const isActive = i === desktopActiveIndex
               return (
                 <li
                   key={d.slug}
