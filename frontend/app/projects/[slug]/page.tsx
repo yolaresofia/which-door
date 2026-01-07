@@ -85,7 +85,7 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Fade-out animation function - EXACT SAME as ProjectsLanding
+  // Fade-out animation function - animates controls exit before navigation
   const fadeOutAndNavigate = useCallback((url: string) => {
     if (isNavigating || isMobile) return
 
@@ -96,37 +96,39 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
       mainRef.current.style.pointerEvents = 'none'
     }
 
-    // Fade out controls
-    const controlsContainer = document.querySelector('[data-touch-toggle-ignore]')
-    if (controlsContainer) {
-      const items = controlsContainer.querySelectorAll('[data-reveal]')
+    // Find all [data-reveal] elements inside controls containers
+    // Use querySelectorAll to get all matching containers (ControlsDesktop and ControlsMobile both have the attribute)
+    const controlsContainers = document.querySelectorAll('[data-touch-toggle-ignore]')
+    const allRevealItems: Element[] = []
 
-      if (items.length === 0) {
-        router.push(url)
-        return
-      }
+    controlsContainers.forEach(container => {
+      const items = container.querySelectorAll('[data-reveal]')
+      items.forEach(item => allRevealItems.push(item))
+    })
 
-      // Create the animation
-      gsap.to(items, {
-        opacity: 0,
-        y: -30,
-        scale: 0.92,
-        duration: 0.7,
-        ease: 'power2.in',
-        stagger: {
-          each: 0.05,
-          from: 'start'
-        },
-        onComplete: () => {
-          // Small safety delay to ensure animation is fully visible
-          setTimeout(() => {
-            router.push(url)
-          }, 50)
-        }
-      })
-    } else {
+    if (allRevealItems.length === 0) {
       router.push(url)
+      return
     }
+
+    // Create the animation
+    gsap.to(allRevealItems, {
+      opacity: 0,
+      y: -30,
+      scale: 0.92,
+      duration: 0.7,
+      ease: 'power2.in',
+      stagger: {
+        each: 0.05,
+        from: 'start'
+      },
+      onComplete: () => {
+        // Small safety delay to ensure animation is fully visible
+        setTimeout(() => {
+          router.push(url)
+        }, 50)
+      }
+    })
   }, [isNavigating, isMobile, router])
 
   // Expose fade-out function globally for header navigation

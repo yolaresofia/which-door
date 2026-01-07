@@ -1,10 +1,11 @@
 'use client'
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react'
 import { directors } from '../components/constants'
 import { useCrossfadeMedia } from '../utils/useCrossfadeMedia'
 import { useSequencedReveal } from '../utils/useSequencedReveal'
 import { usePageTransitionVideo } from '../utils/usePageTransitionVideo'
 import { useFadeOutNavigation } from '../utils/useFadeOutNavigation'
+import { useVideoReady } from '../utils/useVideoReady'
 import BackgroundMedia from '../components/BackgroundMedia/BackgroundMedia'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
@@ -27,8 +28,13 @@ export default function DirectorsIndexPage() {
 
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [activeIndex, setActiveIndex] = useState(0) // For mobile - which director is centered
-  const [fontLoaded, setFontLoaded] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+
+  // Track video ready state for smoother content reveal
+  const { isReady: videoReady, markReady } = useVideoReady({
+    skip: isMobile, // Skip waiting on mobile (simpler experience)
+    timeout: 2500,
+  })
 
   const listRef = useRef<HTMLUListElement | null>(null)
   const mainRef = useRef<HTMLElement | null>(null)
@@ -94,60 +100,25 @@ export default function DirectorsIndexPage() {
   }, [])
 
   // Hide content initially to prevent FOUC (desktop only)
-  useGSAP(() => {
+  // useLayoutEffect runs synchronously before browser paint
+  useLayoutEffect(() => {
     if (!listRef.current || isMobile) return
     const items = listRef.current.querySelectorAll('[data-reveal]')
     gsap.set(items, { opacity: 0, y: 20, scale: 0.98 })
-  }, { dependencies: [isMobile], scope: listRef })
+  }, [isMobile])
 
-  // Font loading + trigger enter animation (desktop only)
+  // Start animation when video is ready (desktop only)
   useEffect(() => {
     if (isMobile) return
-    if (fontLoaded) return
+    if (!videoReady) return
 
-    let cancelled = false
-    let timeoutId: NodeJS.Timeout
+    // Use RAF to ensure DOM is fully ready
+    const rafId = requestAnimationFrame(() => {
+      start()
+    })
 
-    const triggerAnimation = () => {
-      if (cancelled) return
-      setFontLoaded(true)
-      requestAnimationFrame(() => {
-        start()
-      })
-    }
-
-    if (typeof window !== 'undefined' && 'fonts' in document) {
-      const fonts = (document as any).fonts
-      if (fonts?.ready) {
-        fonts.ready.then(() => {
-          Promise.race([
-            fonts.load('normal 1em Neue').catch(() => null),
-            new Promise(resolve => setTimeout(resolve, 500))
-          ]).then(() => {
-            if (!cancelled) triggerAnimation()
-          })
-        }).catch(() => {
-          if (!cancelled) timeoutId = setTimeout(triggerAnimation, 100)
-        })
-      } else {
-        timeoutId = setTimeout(triggerAnimation, 100)
-      }
-    } else {
-      timeoutId = setTimeout(triggerAnimation, 100)
-    }
-
-    const safetyTimeout = setTimeout(() => {
-      if (!cancelled && !fontLoaded) {
-        triggerAnimation()
-      }
-    }, 1000)
-
-    return () => {
-      cancelled = true
-      if (timeoutId) clearTimeout(timeoutId)
-      clearTimeout(safetyTimeout)
-    }
-  }, [start, fontLoaded, isMobile])
+    return () => cancelAnimationFrame(rafId)
+  }, [isMobile, videoReady, start])
 
   // Mobile: Simple scroll detection - find centered item
   useEffect(() => {
@@ -256,6 +227,7 @@ export default function DirectorsIndexPage() {
                 previewPoster={slotMedia[0].previewPoster}
                 previewPosterLQIP={slotMedia[0].previewPosterLQIP}
                 bgColor={slotMedia[0].bgColor}
+                onVideoReady={markReady}
               />
             )}
           </div>

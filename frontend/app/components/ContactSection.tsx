@@ -1,11 +1,12 @@
 // app/components/ContactSection.tsx
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect, useLayoutEffect } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import BackgroundMedia from "./BackgroundMedia/BackgroundMedia";
 import { useSequencedReveal } from "@/app/utils/useSequencedReveal";
+import { useVideoReady } from "@/app/utils/useVideoReady";
 
 type ContactSectionProps = {
   bgColor?: string;
@@ -31,7 +32,13 @@ export default function ContactSection({
   const tlRef = useRef<gsap.core.Timeline | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
 
-  // Desktop animation - EXACT SAME as ProjectsLanding (only when enableAnimations is true)
+  // Track if video is ready - skip waiting if using color only or animations disabled
+  const { isReady: videoReady, markReady } = useVideoReady({
+    skip: useColorOnly || !enableAnimations,
+    timeout: 2500, // Don't wait too long
+  });
+
+  // Desktop animation - only when enableAnimations is true
   const { start } = useSequencedReveal(contentRef, {
     target: '[data-reveal]',
     duration: 0.8,
@@ -46,15 +53,28 @@ export default function ContactSection({
     },
   });
 
-  // Trigger animation on mount (only if enableAnimations is true)
-  useGSAP(() => {
-    if (!enableAnimations) return;
+  // Hide content initially when animations are enabled
+  // useLayoutEffect runs synchronously before browser paint to prevent FOUC
+  useLayoutEffect(() => {
+    if (!enableAnimations || !contentRef.current) return;
 
-    // Start with RAF to ensure DOM is ready
-    requestAnimationFrame(() => {
+    // Set initial hidden state with GSAP
+    const items = contentRef.current.querySelectorAll('[data-reveal]');
+    gsap.set(items, { opacity: 0, y: 20, scale: 0.98 });
+  }, [enableAnimations]);
+
+  // Start animation when video is ready
+  useEffect(() => {
+    if (!enableAnimations) return;
+    if (!videoReady) return;
+
+    // Use RAF to ensure DOM is fully ready
+    const rafId = requestAnimationFrame(() => {
       start();
     });
-  }, { dependencies: [start, enableAnimations] });
+
+    return () => cancelAnimationFrame(rafId);
+  }, [enableAnimations, videoReady, start]);
 
   useGSAP(() => {
     const el = desktopLinkRef.current;
@@ -138,6 +158,7 @@ export default function ContactSection({
             mobilePreviewUrl={mobilePreviewUrl}
             previewPoster={previewPoster}
             className="absolute inset-0"
+            onVideoReady={markReady}
           />
         )}
 

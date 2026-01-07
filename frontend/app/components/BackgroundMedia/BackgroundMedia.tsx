@@ -27,6 +27,7 @@ export type BackgroundMediaProps = {
   title?: string;
   subtitle?: string;
   onShare?: () => void;
+  onVideoReady?: () => void; // Called when video starts playing
 };
 
 export default function BackgroundMedia({
@@ -43,6 +44,7 @@ export default function BackgroundMedia({
   title,
   subtitle,
   onShare,
+  onVideoReady,
 }: BackgroundMediaProps) {
   const containerEl = useRef<HTMLDivElement | null>(null);
 
@@ -103,6 +105,13 @@ export default function BackgroundMedia({
   const handleNativePlaybackStart = useCallback(() => {
     setVideoHasStarted(true);
   }, []);
+
+  // Notify parent when video has started playing
+  useEffect(() => {
+    if (videoHasStarted) {
+      onVideoReady?.();
+    }
+  }, [videoHasStarted, onVideoReady]);
 
   const clearControlsHideTimer = useCallback(() => {
     if (controlsHideTimerRef.current != null) {
