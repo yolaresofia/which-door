@@ -252,7 +252,7 @@ export default function DirectorsIndexPage() {
 
         {/* FOREGROUND LIST */}
         <section className="relative min-h-dvh w-full pt-32">
-          <div className="max-w-[1600px] mx-auto px-6 md:px-12">
+          <div className="mx-auto px-6 md:px-12">
             <ul
               ref={listRef}
               className="md:space-y-2 space-y-6"

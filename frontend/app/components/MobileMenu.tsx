@@ -1,12 +1,12 @@
 'use client'
 
-import Link from 'next/link'
 import Image from 'next/image'
 import { useEffect, useCallback, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
 
-type NavItem = {href: string; label: string}
+type NavItem = { href: string; label: string }
 
 export default function MobileMenu({
   id = 'mobile-menu',
@@ -21,6 +21,7 @@ export default function MobileMenu({
   navItems: ReadonlyArray<NavItem>
   currentPath: string
 }) {
+  const router = useRouter()
   const menuRef = useRef<HTMLDivElement | null>(null)
   const backdropRef = useRef<HTMLDivElement | null>(null)
   const contentRef = useRef<HTMLDivElement | null>(null)
@@ -28,17 +29,32 @@ export default function MobileMenu({
   const [isVisible, setIsVisible] = useState(false)
   const isAnimatingRef = useRef(false)
   const timelineRef = useRef<gsap.core.Timeline | null>(null)
+  const pendingNavigationRef = useRef<string | null>(null)
+  const gsapContextRef = useRef<gsap.Context | null>(null)
 
-  // Handle close with exit animation
-  const handleClose = useCallback(() => {
-    if (isAnimatingRef.current) {
-      console.log('⚠️ Menu already animating, ignoring close request')
-      return
+  // Cleanup GSAP context on unmount
+  useEffect(() => {
+    return () => {
+      if (gsapContextRef.current) {
+        gsapContextRef.current.revert()
+        gsapContextRef.current = null
+      }
+      if (timelineRef.current) {
+        timelineRef.current.kill()
+        timelineRef.current = null
+      }
     }
+  }, [])
 
-    isAnimatingRef.current = true
+  // Run exit animation and return a promise that resolves when complete
+  const runExitAnimation = useCallback((): Promise<void> => {
+    return new Promise((resolve) => {
+      // If no refs available, resolve immediately
+      if (!menuRef.current) {
+        resolve()
+        return
+      }
 
-    try {
       const backdrop = backdropRef.current
       const content = contentRef.current
       const navItemsList = navRef.current?.querySelectorAll('li')
@@ -46,112 +62,181 @@ export default function MobileMenu({
       // Kill any existing timeline
       if (timelineRef.current) {
         timelineRef.current.kill()
+        timelineRef.current = null
       }
 
       // Create exit animation timeline
       timelineRef.current = gsap.timeline({
         onComplete: () => {
           isAnimatingRef.current = false
-          setIsVisible(false)
-          onClose()
-        }
+          resolve()
+        },
       })
 
-      // Simplified exit: just fade out everything together
+      // Fade out nav items first
       if (navItemsList && navItemsList.length > 0) {
         timelineRef.current.to(navItemsList, {
           opacity: 0,
           scale: 0.95,
-          duration: 0.25,
+          duration: 0.2,
           ease: 'power2.in',
         })
       }
 
+      // Fade out content
       if (content) {
-        timelineRef.current.to(content, {
-          opacity: 0,
-          duration: 0.25,
-          ease: 'power2.in',
-        }, '-=0.2')
+        timelineRef.current.to(
+          content,
+          {
+            opacity: 0,
+            duration: 0.2,
+            ease: 'power2.in',
+          },
+          '-=0.15'
+        )
       }
 
+      // Fade out backdrop
       if (backdrop) {
-        timelineRef.current.to(backdrop, {
-          opacity: 0,
-          duration: 0.2,
-          ease: 'power2.in',
-        }, '-=0.15')
+        timelineRef.current.to(
+          backdrop,
+          {
+            opacity: 0,
+            duration: 0.15,
+            ease: 'power2.in',
+          },
+          '-=0.1'
+        )
       }
 
-      // Safety timeout - close even if animation fails
-      setTimeout(() => {
+      // Safety timeout - resolve even if animation fails
+      const safetyTimeout = setTimeout(() => {
         if (isAnimatingRef.current) {
-          console.log('⏰ Menu animation timeout, closing immediately')
           isAnimatingRef.current = false
-          setIsVisible(false)
-          onClose()
+          resolve()
         }
-      }, 500)
-    } catch (error) {
-      console.error('Menu close animation error:', error)
-      isAnimatingRef.current = false
+      }, 400)
+
+      // Clear timeout if animation completes normally
+      timelineRef.current.eventCallback('onComplete', () => {
+        clearTimeout(safetyTimeout)
+        isAnimatingRef.current = false
+        resolve()
+      })
+    })
+  }, [])
+
+  // Handle navigation with proper sequencing: exit animation -> close -> navigate
+  const handleNavigate = useCallback(
+    async (e: React.MouseEvent, href: string) => {
+      e.preventDefault()
+      e.stopPropagation()
+
+      // Don't navigate if already animating
+      if (isAnimatingRef.current) {
+        return
+      }
+
+      // Don't navigate to current page
+      if (href === currentPath) {
+        // Just close the menu
+        isAnimatingRef.current = true
+        await runExitAnimation()
+        setIsVisible(false)
+        document.body.style.overflow = ''
+        onClose()
+        return
+      }
+
+      // Store the pending navigation
+      pendingNavigationRef.current = href
+      isAnimatingRef.current = true
+
+      // Step 1: Run exit animation
+      await runExitAnimation()
+
+      // Step 2: Hide menu and restore body scroll
       setIsVisible(false)
+      document.body.style.overflow = ''
+
+      // Step 3: Notify parent that menu is closed
       onClose()
+
+      // Step 4: Navigate after a small delay to ensure state is settled
+      const targetHref = pendingNavigationRef.current
+      pendingNavigationRef.current = null
+
+      if (targetHref) {
+        // Use requestAnimationFrame to ensure React has processed state updates
+        requestAnimationFrame(() => {
+          router.push(targetHref)
+        })
+      }
+    },
+    [currentPath, onClose, router, runExitAnimation]
+  )
+
+  // Handle close without navigation (backdrop click, escape key, close button)
+  const handleClose = useCallback(async () => {
+    if (isAnimatingRef.current) {
+      return
     }
-  }, [onClose])
+
+    isAnimatingRef.current = true
+
+    await runExitAnimation()
+    setIsVisible(false)
+    document.body.style.overflow = ''
+    onClose()
+  }, [onClose, runExitAnimation])
 
   const onKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === 'Escape') handleClose()
     },
-    [handleClose],
+    [handleClose]
   )
 
   // Show menu when open prop changes
   useEffect(() => {
-    try {
-      if (open && !isVisible) {
-        setIsVisible(true)
-        document.body.style.overflow = 'hidden'
-      } else if (!open && isVisible && !isAnimatingRef.current) {
-        // User closed from outside without animation
-        setIsVisible(false)
-        document.body.style.overflow = ''
-      }
-    } catch (error) {
-      console.error('Menu visibility error:', error)
+    if (open && !isVisible && !isAnimatingRef.current) {
+      setIsVisible(true)
+      document.body.style.overflow = 'hidden'
     }
   }, [open, isVisible])
 
+  // Add keyboard listener
   useEffect(() => {
     if (!isVisible) return
 
-    try {
-      window.addEventListener('keydown', onKeyDown)
-      return () => {
-        window.removeEventListener('keydown', onKeyDown)
-        document.body.style.overflow = ''
-      }
-    } catch (error) {
-      console.error('Menu keyboard listener error:', error)
+    window.addEventListener('keydown', onKeyDown)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
     }
   }, [isVisible, onKeyDown])
 
-  // Enter animation when menu opens
-  useGSAP(() => {
-    if (!open || !menuRef.current || !isVisible) return
+  // Cleanup body overflow on unmount
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [])
 
-    try {
+  // Enter animation when menu opens
+  useGSAP(
+    () => {
+      if (!open || !menuRef.current || !isVisible) return
+
       const backdrop = backdropRef.current
       const content = contentRef.current
       const navItems = navRef.current?.querySelectorAll('li')
 
       // Set initial states
       if (backdrop) gsap.set(backdrop, { opacity: 0 })
-      if (content) gsap.set(content, { opacity: 0, scale: 0.95 })
+      if (content) gsap.set(content, { opacity: 0, scale: 0.98 })
       if (navItems) gsap.set(navItems, { opacity: 0, scale: 0.95 })
 
-      // Simplified enter animation - everything fades in together
+      // Enter animation
       const tl = gsap.timeline()
 
       // Fade in backdrop
@@ -163,48 +248,69 @@ export default function MobileMenu({
         })
       }
 
-      // Fade in content and nav items together
+      // Fade in content
       if (content) {
-        tl.to(content, {
-          opacity: 1,
-          scale: 1,
-          duration: 0.3,
-          ease: 'power2.out',
-        }, '-=0.1')
+        tl.to(
+          content,
+          {
+            opacity: 1,
+            scale: 1,
+            duration: 0.3,
+            ease: 'power2.out',
+          },
+          '-=0.1'
+        )
       }
 
+      // Stagger in nav items
       if (navItems && navItems.length > 0) {
-        tl.to(navItems, {
-          opacity: 1,
-          scale: 1,
-          duration: 0.3,
-          ease: 'power2.out',
-          stagger: {
-            each: 0.05,
-            from: 'start' as const,
+        tl.to(
+          navItems,
+          {
+            opacity: 1,
+            scale: 1,
+            duration: 0.3,
+            ease: 'power2.out',
+            stagger: {
+              each: 0.05,
+              from: 'start' as const,
+            },
           },
-        }, '-=0.25')
+          '-=0.25'
+        )
       }
 
       return () => {
         tl.kill()
       }
-    } catch (error) {
-      console.error('Menu enter animation error:', error)
-    }
-  }, { dependencies: [open, isVisible], scope: menuRef })
+    },
+    { dependencies: [open, isVisible], scope: menuRef }
+  )
 
   if (!isVisible) return null
 
   return (
-    <div ref={menuRef} id={id} role="dialog" aria-modal="true" className="fixed inset-0 z-50 lg:hidden">
-      <div ref={backdropRef} className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose} />
+    <div
+      ref={menuRef}
+      id={id}
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-50 lg:hidden"
+    >
+      <div
+        ref={backdropRef}
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={handleClose}
+      />
       <div ref={contentRef} className="absolute inset-0 flex flex-col">
         <div className="flex items-center justify-between px-6 md:px-12 h-28">
           <div className="lg:justify-self-start">
-            <Link 
-              href="/" 
+            {/* Logo - navigates to home */}
+            <button
+              type="button"
+              onClick={(e) => handleNavigate(e, '/')}
               className="flex items-center group lg:h-[46px] h-[30px]"
+              aria-label="Go to homepage"
             >
               <Image
                 src="https://cdn.sanity.io/images/xerhtqd5/production/0d40f22651c19648b1b763c39c3be9cf3df8e469-39x46.svg"
@@ -221,7 +327,7 @@ export default function MobileMenu({
                 height={44}
                 className="h-full w-auto ml-2 opacity-100 transition-opacity duration-300 lg:opacity-0 lg:group-hover:opacity-100"
               />
-            </Link>
+            </button>
           </div>
           <button
             type="button"
@@ -234,27 +340,31 @@ export default function MobileMenu({
         </div>
         <nav ref={navRef} className="px-6 md:px-12 pt-6">
           <ul className="space-y-4">
-            {navItems.map(({href, label}) => {
+            {navItems.map(({ href, label }) => {
               // For Projects (/) and Directors (/directors), also match their detail pages
               const isActive =
                 href === '/'
-                  ? currentPath === '/' || currentPath === '/projects' || currentPath?.startsWith('/projects/')
+                  ? currentPath === '/' ||
+                    currentPath === '/projects' ||
+                    currentPath?.startsWith('/projects/')
                   : href === '/directors'
-                    ? currentPath === '/directors' || currentPath?.startsWith('/directors/')
+                    ? currentPath === '/directors' ||
+                      currentPath?.startsWith('/directors/')
                     : currentPath === href
               return (
                 <li key={href}>
-                  <Link
-                    href={href}
-                    onClick={handleClose}
-                    className={`block text-3xl tracking-wide transition-opacity duration-200 ${
+                  {/* Use button for navigation to control timing */}
+                  <button
+                    type="button"
+                    onClick={(e) => handleNavigate(e, href)}
+                    className={`block text-3xl tracking-wide transition-opacity duration-200 text-left ${
                       isActive
                         ? 'text-white opacity-100'
                         : 'text-white opacity-80 hover:opacity-100'
                     }`}
                   >
                     {label}
-                  </Link>
+                  </button>
                 </li>
               )
             })}
@@ -265,43 +375,23 @@ export default function MobileMenu({
             <p className="pointer-events-auto">
               <span className="block">
                 For Inquiries &amp; Commissions{' '}
-                <a
-                  href="mailto:info@whichdoor.com"
-                >
-                  info@whichdoor.com
-                </a>
+                <a href="mailto:info@whichdoor.com">info@whichdoor.com</a>
               </span>
               <span className="block pt-2">
                 For Job Applications &amp; Internships{' '}
-                <a
-                  href="mailto:apply@whichdoor.com"
-                >
-                  apply@whichdoor.com
-                </a>
+                <a href="mailto:apply@whichdoor.com">apply@whichdoor.com</a>
               </span>
             </p>
             <p className="pointer-events-auto">
-              <a
-                href="https://vimeo.com/"
-                target="_blank"
-                rel="noreferrer"
-              >
+              <a href="https://vimeo.com/" target="_blank" rel="noreferrer">
                 Vimeo
               </a>
               ,{' '}
-              <a
-                href="https://youtube.com/"
-                target="_blank"
-                rel="noreferrer"
-              >
+              <a href="https://youtube.com/" target="_blank" rel="noreferrer">
                 YouTube
               </a>
               ,{' '}
-              <a
-                href="https://instagram.com/"
-                target="_blank"
-                rel="noreferrer"
-              >
+              <a href="https://instagram.com/" target="_blank" rel="noreferrer">
                 Instagram
               </a>
             </p>

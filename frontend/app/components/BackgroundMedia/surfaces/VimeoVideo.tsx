@@ -1,5 +1,5 @@
 // components/surfaces/VimeoVideo.tsx
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { buildVimeoEmbedUrl } from "../utils"; // keep your original import path
 
 type Props = {
@@ -27,9 +27,34 @@ export default function VimeoVideo({
   const src = base ? `${base}${base.includes("?") ? "&" : "?"}playsinline=1` : "";
 
   const localRef = useRef<HTMLIFrameElement | null>(null);
+  const isMountedRef = useRef(true);
+
   // Always use object-cover on large screens (lg and above) to ensure full coverage without black bars
   const fitClass = fillMode === "cover" ? "object-cover" : "object-contain lg:object-cover";
   const finalClass = `${fitClass} transition-opacity duration-700 ease-in-out ${className || "h-full w-full"}`;
+
+  // Cleanup iframe on unmount to prevent network errors
+  const cleanupIframe = useCallback(() => {
+    const iframe = localRef.current;
+    if (!iframe) return;
+
+    try {
+      // Clear the src to stop any pending network requests
+      iframe.removeAttribute('src');
+    } catch {
+      // Silently fail
+    }
+  }, []);
+
+  // Track mounted state and cleanup on unmount
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+      cleanupIframe();
+    };
+  }, [cleanupIframe]);
 
   if (!src) {
     return null;

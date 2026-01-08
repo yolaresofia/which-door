@@ -147,7 +147,7 @@ export default function ContactSection({
       </div>
 
       {/* FOREGROUND CONTENT */}
-      <div ref={contentRef} className="relative min-h-dvh flex flex-col pt-20 max-w-[1600px] mx-auto w-full">
+      <div ref={contentRef} className="relative min-h-dvh flex flex-col pt-20 mx-auto w-full">
         <div className="flex-1 grid items-center justify-items-start px-6 md:justify-items-center">
           {/* Tablet & smaller: show BOTH lines stacked, no hover */}
           <a
@@ -185,20 +185,22 @@ export default function ContactSection({
 
         <footer className="w-full px-6 md:px-12 pb-8">
           <div className="mx-auto grid gap-8 md:grid-cols-3 text-sm md:text-base">
-            <p className="leading-tight" data-reveal>
+            <p className="leading-tight 2xl:max-w-md" data-reveal>
               We exist on 5 continents, with bases in Stockholm, Barcelona, Baltimore/DC, Beirut,
               Berlin, Buenos Aires, NYC, Nairobi and Iceland.
             </p>
 
-            <div className="leading-tight" data-reveal>
-              <p>
-                For Inquiries &amp; Commissions{" "}
-                <a href="mailto:info@whichdoor.com">info@whichdoor.com</a>
-              </p>
-              <p>
-                For Job Applications &amp; Internships{" "}
-                <a href="mailto:apply@whichdoor.com">apply@whichdoor.com</a>
-              </p>
+            <div className="md:flex md:justify-center" data-reveal>
+              <div className="leading-tight text-left">
+                <p>
+                  For Inquiries &amp; Commissions{" "}
+                  <a href="mailto:info@whichdoor.com">info@whichdoor.com</a>
+                </p>
+                <p>
+                  For Job Applications &amp; Internships{" "}
+                  <a href="mailto:apply@whichdoor.com">apply@whichdoor.com</a>
+                </p>
+              </div>
             </div>
 
             <nav className="leading-relaxed" data-reveal>

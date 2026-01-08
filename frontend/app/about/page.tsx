@@ -213,7 +213,7 @@ export default function AboutPage() {
       {/* Content with animation - EXACT SAME structure as ProjectsLanding */}
       <section
         ref={contentRef}
-        className="relative z-10 mx-auto w-full max-w-[1600px] px-6 md:px-12 pt-0 md:pt-32"
+        className="relative z-10 mx-auto w-full px-6 md:px-12 pt-0 md:pt-32"
       >
         <div
           data-reveal

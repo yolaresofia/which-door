@@ -1,5 +1,5 @@
 // MediaSurface.tsx
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import VimeoVideo from "./surfaces/VimeoVideo";
 
 type Props = {
@@ -27,6 +27,7 @@ export default function MediaSurface({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const lastSrcRef = useRef<string | undefined>(undefined);
+  const isMountedRef = useRef(true);
 
   // Shared centering
   const containerClass =
@@ -37,6 +38,45 @@ export default function MediaSurface({
     variant === "preview"
       ? "w-full h-full"
       : "w-full aspect-video md:aspect-auto md:w-full md:h-full lg:!w-full lg:!h-full";
+
+  // Properly clean up video element on unmount to prevent "cancelled" network errors
+  // This follows React best practices for media elements
+  const cleanupVideo = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    try {
+      // Pause the video first
+      video.pause();
+
+      // Remove event listeners by setting null handlers
+      video.onplay = null;
+      video.onplaying = null;
+      video.oncanplaythrough = null;
+      video.oncanplay = null;
+      video.onerror = null;
+      video.onloadeddata = null;
+
+      // Clear the source to stop any pending network requests
+      // This prevents the "cancelled" error in the network tab
+      video.removeAttribute('src');
+
+      // Load empty to fully reset the video element
+      video.load();
+    } catch {
+      // Silently fail - video might already be in a bad state
+    }
+  }, []);
+
+  // Track mounted state and cleanup on unmount
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+      cleanupVideo();
+    };
+  }, [cleanupVideo]);
 
   // Handle autoplay when video is ready or source changes
   useEffect(() => {
@@ -50,6 +90,8 @@ export default function MediaSurface({
 
     // Simple play attempt - no retries to avoid loops
     const attemptPlay = () => {
+      // Check if still mounted before playing
+      if (!isMountedRef.current) return;
       if (!video.paused) return;
 
       // Ensure muted for autoplay policy
@@ -58,7 +100,7 @@ export default function MediaSurface({
       const playPromise = video.play();
       if (playPromise?.catch) {
         playPromise.catch(() => {
-          // Silently fail - autoplay blocked
+          // Silently fail - autoplay blocked or component unmounted
         });
       }
     };
@@ -69,7 +111,11 @@ export default function MediaSurface({
     }
 
     // Try to play when ready
-    const handleCanPlay = () => attemptPlay();
+    const handleCanPlay = () => {
+      if (isMountedRef.current) {
+        attemptPlay();
+      }
+    };
 
     video.addEventListener("canplay", handleCanPlay);
 
@@ -83,9 +129,11 @@ export default function MediaSurface({
     };
   }, [usingNative, previewSrc, autoPlay]);
 
-  const handleNativeStart = () => {
-    onNativePlaybackStart?.();
-  };
+  const handleNativeStart = useCallback(() => {
+    if (isMountedRef.current) {
+      onNativePlaybackStart?.();
+    }
+  }, [onNativePlaybackStart]);
 
   return (
     <div
