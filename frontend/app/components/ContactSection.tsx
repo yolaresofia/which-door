@@ -124,7 +124,7 @@ export default function ContactSection({
   };
 
   return (
-    <main className="relative min-h-screen w-full overflow-hidden text-white isolate">
+    <main className="relative min-h-dvh w-full overflow-hidden text-white isolate">
       {/* BACKGROUND LAYER */}
       <div className="absolute inset-0 -z-10">
         {useColorOnly ? (
@@ -147,7 +147,7 @@ export default function ContactSection({
       </div>
 
       {/* FOREGROUND CONTENT */}
-      <div ref={contentRef} className="relative min-h-screen flex flex-col pt-20 max-w-[1600px] mx-auto w-full">
+      <div ref={contentRef} className="relative min-h-dvh flex flex-col pt-20 max-w-[1600px] mx-auto w-full">
         <div className="flex-1 grid items-center justify-items-start px-6 md:justify-items-center">
           {/* Tablet & smaller: show BOTH lines stacked, no hover */}
           <a

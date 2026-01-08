@@ -9,7 +9,7 @@ export default function ContactPage() {
   const mobilePreviewUrl = 'https://cdn.sanity.io/files/xerhtqd5/production/d239a71d8aa67fb9958528cf01e29451e3787e47.mp4'
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-dvh bg-black">
       <ContactSection
         previewUrl={bg}
         mobilePreviewUrl={mobilePreviewUrl}
