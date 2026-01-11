@@ -1,10 +1,11 @@
 // app/components/ContactSection.tsx
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useLayoutEffect, useState } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import BackgroundMedia from "./BackgroundMedia/BackgroundMedia";
+import { REVEAL_HIDDEN_STYLE_SIMPLE } from "../utils/useRevealAnimation";
 
 type ContactSectionProps = {
   bgColor?: string;
@@ -37,6 +38,14 @@ export default function ContactSection({
     setIsMounted(true);
   }, []);
 
+  // CRITICAL: Hide content immediately on mount using useLayoutEffect
+  // This runs synchronously before browser paint to prevent FOUC
+  useLayoutEffect(() => {
+    if (!contentRef.current) return;
+    const items = contentRef.current.querySelectorAll('[data-reveal]');
+    gsap.set(items, { opacity: 0, y: 20 });
+  }, []); // Empty deps - run once on mount
+
   // Run stagger animation once mounted (or when video is ready on desktop)
   useGSAP(() => {
     if (!isMounted || !contentRef.current || hasAnimatedRef.current) return;
@@ -50,8 +59,6 @@ export default function ContactSection({
     const shouldWaitForVideo = !isMobile && !useColorOnly && !videoReady;
 
     if (shouldWaitForVideo) {
-      // Hide content while waiting for video
-      gsap.set(items, { opacity: 0, y: 20 });
       return;
     }
 
@@ -156,6 +163,7 @@ export default function ContactSection({
             aria-label="Get in touch via email"
             title="Get in touch"
             data-reveal
+            style={REVEAL_HIDDEN_STYLE_SIMPLE}
           >
             <span className="block">Have an idea?</span>
             <span className="block mt-1 md:mt-2 opacity-90">Get in touch.</span>
@@ -173,6 +181,7 @@ export default function ContactSection({
             onFocus={playSwap}
             onBlur={reverseSwap}
             data-reveal
+            style={REVEAL_HIDDEN_STYLE_SIMPLE}
           >
             <span className="line-idea col-start-1 row-start-1">
               Have an idea?
@@ -185,12 +194,12 @@ export default function ContactSection({
 
         <footer className="w-full px-6 md:px-12 pb-8">
           <div className="mx-auto grid gap-8 md:grid-cols-3 text-sm md:text-base">
-            <p className="leading-tight 2xl:max-w-md" data-reveal>
+            <p className="leading-tight 2xl:max-w-md" data-reveal style={REVEAL_HIDDEN_STYLE_SIMPLE}>
               We exist on 5 continents, with bases in Stockholm, Barcelona, Baltimore/DC, Beirut,
               Berlin, Buenos Aires, NYC, Nairobi and Iceland.
             </p>
 
-            <div className="md:flex md:justify-center" data-reveal>
+            <div className="md:flex md:justify-center" data-reveal style={REVEAL_HIDDEN_STYLE_SIMPLE}>
               <div className="leading-tight text-left">
                 <p>
                   For Inquiries &amp; Commissions{" "}
@@ -203,7 +212,7 @@ export default function ContactSection({
               </div>
             </div>
 
-            <nav className="leading-relaxed" data-reveal>
+            <nav className="leading-relaxed" data-reveal style={REVEAL_HIDDEN_STYLE_SIMPLE}>
               <ul className="flex gap-4 md:justify-end">
                 <li>
                   <a href="https://vimeo.com/" target="_blank" rel="noopener noreferrer">

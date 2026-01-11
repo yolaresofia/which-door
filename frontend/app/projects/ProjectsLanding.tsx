@@ -49,6 +49,7 @@ export default function ProjectsLanding() {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [activeIndex, setActiveIndex] = useState(0) // For mobile - which project is centered
   const [isMobile, setIsMobile] = useState(false)
+  const [mobileAnimationDone, setMobileAnimationDone] = useState(false)
 
   // Track video ready state for smoother content reveal
   const { isReady: videoReady, markReady } = useVideoReady({
@@ -121,18 +122,26 @@ export default function ProjectsLanding() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Hide content initially to prevent FOUC (desktop only)
-  // useLayoutEffect runs synchronously before browser paint
+  // CRITICAL: Hide content immediately on mount using useLayoutEffect
+  // This runs synchronously before browser paint to prevent FOUC
   useLayoutEffect(() => {
-    if (!listRef.current || isMobile) return
-    const items = listRef.current.querySelectorAll('[data-reveal]')
-    gsap.set(items, { opacity: 0, y: 20, scale: 0.98 })
-  }, [isMobile])
+    // Hide desktop content
+    if (listRef.current) {
+      const desktopItems = listRef.current.querySelectorAll('[data-reveal]')
+      gsap.set(desktopItems, { opacity: 0, y: 20, scale: 0.98 })
+    }
+    // Hide mobile content
+    if (scrollContainerRef.current) {
+      const mobileItems = scrollContainerRef.current.querySelectorAll('[data-mobile-reveal]')
+      gsap.set(mobileItems, { opacity: 0, y: 20 })
+    }
+  }, []) // Empty deps - run once on mount
 
-  // Start animation when video is ready (desktop only)
+  // Start desktop animation when video is ready
   useEffect(() => {
     if (isMobile) return
     if (!videoReady) return
+    if (!listRef.current) return
 
     // Use RAF to ensure DOM is fully ready
     const rafId = requestAnimationFrame(() => {
@@ -141,6 +150,35 @@ export default function ProjectsLanding() {
 
     return () => cancelAnimationFrame(rafId)
   }, [isMobile, videoReady, start])
+
+  // Start mobile animation after a short delay (no video dependency)
+  useEffect(() => {
+    if (!isMobile) return
+    if (!scrollContainerRef.current) return
+
+    // Small delay to ensure layout is stable
+    const timeoutId = setTimeout(() => {
+      const mobileItems = scrollContainerRef.current?.querySelectorAll('[data-mobile-reveal]')
+      if (mobileItems && mobileItems.length > 0) {
+        // First ensure they're hidden (in case useLayoutEffect missed them)
+        gsap.set(mobileItems, { opacity: 0, y: 20 })
+        // Then animate in
+        gsap.to(mobileItems, {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          ease: 'power2.out',
+          stagger: {
+            each: 0.08,
+            from: 'start',
+          },
+          onComplete: () => setMobileAnimationDone(true),
+        })
+      }
+    }, 50)
+
+    return () => clearTimeout(timeoutId)
+  }, [isMobile])
 
   // Mobile: Simple scroll detection - find centered item
   useEffect(() => {
@@ -293,7 +331,7 @@ export default function ProjectsLanding() {
         <section className="relative z-10 flex min-h-screen w-full md:px-12 px-4 items-center justify-center">
           <ul
             ref={listRef}
-            className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-12 gap-y-10"
+            className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-y-10"
           >
             {visibleProjects.map((project, index) => {
               const title = getTitle(project)
@@ -303,14 +341,22 @@ export default function ProjectsLanding() {
               return (
                 <li
                   key={project?.slug ?? `${title}-${index}`}
-                  className={`transition-opacity duration-300 ease-out ${
-                    dimOthers ? 'opacity-40' : 'opacity-100'
-                  }`}
+                  className={`
+                    transition-opacity duration-300 ease-out
+                    first:justify-self-start last:justify-self-end
+                    [&:not(:first-child):not(:last-child)]:justify-self-center
+                    sm:[&:nth-child(2n+1)]:justify-self-start sm:[&:nth-child(2n)]:justify-self-end
+                    md:[&:nth-child(3n+1)]:justify-self-start md:[&:nth-child(3n+2)]:justify-self-center md:[&:nth-child(3n)]:justify-self-end
+                    lg:[&:nth-child(4n+1)]:justify-self-start lg:[&:nth-child(4n+2)]:justify-self-center lg:[&:nth-child(4n+3)]:justify-self-center lg:[&:nth-child(4n)]:justify-self-end
+                    xl:[&:nth-child(5n+1)]:justify-self-start xl:[&:nth-child(5n+2)]:justify-self-center xl:[&:nth-child(5n+3)]:justify-self-center xl:[&:nth-child(5n+4)]:justify-self-center xl:[&:nth-child(5n)]:justify-self-end
+                    ${dimOthers ? 'opacity-40' : 'opacity-100'}
+                  `}
                 >
                   <div
                     onClick={() => handleProjectClick(project?.slug)}
-                    className="block w-full text-left group outline-none cursor-pointer"
+                    className="block text-left group outline-none cursor-pointer"
                     data-reveal
+                    style={{ opacity: 0, transform: 'translateY(20px) scale(0.98)' }}
                     role="button"
                     tabIndex={0}
                     onKeyDown={(e) => {
@@ -397,7 +443,9 @@ export default function ProjectsLanding() {
                 <li
                   key={project?.slug ?? `${title}-${index}`}
                   data-index={index}
+                  data-mobile-reveal
                   className="snap-center snap-always h-screen flex items-center px-6"
+                  style={{ opacity: 0, transform: 'translateY(20px)' }}
                 >
                   <a
                     href={`/projects/${project?.slug}`}

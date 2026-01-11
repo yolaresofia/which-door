@@ -160,16 +160,16 @@ export default function ControlsDesktop(props: Props) {
               onClick={handleShareClick}
               className="text-sm underline-offset-4 decoration-white/60 hover:underline relative"
             >
-              <span className="relative inline-block h-5 min-w-[3.5rem] overflow-hidden">
+              <span className="relative inline-flex items-center justify-center h-5 min-w-[3.5rem] overflow-hidden">
                 <span
-                  className={`absolute inset-0 transition-all duration-200 ease-out ${
+                  className={`absolute inset-0 flex items-center justify-center transition-all duration-200 ease-out ${
                     shareState === 'share' ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1.5'
                   }`}
                 >
                   Share
                 </span>
                 <span
-                  className={`absolute inset-0 transition-all duration-200 ease-out ${
+                  className={`absolute inset-0 flex items-center justify-center transition-all duration-200 ease-out ${
                     shareState === 'copied' ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1.5'
                   }`}
                 >

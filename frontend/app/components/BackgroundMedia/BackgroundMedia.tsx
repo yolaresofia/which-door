@@ -74,12 +74,8 @@ export default function BackgroundMedia({
   const activeSourceKey = usingNativeVideo ? activePreviewSrc : activeVimeoSrc;
   // Show poster while video is loading (until video starts playing)
   // This provides a nice blurred placeholder while the video loads in the background
-  // Works for both Vimeo embeds and native HTML5 video (for mobile previews)
-  // CRITICAL: Always show poster on mobile for preview variant to prevent black screens
-  const shouldUsePoster = Boolean(previewPoster) && (
-    (!usingNativeVideo && hasVimeo) || // Vimeo videos
-    (isMobileDevice && variant === "preview") // ALL mobile preview videos (native or Vimeo)
-  );
+  // For mobile preview videos, we skip the poster to allow smooth video-to-video crossfades
+  const shouldUsePoster = Boolean(previewPoster) && !usingNativeVideo && hasVimeo;
   const resolvedAutoPlay =
     typeof autoPlayProp === "boolean" ? autoPlayProp : !effectiveControls;
 

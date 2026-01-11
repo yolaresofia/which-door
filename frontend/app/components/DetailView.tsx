@@ -3,6 +3,7 @@ import {useEffect, useMemo, useState} from 'react'
 import Link from 'next/link'
 import {usePathname} from 'next/navigation'
 import BackgroundMedia from './BackgroundMedia/BackgroundMedia'
+import { REVEAL_HIDDEN_STYLE } from '../utils/useRevealAnimation'
 
 type RelatedItem = {title: string; directors: string[]; brand?: string; previewUrl?: string; previewPoster?: string; url?: string}
 
@@ -62,19 +63,19 @@ export default function DetailView({
     <main className="relative min-h-dvh w-full overflow-hidden text-white" style={mainStyle}>
       {showBackgroundMedia && <BackgroundMedia variant="preview" previewUrl={activePreviewSrc} bgColor={color} />}
       <section className="relative z-10 pt-32 pb-16 md:px-12 px-6 mx-auto">
-        <header className="mb-8" data-reveal={enableAnimations ? true : undefined}>
+        <header className="mb-8" data-reveal={enableAnimations ? true : undefined} style={enableAnimations ? REVEAL_HIDDEN_STYLE : undefined}>
           <h1 className="md:text-6xl text-2xl leading-[1.05] tracking-tight">{item.name}</h1>
           {item.specialization ? (
             <p className="mt-2 text-2xl text-white/85">{item.specialization}</p>
           ) : null}
         </header>
         {item.description ? (
-          <article className=" text-[18px] md:text-left text-white/90 leading-tight" data-reveal={enableAnimations ? true : undefined}>
+          <article className=" text-[18px] md:text-left text-white/90 leading-tight" data-reveal={enableAnimations ? true : undefined} style={enableAnimations ? REVEAL_HIDDEN_STYLE : undefined}>
             <p>{item.description}</p>
           </article>
         ) : null}
         {item.otherProjects?.length ? (
-          <div className="mt-24" data-reveal={enableAnimations ? true : undefined}>
+          <div className="mt-24" data-reveal={enableAnimations ? true : undefined} style={enableAnimations ? REVEAL_HIDDEN_STYLE : undefined}>
             <h2 className="md:text-[18px] text-base mb-4">
               Other projects
             </h2>

@@ -6,6 +6,7 @@ import { useSequencedReveal } from '../utils/useSequencedReveal'
 import { usePageTransitionVideo } from '../utils/usePageTransitionVideo'
 import { useFadeOutNavigation } from '../utils/useFadeOutNavigation'
 import { useVideoReady } from '../utils/useVideoReady'
+import { REVEAL_HIDDEN_STYLE, REVEAL_HIDDEN_STYLE_SIMPLE } from '../utils/useRevealAnimation'
 import BackgroundMedia from '../components/BackgroundMedia/BackgroundMedia'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
@@ -99,13 +100,20 @@ export default function DirectorsIndexPage() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Hide content initially to prevent FOUC (desktop only)
-  // useLayoutEffect runs synchronously before browser paint
+  // CRITICAL: Hide content immediately on mount using useLayoutEffect
+  // This runs synchronously before browser paint to prevent FOUC
   useLayoutEffect(() => {
-    if (!listRef.current || isMobile) return
-    const items = listRef.current.querySelectorAll('[data-reveal]')
-    gsap.set(items, { opacity: 0, y: 20, scale: 0.98 })
-  }, [isMobile])
+    // Hide desktop content
+    if (listRef.current) {
+      const desktopItems = listRef.current.querySelectorAll('[data-reveal]')
+      gsap.set(desktopItems, { opacity: 0, y: 20, scale: 0.98 })
+    }
+    // Hide mobile content
+    if (scrollContainerRef.current) {
+      const mobileItems = scrollContainerRef.current.querySelectorAll('[data-mobile-reveal]')
+      gsap.set(mobileItems, { opacity: 0, y: 20 })
+    }
+  }, []) // Empty deps - run once on mount
 
   // Start animation when video is ready (desktop only)
   useEffect(() => {
@@ -119,6 +127,34 @@ export default function DirectorsIndexPage() {
 
     return () => cancelAnimationFrame(rafId)
   }, [isMobile, videoReady, start])
+
+  // Start mobile animation after a short delay (no video dependency)
+  useEffect(() => {
+    if (!isMobile) return
+    if (!scrollContainerRef.current) return
+
+    // Small delay to ensure layout is stable
+    const timeoutId = setTimeout(() => {
+      const mobileItems = scrollContainerRef.current?.querySelectorAll('[data-mobile-reveal]')
+      if (mobileItems && mobileItems.length > 0) {
+        // First ensure they're hidden (in case useLayoutEffect missed them)
+        gsap.set(mobileItems, { opacity: 0, y: 20 })
+        // Then animate in
+        gsap.to(mobileItems, {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          ease: 'power2.out',
+          stagger: {
+            each: 0.08,
+            from: 'start',
+          },
+        })
+      }
+    }, 50)
+
+    return () => clearTimeout(timeoutId)
+  }, [isMobile])
 
   // Mobile: Simple scroll detection - find centered item
   useEffect(() => {
@@ -270,6 +306,7 @@ export default function DirectorsIndexPage() {
                 >
                   <div
                     data-reveal
+                    style={REVEAL_HIDDEN_STYLE}
                   >
                     <a
                       href={`/directors/${d.slug}`}
@@ -350,7 +387,9 @@ export default function DirectorsIndexPage() {
                 <li
                   key={d.slug}
                   data-index={index}
+                  data-mobile-reveal
                   className="snap-center snap-always h-screen flex items-center px-6"
+                  style={REVEAL_HIDDEN_STYLE_SIMPLE}
                 >
                   <a
                     href={`/directors/${d.slug}`}

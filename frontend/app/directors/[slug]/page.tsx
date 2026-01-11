@@ -1,7 +1,7 @@
 // app/directors/[slug]/page.tsx
 'use client'
 
-import { use, useEffect, useRef, useState, useMemo, useCallback } from 'react'
+import { use, useEffect, useLayoutEffect, useRef, useState, useMemo, useCallback } from 'react'
 import { notFound } from 'next/navigation'
 import DetailView from '@/app/components/DetailView'
 import { directors, projects } from '@/app/components/constants'
@@ -130,21 +130,39 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Hide content initially to prevent FOUC (desktop only)
-  // On mobile, ensure content is visible
-  useGSAP(() => {
+  // CRITICAL: Hide content immediately on mount using useLayoutEffect
+  // This runs synchronously before browser paint to prevent FOUC
+  useLayoutEffect(() => {
+    if (!contentRef.current) return
+    const items = contentRef.current.querySelectorAll('[data-reveal]')
+    // Hide on initial render - mobile animation will show them immediately after
+    gsap.set(items, { opacity: 0, y: 20, scale: 0.98 })
+  }, []) // Empty deps - run once on mount
+
+  // Start mobile animation after a short delay (no video/font dependency)
+  useEffect(() => {
+    if (!isMobile) return
     if (!contentRef.current) return
 
-    const items = contentRef.current.querySelectorAll('[data-reveal]')
+    const timeoutId = setTimeout(() => {
+      const items = contentRef.current?.querySelectorAll('[data-reveal]')
+      if (items && items.length > 0) {
+        gsap.set(items, { opacity: 0, y: 20 })
+        gsap.to(items, {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          ease: 'power2.out',
+          stagger: {
+            each: 0.08,
+            from: 'start',
+          },
+        })
+      }
+    }, 50)
 
-    if (isMobile) {
-      // On mobile, ensure content is visible (reset any hidden state from initial render)
-      gsap.set(items, { opacity: 1, y: 0, scale: 1 })
-    } else {
-      // On desktop, hide for animation reveal
-      gsap.set(items, { opacity: 0, y: 20, scale: 0.98 })
-    }
-  }, { dependencies: [isMobile], scope: contentRef })
+    return () => clearTimeout(timeoutId)
+  }, [isMobile])
 
   // Font loading + trigger enter animation
   useEffect(() => {

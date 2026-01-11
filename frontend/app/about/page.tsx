@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useRef, useState, useMemo } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, useMemo } from 'react'
 import BackgroundMedia from '../components/BackgroundMedia/BackgroundMedia'
 import { useSequencedReveal } from '../utils/useSequencedReveal'
 import { usePageTransitionVideo } from '../utils/usePageTransitionVideo'
 import { useCrossfadeMedia } from '../utils/useCrossfadeMedia'
 import { useFadeOutNavigation } from '../utils/useFadeOutNavigation'
+import { REVEAL_HIDDEN_STYLE } from '../utils/useRevealAnimation'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
 
@@ -85,14 +86,38 @@ export default function AboutPage() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Hide content initially to prevent FOUC (Flash of Unstyled Content)
-  useGSAP(() => {
-    if (!contentRef.current || isMobile) return
-
-    // Set initial hidden state before animation
+  // CRITICAL: Hide content immediately on mount using useLayoutEffect
+  // This runs synchronously before browser paint to prevent FOUC
+  useLayoutEffect(() => {
+    if (!contentRef.current) return
     const items = contentRef.current.querySelectorAll('[data-reveal]')
     gsap.set(items, { opacity: 0, y: 20, scale: 0.98 })
-  }, { dependencies: [isMobile], scope: contentRef })
+  }, []) // Empty deps - run once on mount
+
+  // Start mobile animation after a short delay (no video/font dependency)
+  useEffect(() => {
+    if (!isMobile) return
+    if (!contentRef.current) return
+
+    const timeoutId = setTimeout(() => {
+      const items = contentRef.current?.querySelectorAll('[data-reveal]')
+      if (items && items.length > 0) {
+        gsap.set(items, { opacity: 0, y: 20 })
+        gsap.to(items, {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          ease: 'power2.out',
+          stagger: {
+            each: 0.08,
+            from: 'start',
+          },
+        })
+      }
+    }, 50)
+
+    return () => clearTimeout(timeoutId)
+  }, [isMobile])
 
   // Font loading - EXACT SAME as ProjectsLanding
   useEffect(() => {
@@ -217,6 +242,7 @@ export default function AboutPage() {
       >
         <div
           data-reveal
+          style={REVEAL_HIDDEN_STYLE}
         >
           <p
             className="text-lg md:text-2xl leading-5 md:leading-7 md:text-left"
