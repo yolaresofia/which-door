@@ -88,20 +88,28 @@ export default function MediaSurface({
     const sourceChanged = lastSrcRef.current !== previewSrc;
     lastSrcRef.current = previewSrc;
 
-    // Simple play attempt - no retries to avoid loops
-    const attemptPlay = () => {
+    // Play attempt with retry for mobile
+    const attemptPlay = (retryCount = 0) => {
       // Check if still mounted before playing
       if (!isMountedRef.current) return;
       if (!video.paused) return;
 
-      // Ensure muted for autoplay policy
+      // Ensure muted for autoplay policy (required for mobile)
       video.muted = true;
+      video.playsInline = true;
 
       const playPromise = video.play();
-      if (playPromise?.catch) {
-        playPromise.catch(() => {
-          // Silently fail - autoplay blocked or component unmounted
-        });
+      if (playPromise?.then) {
+        playPromise
+          .then(() => {
+            // Success - video is playing
+          })
+          .catch(() => {
+            // Retry once after a short delay (mobile sometimes needs this)
+            if (retryCount < 1 && isMountedRef.current) {
+              setTimeout(() => attemptPlay(retryCount + 1), 100);
+            }
+          });
       }
     };
 
@@ -128,10 +136,20 @@ export default function MediaSurface({
     // If already ready, try now
     if (video.readyState >= 3) {
       attemptPlay();
+    } else if (video.readyState >= 1) {
+      // HAVE_METADATA - try to play, browser will buffer
+      attemptPlay();
     } else if (sourceChanged && previewSrc) {
       // For source changes, wait a frame then try to play
       requestAnimationFrame(() => {
-        if (isMountedRef.current && video.readyState >= 2) {
+        if (isMountedRef.current) {
+          attemptPlay();
+        }
+      });
+    } else {
+      // Initial load - try immediately, the video element has autoPlay attribute
+      requestAnimationFrame(() => {
+        if (isMountedRef.current) {
           attemptPlay();
         }
       });

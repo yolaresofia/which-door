@@ -49,7 +49,7 @@ export default function ProjectsLanding() {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [activeIndex, setActiveIndex] = useState(0) // For mobile - which project is centered
   const [isMobile, setIsMobile] = useState(false)
-  const [mobileAnimationDone, setMobileAnimationDone] = useState(false)
+  const [isReady, setIsReady] = useState(false) // Single ready state for animations
 
   // Track video ready state for smoother content reveal
   const { isReady: videoReady, markReady } = useVideoReady({
@@ -61,6 +61,7 @@ export default function ProjectsLanding() {
   const listRef = useRef<HTMLUListElement | null>(null)
   const mainRef = useRef<HTMLElement | null>(null)
   const hasTransitionedRef = useRef(false)
+  const hasAnimatedRef = useRef(false)
 
   // Use the reusable fade-out navigation hook
   const { fadeOutAndNavigate, isNavigating } = useFadeOutNavigation(mainRef, {
@@ -112,62 +113,55 @@ export default function ProjectsLanding() {
     return () => clearTimeout(timeoutId)
   }, [isMobile, previousVideo, crossfadeTo, targetVideo])
 
-  // Detect mobile
+  // Detect mobile ONCE on mount - don't re-run on resize to prevent video interruption
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024)
-    }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
+    const checkMobile = window.innerWidth < 1024
+    setIsMobile(checkMobile)
 
-  // Track if mobile animation has already run
-  const mobileAnimatedRef = useRef(false)
-
-  // Start desktop animation when video is ready
-  useEffect(() => {
-    if (isMobile) return
-    if (!videoReady) return
-    if (!listRef.current) return
-
-    // Use RAF to ensure DOM is fully ready
-    const rafId = requestAnimationFrame(() => {
-      start()
-    })
-
-    return () => cancelAnimationFrame(rafId)
-  }, [isMobile, videoReady, start])
-
-  // Start mobile animation once after mount - elements are already hidden via inline styles
-  useEffect(() => {
-    if (!isMobile) return
-    if (!scrollContainerRef.current) return
-    if (mobileAnimatedRef.current) return
-
-    mobileAnimatedRef.current = true
-
-    // Delay to ensure layout stability, then animate directly from inline hidden state
+    // Mark ready after a short delay to allow initial render
     const timeoutId = setTimeout(() => {
-      const mobileItems = scrollContainerRef.current?.querySelectorAll('[data-mobile-reveal]')
-      if (mobileItems && mobileItems.length > 0) {
-        // Animate from current inline styles to visible - NO gsap.set() call
-        gsap.to(mobileItems, {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          ease: 'power2.out',
-          stagger: {
-            each: 0.08,
-            from: 'start',
-          },
-          onComplete: () => setMobileAnimationDone(true),
-        })
-      }
-    }, 150)
+      setIsReady(true)
+    }, 100)
 
     return () => clearTimeout(timeoutId)
-  }, [isMobile])
+  }, [])
+
+  // Single animation trigger for BOTH desktop and mobile
+  useEffect(() => {
+    if (!isReady) return
+    if (hasAnimatedRef.current) return
+
+    // Desktop: wait for video ready
+    if (!isMobile && !videoReady) return
+
+    hasAnimatedRef.current = true
+
+    if (isMobile) {
+      // Mobile animation - use RAF to ensure DOM is settled
+      requestAnimationFrame(() => {
+        const mobileItems = scrollContainerRef.current?.querySelectorAll('[data-mobile-reveal]')
+        if (mobileItems && mobileItems.length > 0) {
+          // Direct animation from current state (set by inline styles) to visible
+          gsap.to(mobileItems, {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            ease: 'power2.out',
+            stagger: {
+              each: 0.08,
+              from: 'start',
+            },
+            overwrite: 'auto',
+          })
+        }
+      })
+    } else {
+      // Desktop animation
+      requestAnimationFrame(() => {
+        start()
+      })
+    }
+  }, [isReady, isMobile, videoReady, start])
 
   // Mobile: Simple scroll detection - find centered item
   useEffect(() => {
@@ -266,10 +260,14 @@ export default function ProjectsLanding() {
     }
   }, { dependencies: [isMobile, handleFadeOutAndNavigate] })
 
+  // Hidden styles for initial render - applied via inline styles
+  const hiddenStyle = { opacity: 0, transform: 'translateY(20px) scale(0.98)' }
+  const hiddenStyleSimple = { opacity: 0, transform: 'translateY(20px)' }
+
   return (
     <>
       {/* Desktop Layout */}
-      <main 
+      <main
         ref={mainRef}
         className={`relative w-full min-h-screen ${isMobile ? 'hidden' : 'block'}`}
       >
@@ -345,7 +343,7 @@ export default function ProjectsLanding() {
                     onClick={() => handleProjectClick(project?.slug)}
                     className="block text-left group outline-none cursor-pointer"
                     data-reveal
-                    style={{ opacity: 0, transform: 'translateY(20px) scale(0.98)' }}
+                    style={hiddenStyle}
                     role="button"
                     tabIndex={0}
                     onKeyDown={(e) => {
@@ -434,7 +432,7 @@ export default function ProjectsLanding() {
                   data-index={index}
                   data-mobile-reveal
                   className="snap-center snap-always h-screen flex items-center px-6"
-                  style={{ opacity: 0, transform: 'translateY(20px)' }}
+                  style={hiddenStyleSimple}
                 >
                   <a
                     href={`/projects/${project?.slug}`}

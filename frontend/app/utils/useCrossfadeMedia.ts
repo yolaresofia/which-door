@@ -155,9 +155,11 @@ export function useCrossfadeMedia(initial: Media, opts?: { duration?: number, wa
           return
         }
 
-        const tl = gsap.timeline({ defaults: { overwrite: 'auto', ease: 'power2.inOut' } })
-        tl.to(toEl,   { autoAlpha: 1, scale: 1, duration: D }, 0)
-          .to(fromEl, { autoAlpha: 0,           duration: D }, 0)
+        // Smooth crossfade: new video fades in slightly before old fades out
+        // This overlap prevents any black background from showing
+        const tl = gsap.timeline({ defaults: { overwrite: 'auto' } })
+        tl.to(toEl, { autoAlpha: 1, scale: 1, duration: D, ease: 'power2.out' }, 0)
+          .to(fromEl, { autoAlpha: 0, duration: D * 0.8, ease: 'power2.in' }, D * 0.2)
           .add(() => {
             setCurrentSlot(to)
             // Free the now-hidden slot's media to save decode/CPU

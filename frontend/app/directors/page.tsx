@@ -30,6 +30,7 @@ export default function DirectorsIndexPage() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [activeIndex, setActiveIndex] = useState(0) // For mobile - which director is centered
   const [isMobile, setIsMobile] = useState(false)
+  const [isReady, setIsReady] = useState(false) // Single ready state for animations
 
   // Track video ready state for smoother content reveal
   const { isReady: videoReady, markReady } = useVideoReady({
@@ -41,6 +42,7 @@ export default function DirectorsIndexPage() {
   const mainRef = useRef<HTMLElement | null>(null)
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const hasTransitionedRef = useRef(false)
+  const hasAnimatedRef = useRef(false)
 
   // Use the reusable fade-out navigation hook
   const { fadeOutAndNavigate, isNavigating } = useFadeOutNavigation(mainRef, {
@@ -90,60 +92,55 @@ export default function DirectorsIndexPage() {
     return () => clearTimeout(timeoutId)
   }, [isMobile, previousVideo, crossfadeTo, targetMedia])
 
-  // Detect mobile
+  // Detect mobile ONCE on mount - don't re-run on resize to prevent video interruption
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024)
-    }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
+    const checkMobile = window.innerWidth < 1024
+    setIsMobile(checkMobile)
 
-  // Track if mobile animation has already run
-  const mobileAnimatedRef = useRef(false)
-
-  // Start animation when video is ready (desktop only)
-  useEffect(() => {
-    if (isMobile) return
-    if (!videoReady) return
-
-    // Use RAF to ensure DOM is fully ready
-    const rafId = requestAnimationFrame(() => {
-      start()
-    })
-
-    return () => cancelAnimationFrame(rafId)
-  }, [isMobile, videoReady, start])
-
-  // Start mobile animation once after mount - elements are already hidden via inline styles
-  useEffect(() => {
-    if (!isMobile) return
-    if (!scrollContainerRef.current) return
-    if (mobileAnimatedRef.current) return
-
-    mobileAnimatedRef.current = true
-
-    // Delay to ensure layout stability, then animate directly from inline hidden state
+    // Mark ready after a short delay to allow initial render
     const timeoutId = setTimeout(() => {
-      const mobileItems = scrollContainerRef.current?.querySelectorAll('[data-mobile-reveal]')
-      if (mobileItems && mobileItems.length > 0) {
-        // Animate from current inline styles to visible - NO gsap.set() call
-        gsap.to(mobileItems, {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          ease: 'power2.out',
-          stagger: {
-            each: 0.08,
-            from: 'start',
-          },
-        })
-      }
-    }, 150)
+      setIsReady(true)
+    }, 100)
 
     return () => clearTimeout(timeoutId)
-  }, [isMobile])
+  }, [])
+
+  // Single animation trigger for BOTH desktop and mobile
+  useEffect(() => {
+    if (!isReady) return
+    if (hasAnimatedRef.current) return
+
+    // Desktop: wait for video ready
+    if (!isMobile && !videoReady) return
+
+    hasAnimatedRef.current = true
+
+    if (isMobile) {
+      // Mobile animation - use RAF to ensure DOM is settled
+      requestAnimationFrame(() => {
+        const mobileItems = scrollContainerRef.current?.querySelectorAll('[data-mobile-reveal]')
+        if (mobileItems && mobileItems.length > 0) {
+          // Direct animation from current state (set by inline styles) to visible
+          gsap.to(mobileItems, {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            ease: 'power2.out',
+            stagger: {
+              each: 0.08,
+              from: 'start',
+            },
+            overwrite: 'auto',
+          })
+        }
+      })
+    } else {
+      // Desktop animation
+      requestAnimationFrame(() => {
+        start()
+      })
+    }
+  }, [isReady, isMobile, videoReady, start])
 
   // Mobile: Simple scroll detection - find centered item
   useEffect(() => {
@@ -232,7 +229,7 @@ export default function DirectorsIndexPage() {
   return (
     <>
       {/* Desktop Layout - YOUR EXACT VERSION */}
-      <main 
+      <main
         ref={mainRef}
         className={`relative min-h-dvh w-full overflow-hidden text-white ${isMobile ? 'hidden' : 'block'}`}
       >
