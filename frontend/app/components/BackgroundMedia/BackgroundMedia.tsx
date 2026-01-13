@@ -194,20 +194,20 @@ export default function BackgroundMedia({
     return () => window.clearTimeout(timeoutId);
   }, [usingNativeVideo, videoHasStarted, ready]);
 
-  // Fallback for native video: If poster is showing but video hasn't triggered ready after timeout,
-  // mark as ready anyway. This handles the race condition where mobile detection kicks in
-  // AFTER the video already started playing (so we miss the onPlay event).
+  // Fallback for native video: mark as ready after short timeout
+  // This ensures onVideoReady fires even if video events don't trigger
+  // (e.g., race condition with mobile detection, or autoplay issues)
   useEffect(() => {
     if (!usingNativeVideo) return;
     if (videoHasStarted) return;
-    if (!shouldUsePoster) return; // Only needed when poster is covering the video
 
+    // Short timeout - we want content to appear quickly
     const timeoutId = window.setTimeout(() => {
       setVideoHasStarted(true);
-    }, 1500); // 1.5 second fallback for native video
+    }, 500); // 500ms fallback for native video
 
     return () => window.clearTimeout(timeoutId);
-  }, [usingNativeVideo, videoHasStarted, shouldUsePoster]);
+  }, [usingNativeVideo, videoHasStarted]);
 
   useEffect(() => {
     setPosterPhase((phase) => {

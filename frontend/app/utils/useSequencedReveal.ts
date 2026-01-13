@@ -80,9 +80,12 @@ export function useSequencedReveal(
       const items = gsap.utils.toArray<HTMLElement>(target)
       if (!items.length) return
 
-      // Set initial state with GPU acceleration hints
+      // IMPORTANT: Do NOT call gsap.set() here!
+      // Elements already have inline styles setting initial state.
+      // Calling gsap.set() causes a redundant style update that triggers
+      // a repaint and creates a visible "glitch" or "bounce" effect.
+      // Just apply GPU hints without changing opacity/transform.
       gsap.set(items, {
-        ...from,
         willChange: 'transform, opacity',
         backfaceVisibility: 'hidden',
         force3D: true,

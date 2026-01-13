@@ -115,14 +115,16 @@ export function useRevealAnimation(options: RevealAnimationOptions = {}): Reveal
     }
 
     const timeoutId = setTimeout(() => {
-      // Ensure elements start hidden (safety check)
+      // IMPORTANT: Do NOT call gsap.set() to reset initial state!
+      // Elements already have inline styles (REVEAL_HIDDEN_STYLE).
+      // Calling gsap.set() causes a redundant repaint and creates glitch.
+      // Just apply GPU hints for smoother animation.
       gsap.set(items, {
-        opacity: 0,
-        y: 20,
-        scale: includeScale ? 0.98 : 1,
+        willChange: 'transform, opacity',
+        force3D: true,
       })
 
-      // Animate in
+      // Animate in - gsap.to() will animate FROM current inline styles TO target
       animationRef.current = gsap.to(items, {
         opacity: 1,
         y: 0,
@@ -134,10 +136,11 @@ export function useRevealAnimation(options: RevealAnimationOptions = {}): Reveal
           from: 'start',
           ease: 'power2.inOut',
         },
+        overwrite: 'auto',
         onComplete: () => {
           setHasRevealed(true)
-          // Clear transform to allow CSS transitions to work normally
-          gsap.set(items, { clearProps: 'transform' })
+          // Clear transform and will-change for performance
+          gsap.set(items, { clearProps: 'transform', willChange: 'auto' })
           onComplete?.()
         },
       })

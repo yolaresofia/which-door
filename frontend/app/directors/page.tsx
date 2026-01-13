@@ -33,9 +33,11 @@ export default function DirectorsIndexPage() {
   const [isReady, setIsReady] = useState(false) // Single ready state for animations
 
   // Track video ready state for smoother content reveal
+  // Short timeout (800ms) - we don't want to wait too long for the video
+  // Better UX to show content slightly before video than wait 4 seconds
   const { isReady: videoReady, markReady } = useVideoReady({
     skip: isMobile, // Skip waiting on mobile (simpler experience)
-    timeout: 2500,
+    timeout: 800,
   })
 
   const listRef = useRef<HTMLUListElement | null>(null)
@@ -322,7 +324,7 @@ export default function DirectorsIndexPage() {
         </section>
       </main>
 
-      {/* Mobile Layout */}
+      {/* Mobile Layout - IMPORTANT: Mount video immediately, just hide container */}
       <main className={`fixed inset-0 ${isMobile ? 'block' : 'hidden'}`}>
         {/* Background video - crossfade slots */}
         <div className="fixed inset-0 z-0 bg-black">
@@ -330,7 +332,9 @@ export default function DirectorsIndexPage() {
             ref={(el) => { if (isMobile) setSlotRef(0)(el) }}
             className="absolute inset-0"
           >
-            {isMobile && slotMedia[0] && (
+            {/* Mount BackgroundMedia immediately when slotMedia exists
+                so video can start loading. Container visibility handles show/hide */}
+            {slotMedia[0] && (
               <BackgroundMedia
                 variant="preview"
                 previewUrl={slotMedia[0].previewUrl}
@@ -346,7 +350,7 @@ export default function DirectorsIndexPage() {
             ref={(el) => { if (isMobile) setSlotRef(1)(el) }}
             className="absolute inset-0"
           >
-            {isMobile && slotMedia[1] && (
+            {slotMedia[1] && (
               <BackgroundMedia
                 variant="preview"
                 previewUrl={slotMedia[1].previewUrl}
