@@ -48,20 +48,20 @@ export default function BackgroundMedia({
 }: BackgroundMediaProps) {
   const containerEl = useRef<HTMLDivElement | null>(null);
 
-  // Detect mobile/tablet (< 1024px) for using lower quality video and posters
-  // CRITICAL: Always initialize to false to prevent hydration mismatch
-  // The useEffect will update this on the client after hydration completes
-  const [isMobileDevice, setIsMobileDevice] = useState(false);
+  // Detect mobile/tablet (< 1024px) for using lower quality video
+  // Use a ref to detect on first render client-side, avoiding state-based re-renders
+  // that would cause the video to reload mid-stream
+  const isMobileDeviceRef = useRef<boolean | null>(null);
 
-  useEffect(() => {
-    const checkMobile = () => setIsMobileDevice(window.innerWidth < 1024);
-    // Check immediately after mount, then listen for resize
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  // Synchronously detect on first client render (not in useEffect which is too late)
+  if (isMobileDeviceRef.current === null && typeof window !== 'undefined') {
+    isMobileDeviceRef.current = window.innerWidth < 1024;
+  }
+
+  const isMobileDevice = isMobileDeviceRef.current ?? false;
 
   // Use mobile video URL when available and on mobile/tablet
+  // This is determined once on mount and doesn't change (prevents video reload)
   const effectivePreviewUrl = (isMobileDevice && mobilePreviewUrl) ? mobilePreviewUrl : previewUrl;
 
   const hasPreview = Boolean(effectivePreviewUrl);
@@ -155,19 +155,9 @@ export default function BackgroundMedia({
     }
   }, [activeSourceKey, shouldUsePoster]);
 
-  // Handle resize changes (when switching between mobile/desktop)
-  // Reset video state when screen size changes to load appropriate video
-  const prevMobileRef = useRef<boolean>(isMobileDevice);
-  useEffect(() => {
-    // Only reset if the mobile state actually changed (e.g., resize from desktop to mobile)
-    if (prevMobileRef.current !== isMobileDevice) {
-      prevMobileRef.current = isMobileDevice;
-      if (shouldUsePoster) {
-        setPosterPhase("shown");
-        setVideoHasStarted(false);
-      }
-    }
-  }, [isMobileDevice, shouldUsePoster]);
+  // NOTE: We no longer handle resize for video switching.
+  // Mobile detection is done once on mount to prevent video reload mid-stream.
+  // Users who resize their browser will keep their initial video.
 
   useEffect(() => {
     if (usingNativeVideo) return;

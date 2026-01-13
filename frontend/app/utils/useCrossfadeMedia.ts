@@ -49,12 +49,9 @@ export function useCrossfadeMedia(initial: Media, opts?: { duration?: number, wa
 
         // Check if video is already ready
         if (videoEl.readyState >= 3) { // HAVE_FUTURE_DATA or higher
-          console.log('✅ Video already loaded')
           resolve()
           return
         }
-
-        console.log('⏳ Waiting for video to load...')
 
         let resolved = false
         let timeoutId: NodeJS.Timeout | null = null
@@ -63,7 +60,6 @@ export function useCrossfadeMedia(initial: Media, opts?: { duration?: number, wa
           if (resolved) return
           resolved = true
           cleanup()
-          console.log('✅ Video ready to play')
           resolve()
         }
 
@@ -80,12 +76,11 @@ export function useCrossfadeMedia(initial: Media, opts?: { duration?: number, wa
         videoEl.addEventListener('canplay', handleReady, { once: true })
         videoEl.addEventListener('loadeddata', handleReady, { once: true })
 
-        // Safety timeout: proceed after 3 seconds even if video isn't ready
+        // Safety timeout: proceed after 2 seconds even if video isn't ready
         timeoutId = setTimeout(() => {
           if (resolved) return
-          console.log('⏰ Video load timeout, proceeding with crossfade')
           handleReady()
-        }, 3000)
+        }, 2000)
 
       } catch (error) {
         console.warn('Error waiting for video:', error)
@@ -182,27 +177,7 @@ export function useCrossfadeMedia(initial: Media, opts?: { duration?: number, wa
     };
   }, [])
 
-  // CRITICAL FIX: Let initial video load in background, don't wait
-  // The LQIP poster will show immediately, video plays when ready
-  useEffect(() => {
-    const initialSlot = slotRefs.current[0]
-    if (!initialSlot) return
-
-    const videoEl = initialSlot.querySelector('video')
-    if (videoEl) {
-      console.log('📹 Initial video loading in background (readyState:', videoEl.readyState, ')')
-
-      const handleFirstPlay = () => {
-        console.log('✅ Initial video started playing')
-      }
-
-      videoEl.addEventListener('playing', handleFirstPlay, { once: true })
-
-      return () => {
-        videoEl.removeEventListener('playing', handleFirstPlay)
-      }
-    }
-  }, [])
+  // Initial video loads in background - no logging needed
 
   return {
     // which slot is visible

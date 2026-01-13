@@ -8,7 +8,6 @@ import { useSequencedReveal } from '../utils/useSequencedReveal'
 import { usePageTransitionVideo } from '../utils/usePageTransitionVideo'
 import { useFadeOutNavigation } from '../utils/useFadeOutNavigation'
 import { useVideoReady } from '../utils/useVideoReady'
-import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
 
 const getTitle = (p: any) => p?.name ?? p?.title ?? 'Untitled'
@@ -139,32 +138,16 @@ export default function ProjectsLanding() {
     hasAnimatedRef.current = true
 
     if (isMobile) {
-      // Mobile animation - use RAF to ensure DOM is settled
-      requestAnimationFrame(() => {
-        const mobileItems = scrollContainerRef.current?.querySelectorAll('[data-mobile-reveal]')
-        if (mobileItems && mobileItems.length > 0) {
-          // Apply GPU hints for smoother animation (don't reset opacity/y!)
-          gsap.set(mobileItems, {
-            willChange: 'transform, opacity',
-            force3D: true,
-          })
-          // Direct animation from current state (set by inline styles) to visible
-          gsap.to(mobileItems, {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            ease: 'power2.out',
-            stagger: {
-              each: 0.08,
-              from: 'start',
-            },
-            overwrite: 'auto',
-            onComplete: () => {
-              gsap.set(mobileItems, { clearProps: 'transform', willChange: 'auto' })
-            },
-          })
-        }
-      })
+      // Mobile: Simple immediate show - no animation for better performance
+      // GSAP stagger animations are heavy on mobile and cause glitches
+      const mobileItems = scrollContainerRef.current?.querySelectorAll('[data-mobile-reveal]')
+      if (mobileItems && mobileItems.length > 0) {
+        mobileItems.forEach((item) => {
+          const el = item as HTMLElement
+          el.style.opacity = '1'
+          el.style.transform = 'none'
+        })
+      }
     } else {
       // Desktop animation
       requestAnimationFrame(() => {

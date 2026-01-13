@@ -10,7 +10,6 @@ import { usePageTransitionVideo } from '@/app/utils/usePageTransitionVideo'
 import { useCrossfadeMedia } from '@/app/utils/useCrossfadeMedia'
 import { useFadeOutNavigation } from '@/app/utils/useFadeOutNavigation'
 import BackgroundMedia from '@/app/components/BackgroundMedia/BackgroundMedia'
-import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
 
 export default function DirectorPage({params}: {params: Promise<{slug: string}>}) {
@@ -134,40 +133,21 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
   // Do NOT use useLayoutEffect with gsap.set() - it causes redundant repaints and glitches
   // The inline styles handle FOUC prevention
 
-  // Start mobile animation after a short delay (no video/font dependency)
+  // Start mobile content reveal - simple immediate show for performance
   useEffect(() => {
     if (!isMobile) return
     if (!contentRef.current) return
 
-    const timeoutId = setTimeout(() => {
-      const items = contentRef.current?.querySelectorAll('[data-reveal]')
-      if (items && items.length > 0) {
-        // IMPORTANT: Do NOT call gsap.set() to reset state!
-        // Elements already have inline hidden styles. Just apply GPU hints.
-        gsap.set(items, {
-          willChange: 'transform, opacity',
-          force3D: true,
-        })
-        // Animate from current inline styles to visible
-        gsap.to(items, {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 0.6,
-          ease: 'power2.out',
-          stagger: {
-            each: 0.08,
-            from: 'start',
-          },
-          overwrite: 'auto',
-          onComplete: () => {
-            gsap.set(items, { clearProps: 'transform', willChange: 'auto' })
-          },
-        })
-      }
-    }, 50)
-
-    return () => clearTimeout(timeoutId)
+    // Mobile: Simple immediate show - no animation for better performance
+    // GSAP stagger animations are heavy on mobile and cause glitches
+    const items = contentRef.current.querySelectorAll('[data-reveal]')
+    if (items && items.length > 0) {
+      items.forEach((item) => {
+        const el = item as HTMLElement
+        el.style.opacity = '1'
+        el.style.transform = 'none'
+      })
+    }
   }, [isMobile])
 
   // Font loading + trigger enter animation
