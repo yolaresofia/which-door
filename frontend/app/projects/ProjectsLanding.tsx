@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useRef, useState, useCallback, useMemo } from 'react'
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import BackgroundMedia from '../components/BackgroundMedia'
 import { projects } from '../components/constants'
 import { useCrossfadeMedia } from '../utils/useCrossfadeMedia'
@@ -122,20 +122,8 @@ export default function ProjectsLanding() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // CRITICAL: Hide content immediately on mount using useLayoutEffect
-  // This runs synchronously before browser paint to prevent FOUC
-  useLayoutEffect(() => {
-    // Hide desktop content
-    if (listRef.current) {
-      const desktopItems = listRef.current.querySelectorAll('[data-reveal]')
-      gsap.set(desktopItems, { opacity: 0, y: 20, scale: 0.98 })
-    }
-    // Hide mobile content
-    if (scrollContainerRef.current) {
-      const mobileItems = scrollContainerRef.current.querySelectorAll('[data-mobile-reveal]')
-      gsap.set(mobileItems, { opacity: 0, y: 20 })
-    }
-  }, []) // Empty deps - run once on mount
+  // Track if mobile animation has already run
+  const mobileAnimatedRef = useRef(false)
 
   // Start desktop animation when video is ready
   useEffect(() => {
@@ -151,18 +139,19 @@ export default function ProjectsLanding() {
     return () => cancelAnimationFrame(rafId)
   }, [isMobile, videoReady, start])
 
-  // Start mobile animation after a short delay (no video dependency)
+  // Start mobile animation once after mount - elements are already hidden via inline styles
   useEffect(() => {
     if (!isMobile) return
     if (!scrollContainerRef.current) return
+    if (mobileAnimatedRef.current) return
 
-    // Small delay to ensure layout is stable
+    mobileAnimatedRef.current = true
+
+    // Delay to ensure layout stability, then animate directly from inline hidden state
     const timeoutId = setTimeout(() => {
       const mobileItems = scrollContainerRef.current?.querySelectorAll('[data-mobile-reveal]')
       if (mobileItems && mobileItems.length > 0) {
-        // First ensure they're hidden (in case useLayoutEffect missed them)
-        gsap.set(mobileItems, { opacity: 0, y: 20 })
-        // Then animate in
+        // Animate from current inline styles to visible - NO gsap.set() call
         gsap.to(mobileItems, {
           opacity: 1,
           y: 0,
@@ -175,7 +164,7 @@ export default function ProjectsLanding() {
           onComplete: () => setMobileAnimationDone(true),
         })
       }
-    }, 50)
+    }, 150)
 
     return () => clearTimeout(timeoutId)
   }, [isMobile])

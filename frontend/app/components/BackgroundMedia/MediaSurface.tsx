@@ -105,10 +105,9 @@ export default function MediaSurface({
       }
     };
 
-    // If source changed, load and play
-    if (sourceChanged && previewSrc) {
-      video.load();
-    }
+    // If source changed, the video element's src attribute will update automatically
+    // DON'T call video.load() as it interrupts playback on mobile
+    // The browser will handle loading the new source when src changes
 
     // Try to play when ready
     const handleCanPlay = () => {
@@ -117,15 +116,30 @@ export default function MediaSurface({
       }
     };
 
+    const handleLoadedData = () => {
+      if (isMountedRef.current) {
+        attemptPlay();
+      }
+    };
+
     video.addEventListener("canplay", handleCanPlay);
+    video.addEventListener("loadeddata", handleLoadedData);
 
     // If already ready, try now
     if (video.readyState >= 3) {
       attemptPlay();
+    } else if (sourceChanged && previewSrc) {
+      // For source changes, wait a frame then try to play
+      requestAnimationFrame(() => {
+        if (isMountedRef.current && video.readyState >= 2) {
+          attemptPlay();
+        }
+      });
     }
 
     return () => {
       video.removeEventListener("canplay", handleCanPlay);
+      video.removeEventListener("loadeddata", handleLoadedData);
     };
   }, [usingNative, previewSrc, autoPlay]);
 
