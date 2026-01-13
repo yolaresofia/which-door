@@ -143,6 +143,11 @@ export default function ProjectsLanding() {
       requestAnimationFrame(() => {
         const mobileItems = scrollContainerRef.current?.querySelectorAll('[data-mobile-reveal]')
         if (mobileItems && mobileItems.length > 0) {
+          // Apply GPU hints for smoother animation (don't reset opacity/y!)
+          gsap.set(mobileItems, {
+            willChange: 'transform, opacity',
+            force3D: true,
+          })
           // Direct animation from current state (set by inline styles) to visible
           gsap.to(mobileItems, {
             opacity: 1,
@@ -154,6 +159,9 @@ export default function ProjectsLanding() {
               from: 'start',
             },
             overwrite: 'auto',
+            onComplete: () => {
+              gsap.set(mobileItems, { clearProps: 'transform', willChange: 'auto' })
+            },
           })
         }
       })

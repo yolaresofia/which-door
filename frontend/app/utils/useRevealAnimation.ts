@@ -213,7 +213,12 @@ export function usePageRevealAnimation(options: {
     const items = desktopContainerRef.current.querySelectorAll('[data-reveal]')
     if (items.length === 0) return
 
-    gsap.set(items, { opacity: 0, y: 20, scale: 0.98 })
+    // IMPORTANT: Do NOT call gsap.set() to reset opacity/y/scale!
+    // Elements already have inline styles. Just apply GPU hints.
+    gsap.set(items, {
+      willChange: 'transform, opacity',
+      force3D: true,
+    })
 
     gsap.to(items, {
       opacity: 1,
@@ -226,9 +231,10 @@ export function usePageRevealAnimation(options: {
         from: 'start',
         ease: 'power2.inOut',
       },
+      overwrite: 'auto',
       onComplete: () => {
         setDesktopRevealed(true)
-        gsap.set(items, { clearProps: 'transform' })
+        gsap.set(items, { clearProps: 'transform', willChange: 'auto' })
       },
     })
   }, [isMobile, desktopRevealed])
@@ -240,7 +246,12 @@ export function usePageRevealAnimation(options: {
     const items = mobileContainerRef.current.querySelectorAll('[data-mobile-reveal]')
     if (items.length === 0) return
 
-    gsap.set(items, { opacity: 0, y: 20 })
+    // IMPORTANT: Do NOT call gsap.set() to reset opacity/y!
+    // Elements already have inline styles. Just apply GPU hints.
+    gsap.set(items, {
+      willChange: 'transform, opacity',
+      force3D: true,
+    })
 
     gsap.to(items, {
       opacity: 1,
@@ -251,9 +262,10 @@ export function usePageRevealAnimation(options: {
         each: 0.08,
         from: 'start',
       },
+      overwrite: 'auto',
       onComplete: () => {
         setMobileRevealed(true)
-        gsap.set(items, { clearProps: 'transform' })
+        gsap.set(items, { clearProps: 'transform', willChange: 'auto' })
       },
     })
   }, [isMobile, mobileRevealed])

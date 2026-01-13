@@ -88,7 +88,7 @@ export default function MediaSurface({
     const sourceChanged = lastSrcRef.current !== previewSrc;
     lastSrcRef.current = previewSrc;
 
-    // Play attempt with retry for mobile
+    // Play attempt with aggressive retry for mobile
     const attemptPlay = (retryCount = 0) => {
       // Check if still mounted before playing
       if (!isMountedRef.current) return;
@@ -98,6 +98,11 @@ export default function MediaSurface({
       video.muted = true;
       video.playsInline = true;
 
+      // Force attributes on the video element
+      video.setAttribute('muted', '');
+      video.setAttribute('playsinline', '');
+      video.setAttribute('autoplay', '');
+
       const playPromise = video.play();
       if (playPromise?.then) {
         playPromise
@@ -105,9 +110,11 @@ export default function MediaSurface({
             // Success - video is playing
           })
           .catch(() => {
-            // Retry once after a short delay (mobile sometimes needs this)
-            if (retryCount < 1 && isMountedRef.current) {
-              setTimeout(() => attemptPlay(retryCount + 1), 100);
+            // Aggressive retry - mobile browsers are finnicky
+            // Increase max retries and use exponential backoff
+            if (retryCount < 5 && isMountedRef.current) {
+              const delay = Math.min(100 * Math.pow(1.5, retryCount), 500);
+              setTimeout(() => attemptPlay(retryCount + 1), delay);
             }
           });
       }
@@ -155,9 +162,28 @@ export default function MediaSurface({
       });
     }
 
+    // Also try playing on visibility change (mobile safari quirk)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && isMountedRef.current) {
+        attemptPlay();
+      }
+    };
+
+    // And on page show (for bfcache)
+    const handlePageShow = () => {
+      if (isMountedRef.current) {
+        attemptPlay();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pageshow', handlePageShow);
+
     return () => {
       video.removeEventListener("canplay", handleCanPlay);
       video.removeEventListener("loadeddata", handleLoadedData);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pageshow', handlePageShow);
     };
   }, [usingNative, previewSrc, autoPlay]);
 
