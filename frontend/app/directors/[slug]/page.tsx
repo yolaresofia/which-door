@@ -1,7 +1,7 @@
 // app/directors/[slug]/page.tsx
 'use client'
 
-import { use, useEffect, useLayoutEffect, useRef, useState, useMemo, useCallback } from 'react'
+import { use, useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import { notFound } from 'next/navigation'
 import DetailView from '@/app/components/DetailView'
 import { directors, projects } from '@/app/components/constants'
@@ -130,14 +130,9 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // CRITICAL: Hide content immediately on mount using useLayoutEffect
-  // This runs synchronously before browser paint to prevent FOUC
-  useLayoutEffect(() => {
-    if (!contentRef.current) return
-    const items = contentRef.current.querySelectorAll('[data-reveal]')
-    // Hide on initial render - mobile animation will show them immediately after
-    gsap.set(items, { opacity: 0, y: 20, scale: 0.98 })
-  }, []) // Empty deps - run once on mount
+  // NOTE: Elements are already hidden via inline styles (REVEAL_HIDDEN_STYLE in DetailView)
+  // Do NOT use useLayoutEffect with gsap.set() - it causes redundant repaints and glitches
+  // The inline styles handle FOUC prevention
 
   // Start mobile animation after a short delay (no video/font dependency)
   useEffect(() => {
@@ -147,15 +142,26 @@ export default function DirectorPage({params}: {params: Promise<{slug: string}>}
     const timeoutId = setTimeout(() => {
       const items = contentRef.current?.querySelectorAll('[data-reveal]')
       if (items && items.length > 0) {
-        gsap.set(items, { opacity: 0, y: 20 })
+        // IMPORTANT: Do NOT call gsap.set() to reset state!
+        // Elements already have inline hidden styles. Just apply GPU hints.
+        gsap.set(items, {
+          willChange: 'transform, opacity',
+          force3D: true,
+        })
+        // Animate from current inline styles to visible
         gsap.to(items, {
           opacity: 1,
           y: 0,
+          scale: 1,
           duration: 0.6,
           ease: 'power2.out',
           stagger: {
             each: 0.08,
             from: 'start',
+          },
+          overwrite: 'auto',
+          onComplete: () => {
+            gsap.set(items, { clearProps: 'transform', willChange: 'auto' })
           },
         })
       }
