@@ -176,14 +176,29 @@ export default function MediaSurface({
       }
     };
 
+    // Fallback: try playing on first user interaction (touch/click anywhere)
+    // This handles cases where autoplay is blocked until user gesture
+    const handleUserInteraction = () => {
+      if (isMountedRef.current && video.paused) {
+        attemptPlay();
+      }
+      // Remove after first attempt to avoid repeated calls
+      document.removeEventListener('touchstart', handleUserInteraction);
+      document.removeEventListener('click', handleUserInteraction);
+    };
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('pageshow', handlePageShow);
+    document.addEventListener('touchstart', handleUserInteraction, { passive: true, once: true });
+    document.addEventListener('click', handleUserInteraction, { once: true });
 
     return () => {
       video.removeEventListener("canplay", handleCanPlay);
       video.removeEventListener("loadeddata", handleLoadedData);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('pageshow', handlePageShow);
+      document.removeEventListener('touchstart', handleUserInteraction);
+      document.removeEventListener('click', handleUserInteraction);
     };
   }, [usingNative, previewSrc, autoPlay]);
 
@@ -208,6 +223,9 @@ export default function MediaSurface({
           muted
           loop
           playsInline
+          disablePictureInPicture
+          disableRemotePlayback
+          controls={false}
           preload="auto"
           autoPlay={autoPlay}
           onPlay={handleNativeStart}
