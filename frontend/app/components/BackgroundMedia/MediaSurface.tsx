@@ -93,7 +93,10 @@ export default function MediaSurface({
   // Debug state for visual overlay
   const [debugInfo, setDebugInfo] = useState({
     readyState: 0,
+    networkState: 0,
     paused: true,
+    buffered: '0',
+    currentTime: 0,
     error: '',
     src: previewSrc?.slice(-30) || 'none',
   });
@@ -104,9 +107,17 @@ export default function MediaSurface({
     const interval = setInterval(() => {
       const video = videoRef.current;
       if (video) {
+        // Get buffered amount
+        let bufferedEnd = 0;
+        if (video.buffered.length > 0) {
+          bufferedEnd = video.buffered.end(video.buffered.length - 1);
+        }
         setDebugInfo({
           readyState: video.readyState,
+          networkState: video.networkState,
           paused: video.paused,
+          buffered: bufferedEnd.toFixed(1) + 's',
+          currentTime: Math.round(video.currentTime * 10) / 10,
           error: video.error?.message || '',
           src: previewSrc?.slice(-30) || 'none',
         });
@@ -124,15 +135,17 @@ export default function MediaSurface({
     >
       {/* Debug overlay - remove after fixing */}
       {usingNative && (
-        <div className="absolute bottom-24 left-4 z-50 bg-black/80 text-white text-xs p-2 rounded max-w-[200px] break-all">
+        <div className="absolute bottom-24 left-4 z-50 bg-black/80 text-white text-xs p-2 rounded max-w-[250px] break-all">
           <div>src: {debugInfo.src}</div>
-          <div>ready: {debugInfo.readyState}</div>
-          <div>paused: {debugInfo.paused ? 'YES' : 'NO'}</div>
+          <div>ready: {debugInfo.readyState} | net: {debugInfo.networkState}</div>
+          <div>paused: {debugInfo.paused ? 'YES' : 'NO'} | buf: {debugInfo.buffered}</div>
+          <div>time: {debugInfo.currentTime}</div>
           {debugInfo.error && <div className="text-red-400">err: {debugInfo.error}</div>}
         </div>
       )}
       {usingNative ? (
         <video
+          key={previewSrc}
           ref={videoRef}
           className={`${mediaClass} object-cover`}
           src={previewSrc}
