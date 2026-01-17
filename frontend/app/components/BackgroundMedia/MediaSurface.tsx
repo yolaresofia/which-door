@@ -1,5 +1,5 @@
 // MediaSurface.tsx
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import VimeoVideo from "./surfaces/VimeoVideo";
 
 type Props = {
@@ -81,6 +81,56 @@ export default function MediaSurface({
     }
   }, [onNativePlaybackStart]);
 
+  // Explicitly call play() - autoPlay attribute alone doesn't work reliably on mobile
+  // We need to wait for loadeddata to ensure video is ready, then call play()
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !usingNative) return;
+
+    const tryPlay = () => {
+      video.play().catch((err) => {
+        // Only log non-abort errors (abort happens during unmount)
+        if (err.name !== 'AbortError') {
+          console.log('[MediaSurface] Play blocked:', err.name, previewSrc?.slice(-30));
+        }
+      });
+    };
+
+    // If video already has data, play immediately
+    if (video.readyState >= 2) {
+      tryPlay();
+    } else {
+      // Otherwise wait for data to load
+      video.addEventListener('loadeddata', tryPlay, { once: true });
+      return () => video.removeEventListener('loadeddata', tryPlay);
+    }
+  }, [usingNative, previewSrc]);
+
+  // Debug state for visual overlay
+  const [debugInfo, setDebugInfo] = useState({
+    readyState: 0,
+    paused: true,
+    error: '',
+    src: previewSrc?.slice(-30) || 'none',
+  });
+
+  // Update debug info periodically
+  useEffect(() => {
+    if (!usingNative) return;
+    const interval = setInterval(() => {
+      const video = videoRef.current;
+      if (video) {
+        setDebugInfo({
+          readyState: video.readyState,
+          paused: video.paused,
+          error: video.error?.message || '',
+          src: previewSrc?.slice(-30) || 'none',
+        });
+      }
+    }, 500);
+    return () => clearInterval(interval);
+  }, [usingNative, previewSrc]);
+
   return (
     <div
       ref={containerRef}
@@ -88,6 +138,15 @@ export default function MediaSurface({
       data-variant={variant}
       data-source={usingNative ? "native" : "vimeo"}
     >
+      {/* Debug overlay - remove after fixing */}
+      {usingNative && (
+        <div className="absolute top-4 left-4 z-50 bg-black/80 text-white text-xs p-2 rounded max-w-[200px] break-all">
+          <div>src: {debugInfo.src}</div>
+          <div>ready: {debugInfo.readyState}</div>
+          <div>paused: {debugInfo.paused ? 'YES' : 'NO'}</div>
+          {debugInfo.error && <div className="text-red-400">err: {debugInfo.error}</div>}
+        </div>
+      )}
       {usingNative ? (
         <video
           ref={videoRef}

@@ -23,7 +23,6 @@ export type BackgroundMediaProps = {
   bgColor?: string;
   className?: string;
   controls?: boolean;
-  autoPlay?: boolean;
   title?: string;
   subtitle?: string;
   onShare?: () => void;
@@ -40,7 +39,6 @@ export default function BackgroundMedia({
   bgColor,
   className = "",
   controls = false,
-  autoPlay: autoPlayProp,
   title,
   subtitle,
   onShare,
@@ -71,7 +69,6 @@ export default function BackgroundMedia({
   const effectiveControls = baseControls && !usingNativeVideo;
   const activeVimeoSrc = usingNativeVideo ? undefined : vimeoUrl || effectivePreviewUrl;
   const activePreviewSrc = usingNativeVideo ? effectivePreviewUrl : undefined;
-  const activeSourceKey = usingNativeVideo ? activePreviewSrc : activeVimeoSrc;
   // Show poster while video is loading (until video starts playing)
   // This provides a nice blurred placeholder while the video loads in the background
   // For mobile preview videos, we skip the poster to allow smooth video-to-video crossfades

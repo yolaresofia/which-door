@@ -161,7 +161,6 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
           vimeoUrl={videoSrc}
           previewPoster={(project as any).previewPoster}
           controls
-          autoPlay
           title={(project as any).name}
           subtitle={(project as any).director}
           className="!z-0"
