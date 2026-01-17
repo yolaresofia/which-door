@@ -140,7 +140,7 @@ export default function MediaSurface({
     >
       {/* Debug overlay - remove after fixing */}
       {usingNative && (
-        <div className="absolute top-4 left-4 z-50 bg-black/80 text-white text-xs p-2 rounded max-w-[200px] break-all">
+        <div className="absolute bottom-4 left-4 z-50 bg-black/80 text-white text-xs p-2 rounded max-w-[200px] break-all">
           <div>src: {debugInfo.src}</div>
           <div>ready: {debugInfo.readyState}</div>
           <div>paused: {debugInfo.paused ? 'YES' : 'NO'}</div>
