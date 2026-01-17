@@ -1,5 +1,5 @@
 // MediaSurface.tsx
-import { useEffect, useRef, useCallback, useState } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import VimeoVideo from "./surfaces/VimeoVideo";
 
 type Props = {
@@ -100,42 +100,6 @@ export default function MediaSurface({
     video.load();
   }, [usingNative, previewSrc]);
 
-  // Debug state for visual overlay
-  const [debugInfo, setDebugInfo] = useState({
-    readyState: 0,
-    networkState: 0,
-    paused: true,
-    buffered: '0',
-    currentTime: 0,
-    error: '',
-    src: previewSrc?.slice(-30) || 'none',
-  });
-
-  // Update debug info periodically
-  useEffect(() => {
-    if (!usingNative) return;
-    const interval = setInterval(() => {
-      const video = videoRef.current;
-      if (video) {
-        // Get buffered amount
-        let bufferedEnd = 0;
-        if (video.buffered.length > 0) {
-          bufferedEnd = video.buffered.end(video.buffered.length - 1);
-        }
-        setDebugInfo({
-          readyState: video.readyState,
-          networkState: video.networkState,
-          paused: video.paused,
-          buffered: bufferedEnd.toFixed(1) + 's',
-          currentTime: Math.round(video.currentTime * 10) / 10,
-          error: video.error?.message || '',
-          src: previewSrc?.slice(-30) || 'none',
-        });
-      }
-    }, 500);
-    return () => clearInterval(interval);
-  }, [usingNative, previewSrc]);
-
   return (
     <div
       ref={containerRef}
@@ -143,16 +107,6 @@ export default function MediaSurface({
       data-variant={variant}
       data-source={usingNative ? "native" : "vimeo"}
     >
-      {/* Debug overlay - remove after fixing */}
-      {usingNative && (
-        <div className="absolute bottom-24 left-4 z-50 bg-black/80 text-white text-xs p-2 rounded max-w-[250px] break-all">
-          <div>src: {debugInfo.src}</div>
-          <div>ready: {debugInfo.readyState} | net: {debugInfo.networkState}</div>
-          <div>paused: {debugInfo.paused ? 'YES' : 'NO'} | buf: {debugInfo.buffered}</div>
-          <div>time: {debugInfo.currentTime}</div>
-          {debugInfo.error && <div className="text-red-400">err: {debugInfo.error}</div>}
-        </div>
-      )}
       {usingNative ? (
         <video
           key={previewSrc}
