@@ -81,30 +81,14 @@ export default function MediaSurface({
     }
   }, [onNativePlaybackStart]);
 
-  // Explicitly call play() - autoPlay attribute alone doesn't work reliably on mobile
-  // We need to wait for loadeddata to ensure video is ready, then call play()
-  useEffect(() => {
+  // Called when video has loaded enough data to play
+  const handleCanPlay = useCallback(() => {
     const video = videoRef.current;
-    if (!video || !usingNative) return;
+    if (!video || !isMountedRef.current) return;
 
-    const tryPlay = () => {
-      video.play().catch((err) => {
-        // Only log non-abort errors (abort happens during unmount)
-        if (err.name !== 'AbortError') {
-          console.log('[MediaSurface] Play blocked:', err.name, previewSrc?.slice(-30));
-        }
-      });
-    };
-
-    // If video already has data, play immediately
-    if (video.readyState >= 2) {
-      tryPlay();
-    } else {
-      // Otherwise wait for data to load
-      video.addEventListener('loadeddata', tryPlay, { once: true });
-      return () => video.removeEventListener('loadeddata', tryPlay);
-    }
-  }, [usingNative, previewSrc]);
+    // Explicitly call play() - autoPlay attribute alone doesn't work reliably on mobile
+    video.play().catch(() => {});
+  }, []);
 
   // Debug state for visual overlay
   const [debugInfo, setDebugInfo] = useState({
@@ -160,6 +144,7 @@ export default function MediaSurface({
           controls={false}
           preload="auto"
           autoPlay
+          onCanPlay={handleCanPlay}
           onPlay={handleNativeStart}
           onPlaying={handleNativeStart}
           onCanPlayThrough={handleNativeStart}
