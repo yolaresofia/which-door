@@ -90,6 +90,16 @@ export default function MediaSurface({
     video.play().catch(() => {});
   }, []);
 
+  // Force video to load data - iOS Safari ignores preload="auto"
+  // Without this, videos stay at readyState=1 (metadata only) with no buffered data
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !usingNative) return;
+
+    // Call load() to force Safari to start downloading
+    video.load();
+  }, [usingNative, previewSrc]);
+
   // Debug state for visual overlay
   const [debugInfo, setDebugInfo] = useState({
     readyState: 0,
