@@ -93,7 +93,7 @@ export default function Header() {
           <div className="lg:justify-self-start">
             <Link 
               href="/" 
-              className="flex items-center group lg:h-[46px] h-[30px]"
+              className="flex items-center group lg:h-[35px] h-[30px]"
               onClick={(e) => handleClick(e, '/')}
             >
               <Image
@@ -107,7 +107,7 @@ export default function Header() {
               <Image
                 src="https://cdn.sanity.io/images/xerhtqd5/production/fb73dc9852c0a288232ff5cf63a37c29f64e477e-131x44.svg"
                 alt="Which Door wordmark"
-                width={131}
+                width={120}
                 height={44}
                 className="h-full w-auto ml-2 opacity-100 transition-opacity duration-300 lg:opacity-0 lg:group-hover:opacity-100"
               />
@@ -118,7 +118,7 @@ export default function Header() {
           <nav className="hidden lg:block lg:justify-self-center">
             <ul
               role="list"
-              className="flex items-center gap-8 text-white text-sm font-medium tracking-wide uppercase"
+              className="flex items-center gap-8 text-white text-xs font-medium tracking-wide uppercase"
             >
               {navItems.map(({ href, label }) => {
                 // For Projects (/) and Directors (/directors), also match their detail pages
