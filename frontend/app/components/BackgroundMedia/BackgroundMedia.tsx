@@ -76,8 +76,6 @@ export default function BackgroundMedia({
   // This provides a nice blurred placeholder while the video loads in the background
   // For mobile preview videos, we skip the poster to allow smooth video-to-video crossfades
   const shouldUsePoster = Boolean(previewPoster) && !usingNativeVideo && hasVimeo;
-  const resolvedAutoPlay =
-    typeof autoPlayProp === "boolean" ? autoPlayProp : !effectiveControls;
 
   const {
     iframeRef,
@@ -90,7 +88,7 @@ export default function BackgroundMedia({
     toggleMute,
     seekToRatio,
     ready,
-  } = useVimeoController({ vimeoSrc: activeVimeoSrc, controls: effectiveControls, autoplay: resolvedAutoPlay });
+  } = useVimeoController({ vimeoSrc: activeVimeoSrc, controls: effectiveControls });
 
   const { isFullscreen, toggleFullscreen } = useFullscreen(containerEl);
 
@@ -133,32 +131,6 @@ export default function BackgroundMedia({
     scheduleControlsHide();
   }, [scheduleControlsHide]);
 
-  // Reset video and poster state when source changes (but NOT on initial mount)
-  // This ensures poster shows immediately for new videos, preventing black screens
-  const prevSourceKeyRef = useRef<string | undefined>(undefined);
-  const isInitialSourceRef = useRef(true);
-  useEffect(() => {
-    // Skip reset on initial mount - we want to let the video play through
-    if (isInitialSourceRef.current) {
-      isInitialSourceRef.current = false;
-      prevSourceKeyRef.current = activeSourceKey;
-      return;
-    }
-
-    // Only reset if the source actually changed (e.g., navigating to different video)
-    if (prevSourceKeyRef.current !== activeSourceKey) {
-      prevSourceKeyRef.current = activeSourceKey;
-      setVideoHasStarted(false);
-      if (shouldUsePoster) {
-        setPosterPhase("shown");
-      }
-    }
-  }, [activeSourceKey, shouldUsePoster]);
-
-  // NOTE: We no longer handle resize for video switching.
-  // Mobile detection is done once on mount to prevent video reload mid-stream.
-  // Users who resize their browser will keep their initial video.
-
   useEffect(() => {
     if (usingNativeVideo) return;
     if (videoHasStarted) return;
@@ -179,7 +151,7 @@ export default function BackgroundMedia({
 
     const timeoutId = window.setTimeout(() => {
       setVideoHasStarted(true);
-    }, 2000); // 2 second fallback
+    }, 3000); // 3 second fallback
 
     return () => window.clearTimeout(timeoutId);
   }, [usingNativeVideo, videoHasStarted, ready]);
@@ -263,8 +235,7 @@ export default function BackgroundMedia({
   }, [effectiveControls, isFullscreen, revealControls, clearControlsHideTimer]);
 
   const posterVisible = shouldUsePoster && posterPhase !== "hidden";
-  const posterOpacity = posterPhase === "shown" ? 1 : 0;
-  // CRITICAL: Video must ALWAYS be visible so it can load and play in the background
+  const posterOpacity = posterPhase === "shown" ? 1 : 0;  // CRITICAL: Video must ALWAYS be visible so it can load and play in the background
   // The poster (z-10) covers it until video starts, then fades out
   // Previously we hid the video which prevented it from loading at all
   const videoVisible = true;
@@ -285,7 +256,6 @@ export default function BackgroundMedia({
           vimeoSrc={activeVimeoSrc}
           previewSrc={activePreviewSrc}
           controls={effectiveControls}
-          autoPlay={resolvedAutoPlay}
           iframeRef={iframeRef}
           variant={variant}
           onNativePlaybackStart={handleNativePlaybackStart}
@@ -300,27 +270,11 @@ export default function BackgroundMedia({
             data-touch-toggle-ignore
           />
         )}
-      </div>
-
-      {posterVisible && (
+      </div>   {posterVisible && (
         <div
           className="pointer-events-none absolute inset-0 z-10 overflow-hidden bg-black transition-opacity ease-in-out"
           style={{ opacity: posterOpacity, transitionDuration: `${POSTER_FADE_MS}ms` }}
         >
-          {/* LQIP base64 placeholder - loads instantly */}
-          {previewPosterLQIP && (
-            <Image
-              src={previewPosterLQIP}
-              alt=""
-              fill
-              className="object-cover transform"
-              style={{ filter: "blur(40px)", transform: "scale(1.12)" }}
-              sizes="100vw"
-              priority={true}
-              quality={20}
-            />
-          )}
-          {/* Full quality poster - loads progressively */}
           <Image
             src={previewPoster as string}
             alt=""
@@ -333,7 +287,6 @@ export default function BackgroundMedia({
             blurDataURL={previewPosterLQIP}
           />
           <div className="absolute inset-0 bg-black/10" />
-          {/* Pulse overlay to indicate loading */}
           {posterPhase === "shown" && (
             <div
               className="absolute inset-0"
@@ -345,7 +298,6 @@ export default function BackgroundMedia({
           )}
         </div>
       )}
-
       {/* controls only for full variant */}
       {effectiveControls && (
         <>

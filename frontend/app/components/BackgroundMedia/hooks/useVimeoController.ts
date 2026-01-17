@@ -6,10 +6,9 @@ import { normalizeUrl } from "../utils";
 type Options = {
   vimeoSrc?: string; // full URL
   controls: boolean;
-  autoplay: boolean;
 };
 
-export function useVimeoController({ vimeoSrc, controls, autoplay }: Options) {
+export function useVimeoController({ vimeoSrc, controls }: Options) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const playerRef = useRef<Player | null>(null);
 
@@ -44,7 +43,7 @@ export function useVimeoController({ vimeoSrc, controls, autoplay }: Options) {
 
     player.on("loaded", async () => {
       try {
-        const [d, vw, vh, vol, loop] = await Promise.all([
+        const [d] = await Promise.all([
           player.getDuration(),
           player.getVideoWidth().catch(() => undefined),
           player.getVideoHeight().catch(() => undefined),
@@ -56,21 +55,6 @@ export function useVimeoController({ vimeoSrc, controls, autoplay }: Options) {
 
         await player.setLoop(true);
         await player.setVolume(!controls ? 0 : 1);
-        if (autoplay) {
-          try {
-            await player.play();
-          } catch (err: any) {
-            if (controls && !destroyed) {
-              try {
-                await player.setVolume(0);
-                setMuted(true);
-                await player.play();
-              } catch (retryErr: any) {
-                // ignore retry errors
-              }
-            }
-          }
-        }
       } catch (e) {
         // ignore load errors
       }
@@ -103,7 +87,7 @@ export function useVimeoController({ vimeoSrc, controls, autoplay }: Options) {
       player.unload().catch(() => {});
       playerRef.current = null;
     };
-  }, [normalizedSrc, controls, vimeoSrc, autoplay]); // re-init when URL or settings change
+  }, [normalizedSrc, controls, vimeoSrc]); // re-init when URL or settings change
 
   useEffect(() => {
     const p = playerRef.current;
