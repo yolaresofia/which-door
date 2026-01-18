@@ -113,8 +113,6 @@ export default function Header() {
               />
             </Link>
           </div>
-
-          {/* Desktop Navigation */}
           <nav className="hidden lg:block lg:justify-self-center">
             <ul
               role="list"
