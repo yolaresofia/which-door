@@ -8,12 +8,12 @@ import {Toaster} from 'sonner'
 
 import DraftModeToast from '@/app/components/DraftModeToast'
 import Header from '@/app/components/Header'
+import LenisProvider from '@/app/components/LenisProvider'
 import * as demo from '@/sanity/lib/demo'
 import {sanityFetch, SanityLive} from '@/sanity/lib/live'
 import {settingsQuery} from '@/sanity/lib/queries'
 import {resolveOpenGraphImage} from '@/sanity/lib/utils'
 import {handleError} from './client-utils'
-import ReactLenis from 'lenis/react'
 
 /**
  * Generate metadata for the page.
@@ -64,9 +64,23 @@ export default async function RootLayout({children}: {children: React.ReactNode}
           type="font/woff2"
           crossOrigin="anonymous"
         />
+        {/* CRITICAL FIX: Preload LCP image (first project poster) to reduce LCP from 9.9s */}
+        <link
+          rel="preload"
+          href="https://cdn.sanity.io/images/xerhtqd5/production/56e1c08338bae02337d4eb3156b2c81b31cfd118-3015x1694.jpg?w=1920&q=75&auto=format"
+          as="image"
+          type="image/jpeg"
+          fetchPriority="high"
+        />
+        {/* Preconnect to Sanity CDN for faster resource loading */}
+        <link rel="preconnect" href="https://cdn.sanity.io" />
+        <link rel="dns-prefetch" href="https://cdn.sanity.io" />
+        {/* Preconnect to Vimeo for video loading */}
+        <link rel="preconnect" href="https://player.vimeo.com" />
+        <link rel="dns-prefetch" href="https://player.vimeo.com" />
       </head>
       <body>
-        <ReactLenis root>
+        <LenisProvider>
           <section className="min-h-screen">
             {/* The <Toaster> component is responsible for rendering toast notifications used in /app/client-utils.ts and /app/components/DraftModeToast.tsx */}
             <Toaster />
@@ -83,7 +97,7 @@ export default async function RootLayout({children}: {children: React.ReactNode}
             <main className="">{children}</main>
           </section>
           <SpeedInsights />
-        </ReactLenis>
+        </LenisProvider>
       </body>
     </html>
   )

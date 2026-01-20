@@ -255,130 +255,19 @@ export default function ProjectsLandingClient() {
   const hiddenStyle = { opacity: 0, transform: 'translateY(20px) scale(0.98)' }
   const hiddenStyleSimple = { opacity: 0, transform: 'translateY(20px)' }
 
-  return (
-    <>
-      {/* Desktop Layout */}
-      <main
-        ref={mainRef}
-        className={`relative w-full min-h-screen ${isMobile ? 'hidden' : 'block'}`}
-      >
-        {/* Background - Fixed */}
-        <div className="fixed inset-0 z-0 bg-black">
-          <div
-            ref={(el) => {
-              setSlotRef(0)(el)
-            }}
-            className="absolute inset-0"
-            style={{ pointerEvents: 'none' }}
-          >
-            {slotMedia[0] && (
-              <BackgroundMedia
-                variant="preview"
-                previewUrl={slotMedia[0].previewUrl ?? slotMedia[0].videoSrc}
-                mobilePreviewUrl={slotMedia[0].mobilePreviewUrl}
-                vimeoUrl={slotMedia[0].vimeoUrl ?? slotMedia[0].videoSrc}
-                previewPoster={slotMedia[0].previewPoster}
-                previewPosterLQIP={slotMedia[0].previewPosterLQIP}
-                bgColor={slotMedia[0].bgColor}
-                onVideoReady={markReady}
-              />
-            )}
-          </div>
-          <div
-            ref={(el) => {
-              setSlotRef(1)(el)
-            }}
-            className="absolute inset-0"
-            style={{ pointerEvents: 'none' }}
-          >
-            {slotMedia[1] && (
-              <BackgroundMedia
-                variant="preview"
-                previewUrl={slotMedia[1].previewUrl ?? slotMedia[1].videoSrc}
-                mobilePreviewUrl={slotMedia[1].mobilePreviewUrl}
-                vimeoUrl={slotMedia[1].vimeoUrl ?? slotMedia[1].videoSrc}
-                previewPoster={slotMedia[1].previewPoster}
-                previewPosterLQIP={slotMedia[1].previewPosterLQIP}
-                bgColor={slotMedia[1].bgColor}
-              />
-            )}
-          </div>
-        </div>
-
-        {/* Desktop Grid */}
-        <section className="relative z-10 flex min-h-screen w-full md:px-12 px-4 items-center justify-center">
-          <ul
-            ref={listRef}
-            className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-y-10"
-          >
-            {visibleProjects.map((project, index) => {
-              const title = getTitle(project)
-              const isHighlighted = selectedIndex === index
-              const dimOthers = !isHighlighted
-
-              return (
-                <li
-                  key={project?.slug ?? `${title}-${index}`}
-                  className={`
-                    transition-opacity duration-300 ease-out
-                    first:justify-self-start last:justify-self-end
-                    [&:not(:first-child):not(:last-child)]:justify-self-center
-                    sm:[&:nth-child(2n+1)]:justify-self-start sm:[&:nth-child(2n)]:justify-self-end
-                    md:[&:nth-child(3n+1)]:justify-self-start md:[&:nth-child(3n+2)]:justify-self-center md:[&:nth-child(3n)]:justify-self-end
-                    lg:[&:nth-child(4n+1)]:justify-self-start lg:[&:nth-child(4n+2)]:justify-self-center lg:[&:nth-child(4n+3)]:justify-self-center lg:[&:nth-child(4n)]:justify-self-end
-                    xl:[&:nth-child(5n+1)]:justify-self-start xl:[&:nth-child(5n+2)]:justify-self-center xl:[&:nth-child(5n+3)]:justify-self-center xl:[&:nth-child(5n+4)]:justify-self-center xl:[&:nth-child(5n)]:justify-self-end
-                    ${dimOthers ? 'opacity-40' : 'opacity-100'}
-                  `}
-                >
-                  <div
-                    onClick={() => handleProjectClick(project?.slug)}
-                    className="block text-left group outline-none cursor-pointer"
-                    data-reveal
-                    style={hiddenStyle}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault()
-                        handleProjectClick(project?.slug)
-                      }
-                    }}
-                  >
-                    <h3
-                      className={`max-w-[20ch] leading-tight font-semibold text-2xl transition-all duration-300 ease-out ${
-                        isHighlighted ? 'text-white' : 'text-white/90'
-                      }`}
-                      onMouseEnter={() => !isNavigating && select(index)}
-                    >
-                      {title}
-                    </h3>
-                    {project?.director && (
-                      <p
-                        className={`text-base transition-all duration-300 ease-out ${
-                          isHighlighted ? 'text-white/90' : 'text-white/70'
-                        }`}
-                      >
-                        {project.director}
-                      </p>
-                    )}
-                  </div>
-                </li>
-              )
-            })}
-          </ul>
-        </section>
-      </main>
-
-      {/* Mobile Layout - IMPORTANT: Mount video immediately, just hide container */}
-      <main className={`fixed inset-0 ${isMobile ? 'block' : 'hidden'}`}>
+  // PERFORMANCE FIX: Only render the layout for current device
+  // Previously both desktop AND mobile components mounted simultaneously,
+  // causing doubled video loading and effects even when hidden with CSS
+  if (isMobile) {
+    // Mobile Layout - optimized for touch scrolling
+    return (
+      <main className="fixed inset-0">
         {/* Background video - crossfade slots */}
         <div className="fixed inset-0 z-0 bg-black">
           <div
-            ref={(el) => { if (isMobile) setSlotRef(0)(el) }}
+            ref={(el) => { setSlotRef(0)(el) }}
             className="absolute inset-0"
           >
-            {/* Mount BackgroundMedia immediately when slotMedia exists
-                so video can start loading. Container visibility handles show/hide */}
             {slotMedia[0] && (
               <BackgroundMedia
                 variant="preview"
@@ -392,7 +281,7 @@ export default function ProjectsLandingClient() {
             )}
           </div>
           <div
-            ref={(el) => { if (isMobile) setSlotRef(1)(el) }}
+            ref={(el) => { setSlotRef(1)(el) }}
             className="absolute inset-0"
           >
             {slotMedia[1] && (
@@ -448,6 +337,116 @@ export default function ProjectsLandingClient() {
           </ul>
         </div>
       </main>
-    </>
+    )
+  }
+
+  // Desktop Layout
+  return (
+    <main
+      ref={mainRef}
+      className="relative w-full min-h-screen"
+    >
+      {/* Background - Fixed */}
+      <div className="fixed inset-0 z-0 bg-black">
+        <div
+          ref={(el) => { setSlotRef(0)(el) }}
+          className="absolute inset-0"
+          style={{ pointerEvents: 'none' }}
+        >
+          {slotMedia[0] && (
+            <BackgroundMedia
+              variant="preview"
+              previewUrl={slotMedia[0].previewUrl ?? slotMedia[0].videoSrc}
+              mobilePreviewUrl={slotMedia[0].mobilePreviewUrl}
+              vimeoUrl={slotMedia[0].vimeoUrl ?? slotMedia[0].videoSrc}
+              previewPoster={slotMedia[0].previewPoster}
+              previewPosterLQIP={slotMedia[0].previewPosterLQIP}
+              bgColor={slotMedia[0].bgColor}
+              onVideoReady={markReady}
+            />
+          )}
+        </div>
+        <div
+          ref={(el) => { setSlotRef(1)(el) }}
+          className="absolute inset-0"
+          style={{ pointerEvents: 'none' }}
+        >
+          {slotMedia[1] && (
+            <BackgroundMedia
+              variant="preview"
+              previewUrl={slotMedia[1].previewUrl ?? slotMedia[1].videoSrc}
+              mobilePreviewUrl={slotMedia[1].mobilePreviewUrl}
+              vimeoUrl={slotMedia[1].vimeoUrl ?? slotMedia[1].videoSrc}
+              previewPoster={slotMedia[1].previewPoster}
+              previewPosterLQIP={slotMedia[1].previewPosterLQIP}
+              bgColor={slotMedia[1].bgColor}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Desktop Grid */}
+      <section className="relative z-10 flex min-h-screen w-full md:px-12 px-4 items-center justify-center">
+        <ul
+          ref={listRef}
+          className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-y-10"
+        >
+          {visibleProjects.map((project, index) => {
+            const title = getTitle(project)
+            const isHighlighted = selectedIndex === index
+            const dimOthers = !isHighlighted
+
+            return (
+              <li
+                key={project?.slug ?? `${title}-${index}`}
+                className={`
+                  transition-opacity duration-300 ease-out
+                  first:justify-self-start last:justify-self-end
+                  [&:not(:first-child):not(:last-child)]:justify-self-center
+                  sm:[&:nth-child(2n+1)]:justify-self-start sm:[&:nth-child(2n)]:justify-self-end
+                  md:[&:nth-child(3n+1)]:justify-self-start md:[&:nth-child(3n+2)]:justify-self-center md:[&:nth-child(3n)]:justify-self-end
+                  lg:[&:nth-child(4n+1)]:justify-self-start lg:[&:nth-child(4n+2)]:justify-self-center lg:[&:nth-child(4n+3)]:justify-self-center lg:[&:nth-child(4n)]:justify-self-end
+                  xl:[&:nth-child(5n+1)]:justify-self-start xl:[&:nth-child(5n+2)]:justify-self-center xl:[&:nth-child(5n+3)]:justify-self-center xl:[&:nth-child(5n+4)]:justify-self-center xl:[&:nth-child(5n)]:justify-self-end
+                  ${dimOthers ? 'opacity-40' : 'opacity-100'}
+                `}
+              >
+                <div
+                  onClick={() => handleProjectClick(project?.slug)}
+                  className="block text-left group outline-none cursor-pointer"
+                  data-reveal
+                  style={hiddenStyle}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      handleProjectClick(project?.slug)
+                    }
+                  }}
+                >
+                  <h3
+                    className={`max-w-[20ch] leading-tight font-semibold text-2xl transition-all duration-300 ease-out ${
+                      isHighlighted ? 'text-white' : 'text-white/90'
+                    }`}
+                    onMouseEnter={() => !isNavigating && select(index)}
+                  >
+                    {title}
+                  </h3>
+                  {project?.director && (
+                    <p
+                      className={`text-base transition-all duration-300 ease-out ${
+                        isHighlighted ? 'text-white/90' : 'text-white/70'
+                      }`}
+                    >
+                      {project.director}
+                    </p>
+                  )}
+                </div>
+              </li>
+            )
+          })}
+        </ul>
+      </section>
+    </main>
   )
 }

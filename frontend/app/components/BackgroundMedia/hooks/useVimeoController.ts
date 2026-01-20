@@ -1,7 +1,17 @@
 // components/background-media/hooks/useVimeoController.ts
 import { useEffect, useMemo, useRef, useState } from "react";
-import Player from "@vimeo/player";
 import { normalizeUrl } from "../utils";
+
+// Lazy load Vimeo player - it's 50KB+ and only needed for full variant with controls
+type VimeoPlayer = import("@vimeo/player").default;
+let PlayerPromise: Promise<typeof import("@vimeo/player").default> | null = null;
+
+function getPlayer() {
+  if (!PlayerPromise) {
+    PlayerPromise = import("@vimeo/player").then((m) => m.default);
+  }
+  return PlayerPromise;
+}
 
 type Options = {
   vimeoSrc?: string; // full URL
@@ -10,7 +20,7 @@ type Options = {
 
 export function useVimeoController({ vimeoSrc, controls }: Options) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
-  const playerRef = useRef<Player | null>(null);
+  const playerRef = useRef<VimeoPlayer | null>(null);
 
   const [duration, setDuration] = useState(0);
   const [current, setCurrent] = useState(0);
@@ -24,68 +34,77 @@ export function useVimeoController({ vimeoSrc, controls }: Options) {
     const iframe = iframeRef.current;
     if (!iframe) return;
 
+    let destroyed = false;
+
+    // Clean up existing player
     if (playerRef.current) {
       playerRef.current.unload().catch(() => {});
       playerRef.current = null;
     }
 
-    const player = new Player(iframe, {
-      dnt: true,
-      // playsinline here is accepted by PlayerOptions; but if your types complain, it’s harmless to keep:
-      // @ts-ignore
-      playsinline: true,
-    });
+    // Lazy load and initialize Vimeo player
+    getPlayer().then((Player) => {
+      if (destroyed) return;
 
-    playerRef.current = player;
-    setReady(false);
+      const player = new Player(iframe, {
+        dnt: true,
+        // playsinline here is accepted by PlayerOptions; but if your types complain, it's harmless to keep:
+        // @ts-ignore
+        playsinline: true,
+      });
 
-    let destroyed = false;
+      playerRef.current = player;
+      setReady(false);
 
-    player.on("loaded", async () => {
-      try {
-        const [d] = await Promise.all([
-          player.getDuration(),
-          player.getVideoWidth().catch(() => undefined),
-          player.getVideoHeight().catch(() => undefined),
-          player.getVolume().catch(() => undefined),
-          player.getLoop().catch(() => undefined),
-        ]);
-        setDuration(d || 0);
-        setReady(true);
+      player.on("loaded", async () => {
+        if (destroyed) return;
+        try {
+          const [d] = await Promise.all([
+            player.getDuration(),
+            player.getVideoWidth().catch(() => undefined),
+            player.getVideoHeight().catch(() => undefined),
+            player.getVolume().catch(() => undefined),
+            player.getLoop().catch(() => undefined),
+          ]);
+          setDuration(d || 0);
+          setReady(true);
 
-        await player.setLoop(true);
-        await player.setVolume(!controls ? 0 : 1);
-      } catch (e) {
-        // ignore load errors
-      }
-    });
+          await player.setLoop(true);
+          await player.setVolume(!controls ? 0 : 1);
+        } catch (e) {
+          // ignore load errors
+        }
+      });
 
-    player.on("timeupdate", (data: any) => {
-      if (typeof data?.seconds === "number") setCurrent(data.seconds);
-    });
+      player.on("timeupdate", (data: any) => {
+        if (typeof data?.seconds === "number") setCurrent(data.seconds);
+      });
 
-    player.on("play", () => {
-      setPlaying(true);
-    });
-    player.on("pause", () => {
-      setPlaying(false);
-    });
+      player.on("play", () => {
+        setPlaying(true);
+      });
+      player.on("pause", () => {
+        setPlaying(false);
+      });
 
-    player.on("error", (e: any) => {
-      const message: string | undefined = typeof e?.message === "string" ? e.message : undefined;
-      if (
-        e?.name === "TypeError" &&
-        message &&
-        message.includes("reading 'includes'")
-      ) {
-        return;
-      }
+      player.on("error", (e: any) => {
+        const message: string | undefined = typeof e?.message === "string" ? e.message : undefined;
+        if (
+          e?.name === "TypeError" &&
+          message &&
+          message.includes("reading 'includes'")
+        ) {
+          return;
+        }
+      });
     });
 
     return () => {
       destroyed = true;
-      player.unload().catch(() => {});
-      playerRef.current = null;
+      if (playerRef.current) {
+        playerRef.current.unload().catch(() => {});
+        playerRef.current = null;
+      }
     };
   }, [normalizedSrc, controls, vimeoSrc]); // re-init when URL or settings change
 

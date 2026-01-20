@@ -6,6 +6,7 @@ import { useSequencedReveal } from '../utils/useSequencedReveal'
 import { usePageTransitionVideo } from '../utils/usePageTransitionVideo'
 import { useFadeOutNavigation } from '../utils/useFadeOutNavigation'
 import { useVideoReady } from '../utils/useVideoReady'
+import { useCenteredItemDetection } from '../utils/useCenteredItemDetection'
 import { REVEAL_HIDDEN_STYLE, REVEAL_HIDDEN_STYLE_SIMPLE } from '../utils/useRevealAnimation'
 import BackgroundMedia from '../components/BackgroundMedia/BackgroundMedia'
 import { useGSAP } from '@gsap/react'
@@ -133,55 +134,22 @@ export default function DirectorsClient() {
     }
   }, [isReady, isMobile, videoReady, start])
 
-  // Mobile: Simple scroll detection - find centered item
-  useEffect(() => {
-    if (!isMobile || !scrollContainerRef.current) return
-
-    const container = scrollContainerRef.current
-    const items = container.querySelectorAll('[data-index]')
-    if (items.length === 0) return
-
-    const findCenteredItem = () => {
-      const containerRect = container.getBoundingClientRect()
-      const centerY = containerRect.top + containerRect.height / 2
-
-      let closestIndex = 0
-      let closestDistance = Infinity
-
-      items.forEach((item, index) => {
-        const rect = item.getBoundingClientRect()
-        const itemCenterY = rect.top + rect.height / 2
-        const distance = Math.abs(itemCenterY - centerY)
-
-        if (distance < closestDistance) {
-          closestDistance = distance
-          closestIndex = index
-        }
-      })
-
-      if (closestIndex !== activeIndex) {
-        setActiveIndex(closestIndex)
-        const d = directors[closestIndex]
-        if (d) {
-          crossfadeTo(getMedia(d, closestIndex))
-        }
-      }
+  // Mobile: Scroll detection using IntersectionObserver (NO layout thrashing!)
+  // This replaces the old getBoundingClientRect loop which caused 76ms composite spikes
+  const handleActiveIndexChange = useCallback((index: number) => {
+    setActiveIndex(index)
+    const d = directors[index]
+    if (d) {
+      crossfadeTo(getMedia(d, index))
     }
+  }, [crossfadeTo])
 
-    // Initial check
-    findCenteredItem()
-
-    // Listen for scroll
-    const handleScroll = () => {
-      requestAnimationFrame(findCenteredItem)
-    }
-
-    container.addEventListener('scroll', handleScroll, { passive: true })
-
-    return () => {
-      container.removeEventListener('scroll', handleScroll)
-    }
-  }, [isMobile, activeIndex, crossfadeTo])
+  useCenteredItemDetection(
+    scrollContainerRef,
+    '[data-index]',
+    handleActiveIndexChange,
+    { enabled: isMobile }
+  )
 
   // Desktop handlers
   const select = (i: number) => {
@@ -217,112 +185,19 @@ export default function DirectorsClient() {
     }
   }, { dependencies: [isMobile, handleFadeOutAndNavigate] })
 
-  return (
-    <>
-      {/* Desktop Layout */}
-      <main
-        ref={mainRef}
-        className={`relative min-h-dvh w-full overflow-hidden text-white ${isMobile ? 'hidden' : 'block'}`}
-      >
-        {/* BACKGROUND (preview variant) */}
-        <div className="absolute inset-0 z-0 bg-black">
-          <div
-            ref={el => { setSlotRef(0)(el) }}
-            className="absolute inset-0 will-change-opacity will-change-transform"
-            style={{ pointerEvents: 'none' }}
-          >
-            {slotMedia[0] && (
-              <BackgroundMedia
-                variant="preview"
-                previewUrl={slotMedia[0].previewUrl ?? slotMedia[0].videoSrc}
-                mobilePreviewUrl={slotMedia[0].mobilePreviewUrl}
-                vimeoUrl={slotMedia[0].vimeoUrl ?? slotMedia[0].videoSrc}
-                previewPoster={slotMedia[0].previewPoster}
-                previewPosterLQIP={slotMedia[0].previewPosterLQIP}
-                bgColor={slotMedia[0].bgColor}
-                onVideoReady={markReady}
-              />
-            )}
-          </div>
-          <div
-            ref={el => { setSlotRef(1)(el) }}
-            className="absolute inset-0 will-change-opacity will-change-transform"
-            style={{ pointerEvents: 'none' }}
-          >
-            {slotMedia[1] && (
-              <BackgroundMedia
-                variant="preview"
-                previewUrl={slotMedia[1].previewUrl ?? slotMedia[1].videoSrc}
-                mobilePreviewUrl={slotMedia[1].mobilePreviewUrl}
-                vimeoUrl={slotMedia[1].vimeoUrl ?? slotMedia[1].videoSrc}
-                previewPoster={slotMedia[1].previewPoster}
-                previewPosterLQIP={slotMedia[1].previewPosterLQIP}
-                bgColor={slotMedia[1].bgColor}
-              />
-            )}
-          </div>
-        </div>
-
-        {/* FOREGROUND LIST */}
-        <section className="relative min-h-dvh w-full pt-32">
-          <div className="mx-auto px-6 md:px-12">
-            <ul
-              ref={listRef}
-              className="md:space-y-2 space-y-6"
-              onMouseLeave={resetToDefault}
-              onTouchEnd={resetToDefault}
-            >
-            {directors.map((d, i) => {
-              const isActive = i === desktopActiveIndex
-              return (
-                <li
-                  key={d.slug}
-                  className={`transition-opacity duration-200 ${
-                    isActive ? 'opacity-100' : 'opacity-70'
-                  }`}
-                >
-                  <div
-                    data-reveal
-                    style={REVEAL_HIDDEN_STYLE}
-                  >
-                    <a
-                      href={`/directors/${d.slug}`}
-                      onClick={(e) => handleDirectorClick(e, d.slug)}
-                      aria-current={isActive ? 'page' : undefined}
-                      className="block outline-none"
-                      onMouseEnter={() => select(i)}
-                      onFocus={() => select(i)}
-                      onTouchStart={() => select(i)}
-                    >
-                      <span
-                        className={[
-                          'block leading-[1.05] tracking-tight transition-all duration-200',
-                          'md:text-6xl text-3xl',
-                          isActive ? 'text-white' : 'text-white/80',
-                        ].join(' ')}
-                      >
-                        {d.name}
-                      </span>
-                    </a>
-                  </div>
-                </li>
-              )
-            })}
-            </ul>
-          </div>
-        </section>
-      </main>
-
-      {/* Mobile Layout - IMPORTANT: Mount video immediately, just hide container */}
-      <main className={`fixed inset-0 ${isMobile ? 'block' : 'hidden'}`}>
+  // PERFORMANCE FIX: Only render the layout for current device
+  // Previously both desktop AND mobile components mounted simultaneously,
+  // causing doubled video loading and effects even when hidden with CSS
+  if (isMobile) {
+    // Mobile Layout
+    return (
+      <main className="fixed inset-0">
         {/* Background video - crossfade slots */}
         <div className="fixed inset-0 z-0 bg-black">
           <div
-            ref={(el) => { if (isMobile) setSlotRef(0)(el) }}
+            ref={(el) => { setSlotRef(0)(el) }}
             className="absolute inset-0"
           >
-            {/* Mount BackgroundMedia immediately when slotMedia exists
-                so video can start loading. Container visibility handles show/hide */}
             {slotMedia[0] && (
               <BackgroundMedia
                 variant="preview"
@@ -336,7 +211,7 @@ export default function DirectorsClient() {
             )}
           </div>
           <div
-            ref={(el) => { if (isMobile) setSlotRef(1)(el) }}
+            ref={(el) => { setSlotRef(1)(el) }}
             className="absolute inset-0"
           >
             {slotMedia[1] && (
@@ -386,6 +261,102 @@ export default function DirectorsClient() {
           </ul>
         </div>
       </main>
-    </>
+    )
+  }
+
+  // Desktop Layout
+  return (
+    <main
+      ref={mainRef}
+      className="relative min-h-dvh w-full overflow-hidden text-white"
+    >
+      {/* BACKGROUND (preview variant) */}
+      <div className="absolute inset-0 z-0 bg-black">
+        <div
+          ref={el => { setSlotRef(0)(el) }}
+          className="absolute inset-0"
+          style={{ pointerEvents: 'none' }}
+        >
+          {slotMedia[0] && (
+            <BackgroundMedia
+              variant="preview"
+              previewUrl={slotMedia[0].previewUrl ?? slotMedia[0].videoSrc}
+              mobilePreviewUrl={slotMedia[0].mobilePreviewUrl}
+              vimeoUrl={slotMedia[0].vimeoUrl ?? slotMedia[0].videoSrc}
+              previewPoster={slotMedia[0].previewPoster}
+              previewPosterLQIP={slotMedia[0].previewPosterLQIP}
+              bgColor={slotMedia[0].bgColor}
+              onVideoReady={markReady}
+            />
+          )}
+        </div>
+        <div
+          ref={el => { setSlotRef(1)(el) }}
+          className="absolute inset-0"
+          style={{ pointerEvents: 'none' }}
+        >
+          {slotMedia[1] && (
+            <BackgroundMedia
+              variant="preview"
+              previewUrl={slotMedia[1].previewUrl ?? slotMedia[1].videoSrc}
+              mobilePreviewUrl={slotMedia[1].mobilePreviewUrl}
+              vimeoUrl={slotMedia[1].vimeoUrl ?? slotMedia[1].videoSrc}
+              previewPoster={slotMedia[1].previewPoster}
+              previewPosterLQIP={slotMedia[1].previewPosterLQIP}
+              bgColor={slotMedia[1].bgColor}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* FOREGROUND LIST */}
+      <section className="relative min-h-dvh w-full pt-32">
+        <div className="mx-auto px-6 md:px-12">
+          <ul
+            ref={listRef}
+            className="md:space-y-2 space-y-6"
+            onMouseLeave={resetToDefault}
+            onTouchEnd={resetToDefault}
+          >
+          {directors.map((d, i) => {
+            const isActive = i === desktopActiveIndex
+            return (
+              <li
+                key={d.slug}
+                className={`transition-opacity duration-200 ${
+                  isActive ? 'opacity-100' : 'opacity-70'
+                }`}
+              >
+                <div
+                  data-reveal
+                  style={REVEAL_HIDDEN_STYLE}
+                >
+                  <a
+                    href={`/directors/${d.slug}`}
+                    onClick={(e) => handleDirectorClick(e, d.slug)}
+                    aria-current={isActive ? 'page' : undefined}
+                    className="block outline-none"
+                    onMouseEnter={() => select(i)}
+                    onFocus={() => select(i)}
+                    onTouchStart={() => select(i)}
+                  >
+                    <span
+                      className={[
+                        'block leading-[1.05] tracking-tight transition-all duration-200',
+                        'md:text-6xl text-3xl',
+                        isActive ? 'text-white' : 'text-white/80',
+                      ].join(' ')}
+                    >
+                      {d.name}
+                    </span>
+                  </a>
+                </div>
+              </li>
+            )
+          })}
+          </ul>
+        </div>
+      </section>
+    </main>
   )
 }

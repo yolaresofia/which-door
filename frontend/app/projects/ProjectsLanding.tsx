@@ -5,9 +5,7 @@ import dynamic from 'next/dynamic'
 // This eliminates hydration issues and ensures correct mobile detection from the start
 const ProjectsLandingClient = dynamic(() => import('./ProjectsLandingClient'), {
   ssr: false,
-  loading: () => (
-    <div className="fixed inset-0 bg-black" />
-  ),
+  loading: () => <div className="fixed inset-0 bg-black" />,
 })
 
 export default function ProjectsLanding() {

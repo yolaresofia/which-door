@@ -1,9 +1,9 @@
 'use client'
 
-import { useRef, useEffect, useState, useLayoutEffect } from 'react'
-import { gsap } from 'gsap'
+import { useRef, useEffect, useState } from 'react'
 import { fmt } from "./utils";
 import { useSequencedReveal } from '@/app/utils/useSequencedReveal'
+import { REVEAL_HIDDEN_STYLE } from '@/app/utils/useRevealAnimation'
 
 type Props = {
   title?: string;
@@ -48,13 +48,8 @@ export default function ControlsDesktop(props: Props) {
     },
   })
 
-  // CRITICAL: Hide elements immediately on mount BEFORE paint to prevent FOUC
-  // useLayoutEffect runs synchronously before browser paint
-  useLayoutEffect(() => {
-    if (!containerRef.current) return
-    const items = containerRef.current.querySelectorAll('[data-reveal]')
-    gsap.set(items, { opacity: 0, y: 20, scale: 0.98 })
-  }, [])
+  // Elements are hidden via inline styles (REVEAL_HIDDEN_STYLE) to prevent FOUC
+  // No useLayoutEffect needed - inline styles are applied synchronously during render
 
   // Start animation when video is ready
   useEffect(() => {
@@ -105,12 +100,13 @@ export default function ControlsDesktop(props: Props) {
         <div
           className="mr-4 min-w-0"
           data-reveal
+          style={REVEAL_HIDDEN_STYLE}
         >
           {title && <div className="text-base font-semibold leading-tight sm:text-2xl max-w-2xs">{title}</div>}
           {subtitle && <div className="text-white/85 truncate text-base">{subtitle}</div>}
         </div>
         <div className="ml-auto flex min-w-0 items-center gap-6">
-          <div data-reveal className="shrink-0">
+          <div data-reveal style={REVEAL_HIDDEN_STYLE} className="shrink-0">
             <button
               onClick={onTogglePlay}
               aria-label={playing ? "Pause" : "Play"}
@@ -130,10 +126,12 @@ export default function ControlsDesktop(props: Props) {
           </div>
           <div
             data-reveal
+            style={REVEAL_HIDDEN_STYLE}
             className="tabular-nums shrink-0 text-sm"
           >{fmt(current)}</div>
           <div
             data-reveal
+            style={REVEAL_HIDDEN_STYLE}
             className="relative h-[2px] w-32 cursor-pointer bg-white/30 sm:w-56 md:w-80 lg:w-[32rem]"
             onClick={handleBarClick}
             role="progressbar"
@@ -145,9 +143,10 @@ export default function ControlsDesktop(props: Props) {
           </div>
           <div
             data-reveal
+            style={REVEAL_HIDDEN_STYLE}
             className="tabular-nums shrink-0 text-sm"
           >{fmt(remaining)}</div>
-          <div data-reveal className="shrink-0">
+          <div data-reveal style={REVEAL_HIDDEN_STYLE} className="shrink-0">
             <button
               onClick={onToggleMute}
               className="text-sm underline-offset-4 decoration-white/60 hover:underline"
@@ -155,7 +154,7 @@ export default function ControlsDesktop(props: Props) {
               {muted ? "Sound OFF" : "Sound ON"}
             </button>
           </div>
-          <div data-reveal className="shrink-0">
+          <div data-reveal style={REVEAL_HIDDEN_STYLE} className="shrink-0">
             <button
               onClick={handleShareClick}
               className="text-sm underline-offset-4 decoration-white/60 hover:underline relative"
@@ -179,7 +178,7 @@ export default function ControlsDesktop(props: Props) {
               </span>
             </button>
           </div>
-          <div data-reveal className="shrink-0">
+          <div data-reveal style={REVEAL_HIDDEN_STYLE} className="shrink-0">
             <button
               onClick={onToggleFullscreen}
               className="text-sm underline-offset-4 decoration-white/60 hover:underline"

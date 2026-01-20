@@ -97,6 +97,7 @@ export default function BackgroundMedia({
   const [videoHasStarted, setVideoHasStarted] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(true);
   const controlsHideTimerRef = useRef<number | null>(null);
+
   const handleNativePlaybackStart = useCallback(() => {
     setVideoHasStarted(true);
   }, []);
@@ -267,32 +268,33 @@ export default function BackgroundMedia({
             data-touch-toggle-ignore
           />
         )}
-      </div>   {posterVisible && (
+      </div>
+      {/* Poster overlay - simplified for mobile performance
+          REMOVED: blur filter (not GPU-accelerated on mobile Safari, causes style invalidation)
+          REMOVED: shimmer animation (causes 76ms composite spikes on mobile)
+          KEPT: scale(1.05) for slight zoom effect (GPU-accelerated transform) */}
+      {posterVisible && (
         <div
-          className="pointer-events-none absolute inset-0 z-10 overflow-hidden bg-black transition-opacity ease-in-out"
-          style={{ opacity: posterOpacity, transitionDuration: `${POSTER_FADE_MS}ms` }}
+          className="pointer-events-none absolute inset-0 z-10 overflow-hidden bg-black"
+          style={{
+            opacity: posterOpacity,
+            transition: `opacity ${POSTER_FADE_MS}ms ease-in-out`,
+            willChange: posterPhase === 'fading' ? 'opacity' : 'auto',
+          }}
         >
           <Image
             src={previewPoster as string}
             alt=""
             fill
-            className="object-cover transform"
-            style={{ filter: "blur(22px)", transform: "scale(1.1)" }}
+            className="object-cover"
+            style={{ transform: 'scale(1.05)' }}
             sizes="100vw"
             priority={variant === "preview"}
+            fetchPriority="high"
             placeholder={previewPosterLQIP ? "blur" : "empty"}
             blurDataURL={previewPosterLQIP}
           />
           <div className="absolute inset-0 bg-black/10" />
-          {posterPhase === "shown" && (
-            <div
-              className="absolute inset-0"
-              style={{
-                background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)",
-                animation: "shimmer 2s infinite",
-              }}
-            />
-          )}
         </div>
       )}
       {/* controls only for full variant */}
