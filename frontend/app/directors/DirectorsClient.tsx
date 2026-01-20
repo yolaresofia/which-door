@@ -6,7 +6,6 @@ import { useSequencedReveal } from '../utils/useSequencedReveal'
 import { usePageTransitionVideo } from '../utils/usePageTransitionVideo'
 import { useFadeOutNavigation } from '../utils/useFadeOutNavigation'
 import { useVideoReady } from '../utils/useVideoReady'
-import { useCenteredItemDetection } from '../utils/useCenteredItemDetection'
 import { REVEAL_HIDDEN_STYLE, REVEAL_HIDDEN_STYLE_SIMPLE } from '../utils/useRevealAnimation'
 import BackgroundMedia from '../components/BackgroundMedia/BackgroundMedia'
 import { useGSAP } from '@gsap/react'
@@ -134,22 +133,56 @@ export default function DirectorsClient() {
     }
   }, [isReady, isMobile, videoReady, start])
 
-  // Mobile: Scroll detection using IntersectionObserver (NO layout thrashing!)
-  // This replaces the old getBoundingClientRect loop which caused 76ms composite spikes
-  const handleActiveIndexChange = useCallback((index: number) => {
-    setActiveIndex(index)
-    const d = directors[index]
-    if (d) {
-      crossfadeTo(getMedia(d, index))
-    }
-  }, [crossfadeTo])
+  // Mobile: Simple scroll detection - find centered item
+  // Uses getBoundingClientRect which works reliably across all browsers
+  useEffect(() => {
+    if (!isMobile || !scrollContainerRef.current) return
 
-  useCenteredItemDetection(
-    scrollContainerRef,
-    '[data-index]',
-    handleActiveIndexChange,
-    { enabled: isMobile }
-  )
+    const container = scrollContainerRef.current
+    const items = container.querySelectorAll('[data-index]')
+    if (items.length === 0) return
+
+    const findCenteredItem = () => {
+      const containerRect = container.getBoundingClientRect()
+      const centerY = containerRect.top + containerRect.height / 2
+
+      let closestIndex = 0
+      let closestDistance = Infinity
+
+      items.forEach((item, index) => {
+        const rect = item.getBoundingClientRect()
+        const itemCenterY = rect.top + rect.height / 2
+        const distance = Math.abs(itemCenterY - centerY)
+
+        if (distance < closestDistance) {
+          closestDistance = distance
+          closestIndex = index
+        }
+      })
+
+      if (closestIndex !== activeIndex) {
+        setActiveIndex(closestIndex)
+        const d = directors[closestIndex]
+        if (d) {
+          crossfadeTo(getMedia(d, closestIndex))
+        }
+      }
+    }
+
+    // Initial check
+    findCenteredItem()
+
+    // Listen for scroll
+    const handleScroll = () => {
+      requestAnimationFrame(findCenteredItem)
+    }
+
+    container.addEventListener('scroll', handleScroll, { passive: true })
+
+    return () => {
+      container.removeEventListener('scroll', handleScroll)
+    }
+  }, [isMobile, activeIndex, crossfadeTo])
 
   // Desktop handlers
   const select = (i: number) => {
