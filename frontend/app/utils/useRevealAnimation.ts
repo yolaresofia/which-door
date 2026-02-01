@@ -2,6 +2,12 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { gsap } from 'gsap'
+import {
+  getRevealConfig,
+  GPU_HINTS,
+  shouldSkipAnimation,
+  getIsMobile,
+} from './animationConfig'
 
 /**
  * Initial hidden styles to apply via inline style prop.
@@ -72,13 +78,17 @@ type RevealAnimationReturn = {
  * ```
  */
 export function useRevealAnimation(options: RevealAnimationOptions = {}): RevealAnimationReturn {
+  // Get device-aware defaults from config
+  const isMobile = getIsMobile()
+  const config = getRevealConfig(isMobile)
+
   const {
     skip = false,
-    duration = 0.6,
+    duration = config.duration,
     delay = 50,
-    stagger = 0.08,
-    ease = 'power2.out',
-    includeScale = true,
+    stagger = config.stagger,
+    ease = config.ease,
+    // includeScale is kept for API compatibility but not currently used
     onComplete,
   } = options
 
@@ -109,20 +119,40 @@ export function useRevealAnimation(options: RevealAnimationOptions = {}): Reveal
     const items = containerRef.current.querySelectorAll('[data-reveal], [data-mobile-reveal]')
     if (items.length === 0) return
 
+    // Check if we should skip animation (too many items on mobile, or reduced motion)
+    if (shouldSkipAnimation(items.length, isMobile)) {
+      gsap.set(items, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        clearProps: 'transform',
+      })
+      setHasRevealed(true)
+      onComplete?.()
+      return
+    }
+
     // Kill any existing animation
     if (animationRef.current) {
       animationRef.current.kill()
     }
 
     const timeoutId = setTimeout(() => {
-      // IMPORTANT: Do NOT call gsap.set() to reset initial state!
-      // Elements already have inline styles (REVEAL_HIDDEN_STYLE).
-      // Calling gsap.set() causes a redundant repaint and creates glitch.
-      // Just apply GPU hints for smoother animation.
-      gsap.set(items, {
-        willChange: 'transform, opacity',
-        force3D: true,
-      })
+      // SURGICAL GPU HINTS: Only apply to desktop, and only right before animation
+      // Mobile: Skip GPU hints entirely - CSS transforms are sufficient
+      // This prevents GPU memory pressure on mobile Safari
+      if (config.useGPUHints) {
+        gsap.set(items, GPU_HINTS.apply(items))
+      }
+
+      // Build stagger config (mobile: no stagger, desktop: full stagger)
+      const staggerConfig = isMobile
+        ? stagger // Will be 0 from config
+        : {
+            each: stagger,
+            from: 'start' as const,
+            ease: 'power2.inOut',
+          }
 
       // Animate in - gsap.to() will animate FROM current inline styles TO target
       animationRef.current = gsap.to(items, {
@@ -131,16 +161,13 @@ export function useRevealAnimation(options: RevealAnimationOptions = {}): Reveal
         scale: 1,
         duration,
         ease,
-        stagger: {
-          each: stagger,
-          from: 'start',
-          ease: 'power2.inOut',
-        },
+        stagger: staggerConfig,
         overwrite: 'auto',
         onComplete: () => {
           setHasRevealed(true)
-          // Clear transform and will-change for performance
-          gsap.set(items, { clearProps: 'transform', willChange: 'auto' })
+          // CRITICAL: Clear GPU hints IMMEDIATELY after animation
+          // Safe to clear transform here since these elements started with REVEAL_HIDDEN_STYLE
+          gsap.set(items, GPU_HINTS.clearWithTransform())
           onComplete?.()
         },
       })
@@ -152,7 +179,7 @@ export function useRevealAnimation(options: RevealAnimationOptions = {}): Reveal
         animationRef.current.kill()
       }
     }
-  }, [skip, hasRevealed, duration, delay, stagger, ease, includeScale, onComplete])
+  }, [skip, hasRevealed, duration, delay, stagger, ease, isMobile, config.useGPUHints, onComplete])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -181,6 +208,12 @@ export function useRevealAnimation(options: RevealAnimationOptions = {}): Reveal
 /**
  * Combined hook for pages that need both desktop (sequenced) and mobile (simple) reveal.
  * Handles the mobile detection internally and provides the right behavior for each.
+ *
+ * MOBILE CHEAPER BY DESIGN:
+ * - No stagger (all items animate together)
+ * - Shorter durations
+ * - Immediate show for many items
+ * This is professional cross-device behavior, not "lowering quality"
  */
 export function usePageRevealAnimation(options: {
   /** Callback when video is ready (desktop) */
@@ -198,6 +231,10 @@ export function usePageRevealAnimation(options: {
   const [desktopRevealed, setDesktopRevealed] = useState(false)
   const [mobileRevealed, setMobileRevealed] = useState(false)
 
+  // Get device-aware configs
+  const desktopConfig = getRevealConfig(false)
+  const mobileConfig = getRevealConfig(true)
+
   // Detect mobile
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024)
@@ -206,69 +243,67 @@ export function usePageRevealAnimation(options: {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Desktop reveal
+  // Desktop reveal - with GPU hints and stagger
   const revealDesktop = useCallback(() => {
     if (isMobile || desktopRevealed || !desktopContainerRef.current) return
 
     const items = desktopContainerRef.current.querySelectorAll('[data-reveal]')
     if (items.length === 0) return
 
-    // IMPORTANT: Do NOT call gsap.set() to reset opacity/y/scale!
-    // Elements already have inline styles. Just apply GPU hints.
-    gsap.set(items, {
-      willChange: 'transform, opacity',
-      force3D: true,
-    })
+    // SURGICAL: Apply GPU hints only to desktop, only right before animation
+    gsap.set(items, GPU_HINTS.apply(items))
 
     gsap.to(items, {
       opacity: 1,
       y: 0,
       scale: 1,
-      duration: 0.8,
-      ease: 'power2.out',
+      duration: desktopConfig.duration,
+      ease: desktopConfig.ease,
       stagger: {
-        each: 0.08,
+        each: typeof desktopConfig.stagger === 'number' ? desktopConfig.stagger : 0.08,
         from: 'start',
         ease: 'power2.inOut',
       },
       overwrite: 'auto',
       onComplete: () => {
         setDesktopRevealed(true)
-        gsap.set(items, { clearProps: 'transform', willChange: 'auto' })
+        // CRITICAL: Clear GPU hints immediately
+        // Safe to clear transform - elements started with REVEAL_HIDDEN_STYLE
+        gsap.set(items, GPU_HINTS.clearWithTransform())
       },
     })
-  }, [isMobile, desktopRevealed])
+  }, [isMobile, desktopRevealed, desktopConfig])
 
-  // Mobile reveal
+  // Mobile reveal - CHEAPER BY DESIGN: no stagger, shorter duration, no GPU hints
   const revealMobile = useCallback(() => {
     if (!isMobile || mobileRevealed || !mobileContainerRef.current) return
 
     const items = mobileContainerRef.current.querySelectorAll('[data-mobile-reveal]')
     if (items.length === 0) return
 
-    // IMPORTANT: Do NOT call gsap.set() to reset opacity/y!
-    // Elements already have inline styles. Just apply GPU hints.
-    gsap.set(items, {
-      willChange: 'transform, opacity',
-      force3D: true,
-    })
+    // Check if we should skip animation entirely (too many items)
+    if (shouldSkipAnimation(items.length, true)) {
+      gsap.set(items, { opacity: 1, y: 0, clearProps: 'transform' })
+      setMobileRevealed(true)
+      return
+    }
 
+    // MOBILE: NO GPU hints (willChange/force3D cause Safari issues)
+    // NO stagger (all animate together for smoothness)
+    // SHORTER duration (snappy feel)
     gsap.to(items, {
       opacity: 1,
       y: 0,
-      duration: 0.6,
-      ease: 'power2.out',
-      stagger: {
-        each: 0.08,
-        from: 'start',
-      },
+      duration: mobileConfig.duration,
+      ease: mobileConfig.ease,
+      stagger: 0, // NO stagger on mobile
       overwrite: 'auto',
       onComplete: () => {
         setMobileRevealed(true)
-        gsap.set(items, { clearProps: 'transform', willChange: 'auto' })
+        gsap.set(items, { clearProps: 'transform' })
       },
     })
-  }, [isMobile, mobileRevealed])
+  }, [isMobile, mobileRevealed, mobileConfig])
 
   // Show mobile immediately without animation
   const showMobileImmediately = useCallback(() => {

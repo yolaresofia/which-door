@@ -1,8 +1,9 @@
 'use client'
 
-import { useRef, useState, useCallback, useEffect } from 'react'
+import { useRef, useState, useCallback } from 'react'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
+import { getCrossfadeConfig, getIsReducedMotion, getIsMobile } from './animationConfig'
 
 export type Media = {
   id: string | number;
@@ -17,13 +18,15 @@ export type Media = {
 };
 
 export function useCrossfadeMedia(initial: Media, opts?: { duration?: number, waitForLoad?: boolean }) {
-  const D = opts?.duration ?? 0.45
+  // Get device-aware config
+  const isMobile = getIsMobile()
+  const config = getCrossfadeConfig(isMobile)
+
+  const D = opts?.duration ?? config.duration
   // NEVER wait for video load - BackgroundMedia handles showing poster until video plays
   // This prevents any black screen during transitions
   const waitForLoad = opts?.waitForLoad ?? false
-  const prefersReduced =
-    typeof window !== 'undefined' &&
-    window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
+  const prefersReduced = getIsReducedMotion()
 
   const [slots, setSlots] = useState<[Media | null, Media | null]>([initial, null])
   const [currentSlot, setCurrentSlot] = useState<0 | 1>(0)

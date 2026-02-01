@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { gsap } from 'gsap'
 import { usePageTransitionVideo } from './usePageTransitionVideo'
+import { getFadeOutConfig, GPU_HINTS } from './animationConfig'
 
 type FadeOutOptions = {
   selector?: string
@@ -87,32 +88,35 @@ export function useFadeOutNavigation(
           clearTimeout(navigationTimeoutRef.current)
         }
 
-        // Animation configuration - consistent with project detail page
-        // Exit animations use 'from: end' for right-to-left stagger (reverse of enter)
+        // Get device-aware config
+        const config = getFadeOutConfig(isMobile)
+
+        // Animation configuration - MOBILE CHEAPER BY DESIGN
+        // Mobile: No stagger, shorter duration, no GPU hints
+        // Desktop: Full stagger, GPU hints for smoothness
         const animationConfig = isMobile ? {
           opacity: 0,
           scale: 0.95,
-          duration: 0.4,
-          ease: 'power2.in',
+          duration: config.duration,
+          ease: config.ease,
+          stagger: 0, // NO stagger on mobile - all items fade together
         } : {
           opacity: 0,
           y: -20,
           scale: 0.95,
-          duration: 0.5,
-          ease: 'power2.in',
-          stagger: {
-            each: 0.05,
-            from: 'end' as const, // Exit from last to first (right-to-left)
-            ease: 'power2.inOut',
-          },
+          duration: config.duration,
+          ease: config.ease,
+          stagger: config.stagger, // Full stagger on desktop
         }
 
-        // GPU acceleration hints for smoother animation
-        gsap.set(items, {
-          willChange: 'transform, opacity',
-          backfaceVisibility: 'hidden',
-          force3D: true
-        })
+        // SURGICAL GPU HINTS: Only apply on desktop, only right before animation
+        // Mobile: Skip entirely - GPU hints cause Safari performance issues
+        if (!isMobile) {
+          gsap.set(items, {
+            ...GPU_HINTS.apply(items),
+            backfaceVisibility: 'hidden',
+          })
+        }
 
         // Create the fade-out animation with error handling
         try {
@@ -123,8 +127,8 @@ export function useFadeOutNavigation(
             },
             onComplete: () => {
               console.log('✅ Fade-out animation complete, navigating...')
-              // Clean up will-change for performance
-              gsap.set(items, { willChange: 'auto', clearProps: 'backfaceVisibility' })
+              // CRITICAL: Clean up GPU hints immediately after animation
+              gsap.set(items, GPU_HINTS.clearAll())
               router.push(url)
             },
           })
