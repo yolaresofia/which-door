@@ -1,8 +1,10 @@
 'use client'
 
 import { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react'
+import BackgroundMedia from '../components/BackgroundMedia/BackgroundMedia'
 import { directors } from '../components/constants'
 import { useBackgroundMedia, type Media } from '../context/BackgroundMediaContext'
+import { useCrossfadeMedia } from '../utils/useCrossfadeMedia'
 import { useSequencedReveal } from '../utils/useSequencedReveal'
 import { useFadeOutNavigation } from '../utils/useFadeOutNavigation'
 import { REVEAL_HIDDEN_STYLE, REVEAL_HIDDEN_STYLE_SIMPLE } from '../utils/useRevealAnimation'
@@ -14,7 +16,7 @@ import { useGSAP } from '@gsap/react'
 
 const DEFAULT_INDEX = 3
 
-/** Convert a director to Media format for the global background */
+/** Convert a director to Media format */
 function directorToMedia(d: any, i: number): Media {
   return {
     id: d?.slug ?? i,
@@ -33,7 +35,20 @@ function directorToMedia(d: any, i: number): Media {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function DirectorsClient() {
+  // Device detection (CSR-only) - detect ONCE at mount
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024
+
+  // Global background context (for desktop)
   const { setBackground } = useBackgroundMedia()
+
+  // Default director index
+  const initialIdx = Number.isInteger(DEFAULT_INDEX) && directors[DEFAULT_INDEX] ? DEFAULT_INDEX : 0
+  const initialMedia = directorToMedia(directors[initialIdx], initialIdx)
+
+  // ─────────────────────────────────────────────────────────────
+  // LOCAL CROSSFADE (mobile only) - uses battle-tested BackgroundMedia
+  // ─────────────────────────────────────────────────────────────
+  const { setSlotRef, slotMedia, crossfadeTo } = useCrossfadeMedia(initialMedia, { duration: 0.45 })
 
   // ─────────────────────────────────────────────────────────────
   // STATE
@@ -42,8 +57,7 @@ export default function DirectorsClient() {
   const [activeIndex, setActiveIndex] = useState(0) // Mobile: which director is centered
   const [isReady, setIsReady] = useState(false)
 
-  // Device detection (CSR-only)
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024
+  const desktopActiveIndex = hoveredIndex ?? initialIdx
 
   // ─────────────────────────────────────────────────────────────
   // REFS
@@ -54,29 +68,27 @@ export default function DirectorsClient() {
   const hasSetInitialBgRef = useRef(false)
   const hasAnimatedRef = useRef(false)
 
-  // Default director index
-  const initialIdx = Number.isInteger(DEFAULT_INDEX) && directors[DEFAULT_INDEX] ? DEFAULT_INDEX : 0
-  const desktopActiveIndex = hoveredIndex ?? initialIdx
-
   // ─────────────────────────────────────────────────────────────
   // FADE-OUT NAVIGATION
   // ─────────────────────────────────────────────────────────────
   const { fadeOutAndNavigate, isNavigating } = useFadeOutNavigation(mainRef, {
     selector: '[data-reveal]',
     isMobile,
-    saveVideo: false, // No longer needed - global background persists
+    saveVideo: false,
   })
 
   // ─────────────────────────────────────────────────────────────
-  // SET INITIAL BACKGROUND ON MOUNT (useLayoutEffect for sync before paint)
+  // SET INITIAL BACKGROUND ON MOUNT (desktop uses global context)
   // ─────────────────────────────────────────────────────────────
   useLayoutEffect(() => {
     if (hasSetInitialBgRef.current) return
     hasSetInitialBgRef.current = true
 
-    // Set the default director's video as background
-    setBackground(directorToMedia(directors[initialIdx], initialIdx))
-  }, [initialIdx, setBackground])
+    // Desktop: set global background
+    if (!isMobile) {
+      setBackground(initialMedia)
+    }
+  }, [isMobile, initialMedia, setBackground])
 
   // ─────────────────────────────────────────────────────────────
   // DESKTOP REVEAL ANIMATION
@@ -121,7 +133,7 @@ export default function DirectorsClient() {
   }, [isReady, isMobile, start])
 
   // ─────────────────────────────────────────────────────────────
-  // MOBILE: Scroll detection for centered item
+  // MOBILE: Scroll detection for centered item (uses local crossfade)
   // ─────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!isMobile || !scrollContainerRef.current) return
@@ -152,7 +164,8 @@ export default function DirectorsClient() {
         setActiveIndex(closestIndex)
         const d = directors[closestIndex]
         if (d) {
-          setBackground(directorToMedia(d, closestIndex))
+          // Mobile: use local crossfade
+          crossfadeTo(directorToMedia(d, closestIndex))
         }
       }
     }
@@ -163,10 +176,10 @@ export default function DirectorsClient() {
     container.addEventListener('scroll', handleScroll, { passive: true })
 
     return () => container.removeEventListener('scroll', handleScroll)
-  }, [isMobile, activeIndex, setBackground])
+  }, [isMobile, activeIndex, crossfadeTo])
 
   // ─────────────────────────────────────────────────────────────
-  // HOVER HANDLERS (desktop)
+  // HOVER HANDLERS (desktop) - uses global context
   // ─────────────────────────────────────────────────────────────
   const select = useCallback((i: number) => {
     if (isNavigating || isMobile) return
@@ -179,8 +192,8 @@ export default function DirectorsClient() {
   const resetToDefault = useCallback(() => {
     if (isNavigating || isMobile) return
     setHoveredIndex(null)
-    setBackground(directorToMedia(directors[initialIdx], initialIdx))
-  }, [isNavigating, isMobile, initialIdx, setBackground])
+    setBackground(initialMedia)
+  }, [isNavigating, isMobile, initialMedia, setBackground])
 
   // ─────────────────────────────────────────────────────────────
   // NAVIGATION HANDLERS
@@ -202,11 +215,45 @@ export default function DirectorsClient() {
   // RENDER
   // ─────────────────────────────────────────────────────────────
 
-  // MOBILE LAYOUT
+  // MOBILE LAYOUT - uses LOCAL BackgroundMedia (battle-tested for iOS)
   if (isMobile) {
     return (
       <main className="fixed inset-0">
-        {/* NO local background - uses GlobalBackgroundMedia from layout */}
+        {/* LOCAL background video - crossfade slots (works well on iOS) */}
+        <div className="fixed inset-0 z-0 bg-black">
+          <div
+            ref={(el) => { setSlotRef(0)(el) }}
+            className="absolute inset-0"
+          >
+            {slotMedia[0] && (
+              <BackgroundMedia
+                variant="preview"
+                previewUrl={slotMedia[0].previewUrl}
+                mobilePreviewUrl={slotMedia[0].mobilePreviewUrl}
+                vimeoUrl={slotMedia[0].vimeoUrl}
+                previewPoster={slotMedia[0].previewPoster}
+                previewPosterLQIP={slotMedia[0].previewPosterLQIP}
+                bgColor={slotMedia[0].bgColor}
+              />
+            )}
+          </div>
+          <div
+            ref={(el) => { setSlotRef(1)(el) }}
+            className="absolute inset-0"
+          >
+            {slotMedia[1] && (
+              <BackgroundMedia
+                variant="preview"
+                previewUrl={slotMedia[1].previewUrl}
+                mobilePreviewUrl={slotMedia[1].mobilePreviewUrl}
+                vimeoUrl={slotMedia[1].vimeoUrl}
+                previewPoster={slotMedia[1].previewPoster}
+                previewPosterLQIP={slotMedia[1].previewPosterLQIP}
+                bgColor={slotMedia[1].bgColor}
+              />
+            )}
+          </div>
+        </div>
 
         {/* Scrollable list with snap */}
         <div
@@ -244,7 +291,7 @@ export default function DirectorsClient() {
     )
   }
 
-  // DESKTOP LAYOUT
+  // DESKTOP LAYOUT - uses GLOBAL background from layout
   return (
     <main
       ref={mainRef}

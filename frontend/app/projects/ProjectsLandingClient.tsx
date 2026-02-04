@@ -1,8 +1,10 @@
 'use client'
 
 import { useEffect, useLayoutEffect, useRef, useState, useCallback, useMemo } from 'react'
+import BackgroundMedia from '../components/BackgroundMedia'
 import { projects } from '../components/constants'
 import { useBackgroundMedia, type Media } from '../context/BackgroundMediaContext'
+import { useCrossfadeMedia } from '../utils/useCrossfadeMedia'
 import { useSequencedReveal } from '../utils/useSequencedReveal'
 import { useFadeOutNavigation } from '../utils/useFadeOutNavigation'
 import { useGSAP } from '@gsap/react'
@@ -19,7 +21,7 @@ const getPoster = (p: any) => p?.previewPoster ?? ''
 const getPosterLQIP = (p: any) => p?.previewPosterLQIP ?? ''
 const getBgColor = (p: any) => p?.bgColor ?? '#000'
 
-/** Convert a project to Media format for the global background */
+/** Convert a project to Media format */
 function projectToMedia(project: any, fallbackId?: number): Media {
   return {
     id: project?.slug ?? fallbackId ?? 0,
@@ -38,6 +40,10 @@ function projectToMedia(project: any, fallbackId?: number): Media {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function ProjectsLandingClient() {
+  // Device detection (CSR-only) - detect ONCE at mount
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024
+
+  // Global background context (for desktop)
   const { setBackground } = useBackgroundMedia()
 
   // ─────────────────────────────────────────────────────────────
@@ -49,6 +55,12 @@ export default function ProjectsLandingClient() {
   )
   const visibleProjects = homepageProjects.length ? homepageProjects : projects
   const first = visibleProjects[0] ?? projects[0]
+  const initialMedia = useMemo(() => projectToMedia(first), [first])
+
+  // ─────────────────────────────────────────────────────────────
+  // LOCAL CROSSFADE (mobile only) - uses battle-tested BackgroundMedia
+  // ─────────────────────────────────────────────────────────────
+  const { setSlotRef, slotMedia, crossfadeTo } = useCrossfadeMedia(initialMedia, { duration: 0.45 })
 
   // ─────────────────────────────────────────────────────────────
   // STATE
@@ -56,9 +68,6 @@ export default function ProjectsLandingClient() {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [activeIndex, setActiveIndex] = useState(0) // Mobile: which project is centered
   const [isReady, setIsReady] = useState(false)
-
-  // Device detection (CSR-only)
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024
 
   // ─────────────────────────────────────────────────────────────
   // REFS
@@ -75,22 +84,24 @@ export default function ProjectsLandingClient() {
   const { fadeOutAndNavigate, isNavigating } = useFadeOutNavigation(mainRef, {
     selector: '[data-reveal]',
     isMobile,
-    saveVideo: false, // No longer needed - global background persists
+    saveVideo: false,
   })
 
   // ─────────────────────────────────────────────────────────────
-  // SET INITIAL BACKGROUND ON MOUNT (useLayoutEffect for sync before paint)
+  // SET INITIAL BACKGROUND ON MOUNT (desktop uses global context)
   // ─────────────────────────────────────────────────────────────
   useLayoutEffect(() => {
     if (hasSetInitialBgRef.current) return
     hasSetInitialBgRef.current = true
 
-    // Set the first project's video as background
-    setBackground(projectToMedia(first))
-  }, [first, setBackground])
+    // Desktop: set global background
+    if (!isMobile) {
+      setBackground(initialMedia)
+    }
+  }, [isMobile, initialMedia, setBackground])
 
   // ─────────────────────────────────────────────────────────────
-  // HOVER HANDLER (desktop) - crossfade to hovered project
+  // HOVER HANDLER (desktop) - crossfade via global context
   // ─────────────────────────────────────────────────────────────
   const select = useCallback((i: number) => {
     setSelectedIndex(i)
@@ -143,7 +154,7 @@ export default function ProjectsLandingClient() {
   }, [isReady, isMobile, start])
 
   // ─────────────────────────────────────────────────────────────
-  // MOBILE: Scroll detection for centered item
+  // MOBILE: Scroll detection for centered item (uses local crossfade)
   // ─────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!isMobile || !scrollContainerRef.current) return
@@ -174,7 +185,8 @@ export default function ProjectsLandingClient() {
         setActiveIndex(closestIndex)
         const project = visibleProjects[closestIndex]
         if (project) {
-          setBackground(projectToMedia(project, closestIndex))
+          // Mobile: use local crossfade
+          crossfadeTo(projectToMedia(project, closestIndex))
         }
       }
     }
@@ -185,7 +197,7 @@ export default function ProjectsLandingClient() {
     container.addEventListener('scroll', handleScroll, { passive: true })
 
     return () => container.removeEventListener('scroll', handleScroll)
-  }, [isMobile, activeIndex, setBackground, visibleProjects])
+  }, [isMobile, activeIndex, crossfadeTo, visibleProjects])
 
   // ─────────────────────────────────────────────────────────────
   // NAVIGATION HANDLERS
@@ -208,11 +220,45 @@ export default function ProjectsLandingClient() {
   const hiddenStyle = { opacity: 0, transform: 'translateY(20px) scale(0.98)' }
   const hiddenStyleSimple = { opacity: 0, transform: 'translateY(20px)' }
 
-  // MOBILE LAYOUT
+  // MOBILE LAYOUT - uses LOCAL BackgroundMedia (battle-tested for iOS)
   if (isMobile) {
     return (
       <main className="fixed inset-0">
-        {/* NO local background - uses GlobalBackgroundMedia from layout */}
+        {/* LOCAL background video - crossfade slots (works well on iOS) */}
+        <div className="fixed inset-0 z-0 bg-black">
+          <div
+            ref={(el) => { setSlotRef(0)(el) }}
+            className="absolute inset-0"
+          >
+            {slotMedia[0] && (
+              <BackgroundMedia
+                variant="preview"
+                previewUrl={slotMedia[0].previewUrl}
+                mobilePreviewUrl={slotMedia[0].mobilePreviewUrl}
+                vimeoUrl={slotMedia[0].vimeoUrl}
+                previewPoster={slotMedia[0].previewPoster}
+                previewPosterLQIP={slotMedia[0].previewPosterLQIP}
+                bgColor={slotMedia[0].bgColor}
+              />
+            )}
+          </div>
+          <div
+            ref={(el) => { setSlotRef(1)(el) }}
+            className="absolute inset-0"
+          >
+            {slotMedia[1] && (
+              <BackgroundMedia
+                variant="preview"
+                previewUrl={slotMedia[1].previewUrl}
+                mobilePreviewUrl={slotMedia[1].mobilePreviewUrl}
+                vimeoUrl={slotMedia[1].vimeoUrl}
+                previewPoster={slotMedia[1].previewPoster}
+                previewPosterLQIP={slotMedia[1].previewPosterLQIP}
+                bgColor={slotMedia[1].bgColor}
+              />
+            )}
+          </div>
+        </div>
 
         {/* Scrollable list with snap */}
         <div
@@ -254,7 +300,7 @@ export default function ProjectsLandingClient() {
     )
   }
 
-  // DESKTOP LAYOUT
+  // DESKTOP LAYOUT - uses GLOBAL background from layout
   return (
     <main ref={mainRef} className="relative w-full min-h-screen">
       {/* NO local background - uses GlobalBackgroundMedia from layout */}
