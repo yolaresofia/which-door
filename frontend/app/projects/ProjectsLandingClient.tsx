@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { projects } from '../components/constants'
 import { useBackgroundMedia, type Media } from '../context/BackgroundMediaContext'
 import { useSequencedReveal } from '../utils/useSequencedReveal'
@@ -79,9 +79,9 @@ export default function ProjectsLandingClient() {
   })
 
   // ─────────────────────────────────────────────────────────────
-  // SET INITIAL BACKGROUND ON MOUNT
+  // SET INITIAL BACKGROUND ON MOUNT (useLayoutEffect for sync before paint)
   // ─────────────────────────────────────────────────────────────
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (hasSetInitialBgRef.current) return
     hasSetInitialBgRef.current = true
 

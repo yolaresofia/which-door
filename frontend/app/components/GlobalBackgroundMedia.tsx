@@ -19,8 +19,13 @@ const VideoSlot = memo(function VideoSlot({ media, slotIndex, onReady }: VideoSl
   const isMountedRef = useRef(true)
   const hasSignaledReadyRef = useRef(false)
 
-  // Detect mobile for using lower quality video
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024
+  // Detect mobile ONCE on mount (ref to avoid re-renders that reload video)
+  const isMobileRef = useRef<boolean | null>(null)
+  if (isMobileRef.current === null && typeof window !== 'undefined') {
+    isMobileRef.current = window.innerWidth < 1024
+  }
+  const isMobile = isMobileRef.current ?? false
+
   const videoSrc = isMobile && media?.mobilePreviewUrl
     ? media.mobilePreviewUrl
     : media?.previewUrl || media?.videoSrc
@@ -38,7 +43,7 @@ const VideoSlot = memo(function VideoSlot({ media, slotIndex, onReady }: VideoSl
     }
   }, [media, videoSrc, onReady, slotIndex])
 
-  // Cleanup on unmount
+  // Cleanup on unmount - matches MediaSurface cleanup
   useEffect(() => {
     isMountedRef.current = true
     return () => {
@@ -47,6 +52,12 @@ const VideoSlot = memo(function VideoSlot({ media, slotIndex, onReady }: VideoSl
       if (video) {
         try {
           video.pause()
+          video.onplay = null
+          video.onplaying = null
+          video.oncanplaythrough = null
+          video.oncanplay = null
+          video.onerror = null
+          video.onloadeddata = null
           video.removeAttribute('src')
           video.load()
         } catch {
@@ -56,23 +67,28 @@ const VideoSlot = memo(function VideoSlot({ media, slotIndex, onReady }: VideoSl
     }
   }, [])
 
-  // Force load on iOS Safari
+  // Force load on iOS Safari - matches MediaSurface
   useEffect(() => {
     const video = videoRef.current
     if (!video || !videoSrc) return
     video.load()
   }, [videoSrc])
 
-  const handleCanPlay = useCallback(() => {
-    const video = videoRef.current
-    if (!video || !isMountedRef.current) return
-    video.play().catch(() => {})
-    // Signal ready only once per media
+  // Signal ready on playback start - matches MediaSurface events
+  const handlePlaybackStart = useCallback(() => {
+    if (!isMountedRef.current) return
     if (!hasSignaledReadyRef.current) {
       hasSignaledReadyRef.current = true
       onReady(slotIndex)
     }
   }, [onReady, slotIndex])
+
+  // Called when video has loaded enough data to play
+  const handleCanPlay = useCallback(() => {
+    const video = videoRef.current
+    if (!video || !isMountedRef.current) return
+    video.play().catch(() => {})
+  }, [])
 
   // Color-only background (no video)
   if (!media || !videoSrc) {
@@ -103,7 +119,9 @@ const VideoSlot = memo(function VideoSlot({ media, slotIndex, onReady }: VideoSl
         preload="auto"
         autoPlay
         onCanPlay={handleCanPlay}
-        // Poster-first strategy for iOS: show poster while video loads
+        onPlay={handlePlaybackStart}
+        onPlaying={handlePlaybackStart}
+        onCanPlayThrough={handlePlaybackStart}
         poster={media.previewPoster}
       />
     </div>
