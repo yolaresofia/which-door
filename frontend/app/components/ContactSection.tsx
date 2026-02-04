@@ -6,6 +6,7 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import BackgroundMedia from "./BackgroundMedia/BackgroundMedia";
 import { REVEAL_HIDDEN_STYLE_SIMPLE } from "../utils/useRevealAnimation";
+import { useFadeOutNavigation } from "../utils/useFadeOutNavigation";
 
 type ContactSectionProps = {
   bgColor?: string;
@@ -14,6 +15,8 @@ type ContactSectionProps = {
   showScrim?: boolean;
   showLeftGradient?: boolean;
   previewPoster?: string;
+  /** When true, skip local background rendering - uses GlobalBackgroundMedia from layout */
+  useGlobalBackground?: boolean;
 };
 
 export default function ContactSection({
@@ -23,15 +26,34 @@ export default function ContactSection({
   showScrim = false,
   showLeftGradient = false,
   previewPoster,
+  useGlobalBackground = false,
 }: ContactSectionProps) {
   const useColorOnly = !!bgColor;
+  const showLocalBackground = !useGlobalBackground;
   const desktopLinkRef = useRef<HTMLAnchorElement | null>(null);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
+  const mainRef = useRef<HTMLElement | null>(null);
   const hasAnimatedRef = useRef(false);
 
   const [isMounted, setIsMounted] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Use the reusable fade-out navigation hook for exit animations
+  const { fadeOutAndNavigate } = useFadeOutNavigation(mainRef, {
+    selector: '[data-reveal]',
+    isMobile,
+    saveVideo: false,
+  });
 
   // Mark as mounted after hydration
   useEffect(() => {
@@ -53,10 +75,10 @@ export default function ContactSection({
     const items = contentRef.current.querySelectorAll('[data-reveal]');
     if (items.length === 0) return;
 
-    // On mobile or when using color only, animate immediately
-    // On desktop with video, wait for video ready
-    const isMobile = window.innerWidth < 1024;
-    const shouldWaitForVideo = !isMobile && !useColorOnly && !videoReady;
+    // On mobile, color only, or global background: animate immediately
+    // On desktop with LOCAL video, wait for video ready
+    const isMobileCheck = window.innerWidth < 1024;
+    const shouldWaitForVideo = !isMobileCheck && !useColorOnly && !useGlobalBackground && !videoReady;
 
     if (shouldWaitForVideo) {
       return;
@@ -79,7 +101,7 @@ export default function ContactSection({
         },
       }
     );
-  }, { dependencies: [isMounted, videoReady, useColorOnly] });
+  }, { dependencies: [isMounted, videoReady, useColorOnly, useGlobalBackground] });
 
   // Desktop hover animation for the "Have an idea?" / "Get in touch." swap
   useGSAP(() => {
@@ -130,28 +152,46 @@ export default function ContactSection({
     setVideoReady(true);
   };
 
-  return (
-    <main className="relative min-h-dvh w-full overflow-hidden text-white isolate">
-      {/* BACKGROUND LAYER */}
-      <div className="absolute inset-0 -z-10">
-        {useColorOnly ? (
-          <div className="h-full w-full" style={{ backgroundColor: bgColor }} />
-        ) : (
-          <BackgroundMedia
-            variant="preview"
-            previewUrl={previewUrl}
-            mobilePreviewUrl={mobilePreviewUrl}
-            previewPoster={previewPoster}
-            className="absolute inset-0"
-            onVideoReady={handleVideoReady}
-          />
-        )}
+  // Expose fade-out function globally for header navigation
+  useGSAP(() => {
+    if (isMobile) return;
 
-        {showScrim && <div className="absolute inset-0 bg-black/30" />}
-        {showLeftGradient && (
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-black/40 to-transparent" />
-        )}
-      </div>
+    const handleFadeOutAndNavigate = (url: string) => {
+      fadeOutAndNavigate(url);
+    };
+
+    // Make fade-out function available globally
+    (window as any).__contactFadeOut = handleFadeOutAndNavigate;
+
+    return () => {
+      delete (window as any).__contactFadeOut;
+    };
+  }, { dependencies: [isMobile, fadeOutAndNavigate] });
+
+  return (
+    <main ref={mainRef} className="relative min-h-dvh w-full overflow-hidden text-white isolate">
+      {/* BACKGROUND LAYER - only render if not using global background */}
+      {showLocalBackground && (
+        <div className="absolute inset-0 -z-10">
+          {useColorOnly ? (
+            <div className="h-full w-full" style={{ backgroundColor: bgColor }} />
+          ) : (
+            <BackgroundMedia
+              variant="preview"
+              previewUrl={previewUrl}
+              mobilePreviewUrl={mobilePreviewUrl}
+              previewPoster={previewPoster}
+              className="absolute inset-0"
+              onVideoReady={handleVideoReady}
+            />
+          )}
+
+          {showScrim && <div className="absolute inset-0 bg-black/30" />}
+          {showLeftGradient && (
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-black/40 to-transparent" />
+          )}
+        </div>
+      )}
 
       {/* FOREGROUND CONTENT */}
       <div ref={contentRef} className="relative min-h-dvh flex flex-col pt-20 mx-auto w-full">

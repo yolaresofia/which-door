@@ -9,6 +9,7 @@ export default function Intro() {
         fill
         className="object-cover"
         priority
+        unoptimized
       />
       <div className="absolute inset-0 flex items-center justify-center">
         <Image
@@ -17,6 +18,7 @@ export default function Intro() {
           width={265}
           height={313}
           priority
+          unoptimized
         />
       </div>
     </section>

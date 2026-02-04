@@ -66,6 +66,74 @@ body {
   scrollbar-width: none;
 }
 
+/* ==========================================================================
+   GLOBAL BACKGROUND HARDENING
+   Prevents white/black flashes during page transitions by ensuring
+   explicit backgrounds at every level of the DOM hierarchy.
+   ========================================================================== */
+
+html {
+  /* Match app theme - dark background for video-heavy pages */
+  background-color: #000;
+}
+
+body {
+  /* Explicit background prevents any flash from body default */
+  background-color: #000;
+  /* Ensure body fills viewport during transitions */
+  min-height: 100dvh;
+}
+
+/* Root transition layer - ensures no flash between route changes */
+#__next,
+[data-transition-root] {
+  background-color: #000;
+  min-height: 100dvh;
+}
+
+/* ==========================================================================
+   PAGE TRANSITION LAYER
+   Fixed position layer that holds outgoing/incoming pages during transitions.
+   Both pages are mounted simultaneously to prevent any blank frames.
+   ========================================================================== */
+
+[data-page-transition-layer] {
+  position: fixed;
+  inset: 0;
+  overflow: clip;
+  background-color: #000;
+  /* Ensure layer is above normal content during transition */
+  z-index: 9999;
+  /* Prevent interaction during transition */
+  pointer-events: none;
+}
+
+[data-page-transition-layer] > * {
+  position: absolute;
+  inset: 0;
+  /* GPU acceleration for smooth animations */
+  will-change: transform, opacity;
+}
+
+/* ==========================================================================
+   REDUCED MOTION SUPPORT
+   Respects user preference for reduced motion.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  [data-page-transition-layer] {
+    display: none !important;
+  }
+}
+
 /* Shimmer animation for loading states */
 @keyframes shimmer {
   0% {
@@ -74,4 +142,140 @@ body {
   100% {
     transform: translateX(100%);
   }
+}
+
+/* ==========================================================================
+   MEDIA LOADING ANIMATIONS
+   Pulsing animation for preview images while video loads.
+   GPU-accelerated using only opacity (no layout properties).
+   ========================================================================== */
+
+@keyframes media-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+[data-media-loading="true"] {
+  animation: media-pulse 1.5s ease-in-out infinite;
+}
+
+/* Disable pulse animation when reduced motion is preferred */
+@media (prefers-reduced-motion: reduce) {
+  [data-media-loading="true"] {
+    animation: none;
+  }
+}
+
+/* ==========================================================================
+   PAGE TRANSITION ANIMATIONS
+   DISABLED: Individual GSAP animations handle exit/enter for each element.
+   The page-level CSS animations were causing a "slide up together" effect
+   that conflicted with the staggered GSAP animations.
+   ========================================================================== */
+
+/* These data attributes are still used by PageTransitionProvider for state
+   tracking, but no longer trigger CSS animations. GSAP handles all animations. */
+[data-page-entering],
+[data-page-exiting] {
+  /* No animation - GSAP handles individual element transitions */
+}
+
+/* ==========================================================================
+   GLOBAL BACKGROUND MEDIA SYSTEM
+   Persistent video layer that lives in layout - never unmounts on navigation.
+   ========================================================================== */
+
+/* Global background container - fixed position, behind all content */
+[data-global-bg] {
+  /* Styles are inline for SSR safety, but we add video-specific rules here */
+}
+
+/* Global slots use data-global-slot attribute */
+[data-global-slot] video {
+  /* Prevent black frame before first paint on iOS */
+  background: transparent;
+}
+
+/* ==========================================================================
+   LEGACY CROSSFADE SLOT SYSTEM (for pages that still use local crossfade)
+   Can be removed once all pages migrate to global background.
+   ========================================================================== */
+
+/* Parent container for the two slots */
+[data-crossfade-container] {
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+  background-color: #000;
+  overflow: hidden;
+  contain: layout style paint;
+}
+
+/* Individual slot wrappers */
+[data-crossfade-slot] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* CSS-first visibility for legacy slots */
+[data-crossfade-slot]:first-child {
+  opacity: 1;
+}
+
+[data-crossfade-slot]:last-child {
+  opacity: 0;
+}
+
+/* Ensure video/img inside slots cover fully */
+[data-crossfade-slot] > * {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Video element specific */
+[data-crossfade-slot] video {
+  background: transparent;
+}
+
+/* ==========================================================================
+   BACKGROUND MEDIA COMPONENT
+   Ensure poster shows until video is ready
+   ========================================================================== */
+
+[data-background-media] {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Poster image should be on top until video plays */
+[data-background-media] img[data-poster] {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  object-fit: cover;
+  /* Smooth fade when video takes over */
+  transition: opacity 0.3s ease-out;
+}
+
+/* Hide poster when video is playing */
+[data-background-media][data-video-playing="true"] img[data-poster] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+[data-background-media] video {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  object-fit: cover;
 }

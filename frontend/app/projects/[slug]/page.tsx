@@ -164,6 +164,7 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
           title={(project as any).name}
           subtitle={(project as any).director}
           className="!z-0"
+          showControlsImmediately
         />
       </section>
 

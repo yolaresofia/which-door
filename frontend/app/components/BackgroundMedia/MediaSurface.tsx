@@ -9,6 +9,7 @@ type Props = {
   iframeRef: React.RefObject<HTMLIFrameElement | null>;
   variant: "full" | "preview";
   onNativePlaybackStart?: () => void;
+  bgColor?: string;
 };
 
 export default function MediaSurface({
@@ -18,6 +19,7 @@ export default function MediaSurface({
   iframeRef,
   variant,
   onNativePlaybackStart,
+  bgColor,
 }: Props) {
   // Use native video for previews, Vimeo for full with controls
   const usingNative = Boolean(previewSrc) && (!controls || !vimeoSrc);
@@ -26,9 +28,9 @@ export default function MediaSurface({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const isMountedRef = useRef(true);
 
-  // Shared centering
+  // Shared centering - removed bg-black to allow parent bgColor to show through
   const containerClass =
-    "absolute inset-0 flex bg-black items-center justify-center " +
+    "absolute inset-0 flex items-center justify-center " +
     (variant === "preview" ? "h-screen md:h-full" : "");
   // Always use w-full h-full on large screens (lg+) to ensure full coverage
   const mediaClass =
@@ -104,6 +106,7 @@ export default function MediaSurface({
     <div
       ref={containerRef}
       className={containerClass}
+      style={bgColor ? { backgroundColor: bgColor } : undefined}
       data-variant={variant}
       data-source={usingNative ? "native" : "vimeo"}
     >

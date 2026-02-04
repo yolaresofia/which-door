@@ -318,6 +318,7 @@ export default function MobileMenu({
                 width={39}
                 height={46}
                 priority
+                unoptimized
                 className="h-full w-auto"
               />
               <Image
@@ -325,6 +326,7 @@ export default function MobileMenu({
                 alt="Which Door wordmark"
                 width={131}
                 height={44}
+                unoptimized
                 className="h-full w-auto ml-2 opacity-100 transition-opacity duration-300 lg:opacity-0 lg:group-hover:opacity-100"
               />
             </button>

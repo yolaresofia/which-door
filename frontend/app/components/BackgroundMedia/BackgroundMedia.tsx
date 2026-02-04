@@ -27,6 +27,12 @@ export type BackgroundMediaProps = {
   subtitle?: string;
   onShare?: () => void;
   onVideoReady?: () => void; // Called when video starts playing
+  /**
+   * Show controls immediately without waiting for video to be ready.
+   * Useful for dedicated project pages where controls should be visible on first arrival.
+   * Default: false (controls animate in after video starts)
+   */
+  showControlsImmediately?: boolean;
 };
 
 export default function BackgroundMedia({
@@ -43,6 +49,7 @@ export default function BackgroundMedia({
   subtitle,
   onShare,
   onVideoReady,
+  showControlsImmediately = false,
 }: BackgroundMediaProps) {
   const containerEl = useRef<HTMLDivElement | null>(null);
 
@@ -95,11 +102,14 @@ export default function BackgroundMedia({
     shouldUsePoster ? "shown" : "hidden"
   );
   const [videoHasStarted, setVideoHasStarted] = useState(false);
+  // Track native video loading for pulsing animation (separate from poster)
+  const [nativeVideoLoading, setNativeVideoLoading] = useState(usingNativeVideo);
   const [controlsVisible, setControlsVisible] = useState(true);
   const controlsHideTimerRef = useRef<number | null>(null);
 
   const handleNativePlaybackStart = useCallback(() => {
     setVideoHasStarted(true);
+    setNativeVideoLoading(false);
   }, []);
 
   // Notify parent when video has started playing
@@ -257,6 +267,7 @@ export default function BackgroundMedia({
           iframeRef={iframeRef}
           variant={variant}
           onNativePlaybackStart={handleNativePlaybackStart}
+          bgColor={bgColor}
         />
         {/* Click/tap overlay to toggle play/pause */}
         {effectiveControls && (
@@ -271,11 +282,12 @@ export default function BackgroundMedia({
       </div>
       {/* Poster overlay - simplified for mobile performance
           REMOVED: blur filter (not GPU-accelerated on mobile Safari, causes style invalidation)
-          REMOVED: shimmer animation (causes 76ms composite spikes on mobile)
-          KEPT: scale(1.05) for slight zoom effect (GPU-accelerated transform) */}
+          KEPT: scale(1.05) for slight zoom effect (GPU-accelerated transform)
+          ADDED: Pulsing animation while video loads (GPU-accelerated opacity only) */}
       {posterVisible && (
         <div
           className="pointer-events-none absolute inset-0 z-10 overflow-hidden bg-black"
+          data-media-loading={posterPhase === 'shown' && !videoHasStarted ? 'true' : 'false'}
           style={{
             opacity: posterOpacity,
             transition: `opacity ${POSTER_FADE_MS}ms ease-in-out`,
@@ -296,6 +308,18 @@ export default function BackgroundMedia({
           />
           <div className="absolute inset-0 bg-black/10" />
         </div>
+      )}
+      {/* Native video loading overlay - shows pulsing animation while video loads
+          Only shows when using native video (no poster) and video hasn't started yet */}
+      {usingNativeVideo && nativeVideoLoading && (
+        <div
+          className="pointer-events-none absolute inset-0 z-10"
+          data-media-loading="true"
+          style={{
+            backgroundColor: bgColor || '#000',
+            transition: 'opacity 300ms ease-out',
+          }}
+        />
       )}
       {/* controls only for full variant */}
       {effectiveControls && (
@@ -326,7 +350,7 @@ export default function BackgroundMedia({
               onShare={handleShare}
               isFullscreen={isFullscreen}
               onToggleFullscreen={toggleFullscreen}
-              isVideoReady={videoHasStarted}
+              isVideoReady={showControlsImmediately || videoHasStarted}
             />
           </div>
           <div

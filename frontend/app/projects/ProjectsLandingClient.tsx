@@ -1,14 +1,15 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
-import BackgroundMedia from '../components/BackgroundMedia'
 import { projects } from '../components/constants'
-import { useCrossfadeMedia } from '../utils/useCrossfadeMedia'
+import { useBackgroundMedia, type Media } from '../context/BackgroundMediaContext'
 import { useSequencedReveal } from '../utils/useSequencedReveal'
-import { usePageTransitionVideo } from '../utils/usePageTransitionVideo'
 import { useFadeOutNavigation } from '../utils/useFadeOutNavigation'
-import { useVideoReady } from '../utils/useVideoReady'
 import { useGSAP } from '@gsap/react'
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
 
 const getTitle = (p: any) => p?.name ?? p?.title ?? 'Untitled'
 const getPreview = (p: any) => p?.previewUrl ?? ''
@@ -18,78 +19,90 @@ const getPoster = (p: any) => p?.previewPoster ?? ''
 const getPosterLQIP = (p: any) => p?.previewPosterLQIP ?? ''
 const getBgColor = (p: any) => p?.bgColor ?? '#000'
 
-export default function ProjectsLandingClient() {
-  const { getPreviousVideoState } = usePageTransitionVideo()
+/** Convert a project to Media format for the global background */
+function projectToMedia(project: any, fallbackId?: number): Media {
+  return {
+    id: project?.slug ?? fallbackId ?? 0,
+    videoSrc: getPreview(project) || getVimeo(project),
+    previewUrl: getPreview(project),
+    mobilePreviewUrl: getMobilePreview(project),
+    vimeoUrl: getVimeo(project),
+    previewPoster: getPoster(project),
+    previewPosterLQIP: getPosterLQIP(project),
+    bgColor: getBgColor(project),
+  }
+}
 
+// ─────────────────────────────────────────────────────────────────────────────
+// COMPONENT
+// ─────────────────────────────────────────────────────────────────────────────
+
+export default function ProjectsLandingClient() {
+  const { setBackground } = useBackgroundMedia()
+
+  // ─────────────────────────────────────────────────────────────
+  // PROJECTS DATA
+  // ─────────────────────────────────────────────────────────────
   const homepageProjects = useMemo(
     () => projects.filter((project) => project.isInHomePage),
     []
   )
   const visibleProjects = homepageProjects.length ? homepageProjects : projects
-
   const first = visibleProjects[0] ?? projects[0]
-  const targetVideo = useMemo(() => ({
-    id: first?.slug ?? 0,
-    videoSrc: getPreview(first) || getVimeo(first),
-    previewUrl: getPreview(first),
-    mobilePreviewUrl: getMobilePreview(first),
-    vimeoUrl: getVimeo(first),
-    previewPoster: getPoster(first),
-    previewPosterLQIP: getPosterLQIP(first),
-    bgColor: getBgColor(first),
-  }), [first])
 
-  // Check for previous video state to determine initial state
-  const previousVideo = getPreviousVideoState()
-  const initialVideo = previousVideo || targetVideo
-
-  const { setSlotRef, slotMedia, crossfadeTo } = useCrossfadeMedia(initialVideo, { duration: 0.45 })
-
+  // ─────────────────────────────────────────────────────────────
+  // STATE
+  // ─────────────────────────────────────────────────────────────
   const [selectedIndex, setSelectedIndex] = useState(0)
-  const [activeIndex, setActiveIndex] = useState(0) // For mobile - which project is centered
-  const [isReady, setIsReady] = useState(false) // Single ready state for animations
+  const [activeIndex, setActiveIndex] = useState(0) // Mobile: which project is centered
+  const [isReady, setIsReady] = useState(false)
 
-  // CSR-only: We can detect mobile immediately since we're only on client
+  // Device detection (CSR-only)
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024
 
-  // Track video ready state for smoother content reveal
-  // Short timeout (800ms) - we don't want to wait too long for the video
-  // Better UX to show content slightly before video than wait 4 seconds
-  const { isReady: videoReady, markReady } = useVideoReady({
-    skip: isMobile, // Skip waiting on mobile (simpler experience)
-    timeout: 800,
-  })
-
+  // ─────────────────────────────────────────────────────────────
+  // REFS
+  // ─────────────────────────────────────────────────────────────
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const listRef = useRef<HTMLUListElement | null>(null)
   const mainRef = useRef<HTMLElement | null>(null)
-  const hasTransitionedRef = useRef(false)
+  const hasSetInitialBgRef = useRef(false)
   const hasAnimatedRef = useRef(false)
 
-  // Use the reusable fade-out navigation hook
+  // ─────────────────────────────────────────────────────────────
+  // FADE-OUT NAVIGATION
+  // ─────────────────────────────────────────────────────────────
   const { fadeOutAndNavigate, isNavigating } = useFadeOutNavigation(mainRef, {
     selector: '[data-reveal]',
     isMobile,
-    saveVideo: true,
+    saveVideo: false, // No longer needed - global background persists
   })
 
+  // ─────────────────────────────────────────────────────────────
+  // SET INITIAL BACKGROUND ON MOUNT
+  // ─────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (hasSetInitialBgRef.current) return
+    hasSetInitialBgRef.current = true
+
+    // Set the first project's video as background
+    setBackground(projectToMedia(first))
+  }, [first, setBackground])
+
+  // ─────────────────────────────────────────────────────────────
+  // HOVER HANDLER (desktop) - crossfade to hovered project
+  // ─────────────────────────────────────────────────────────────
   const select = useCallback((i: number) => {
     setSelectedIndex(i)
     const project = visibleProjects[i]
-    if (!project) return
-    crossfadeTo({
-      id: project?.slug ?? i,
-      videoSrc: getPreview(project) || getVimeo(project),
-      previewUrl: getPreview(project),
-      mobilePreviewUrl: getMobilePreview(project),
-      vimeoUrl: getVimeo(project),
-      previewPoster: getPoster(project),
-      previewPosterLQIP: getPosterLQIP(project),
-      bgColor: getBgColor(project),
-    })
-  }, [crossfadeTo, visibleProjects])
+    if (project) {
+      setBackground(projectToMedia(project, i))
+    }
+  }, [setBackground, visibleProjects])
 
-  // Desktop animation
+  // ─────────────────────────────────────────────────────────────
+  // DESKTOP REVEAL ANIMATION
+  // ─────────────────────────────────────────────────────────────
   const { start } = useSequencedReveal(listRef, {
     target: '[data-reveal]',
     duration: 0.8,
@@ -104,57 +117,34 @@ export default function ProjectsLandingClient() {
     },
   })
 
-  // Handle incoming page transition video (desktop only)
+  // Mark ready after short delay
   useEffect(() => {
-    if (hasTransitionedRef.current || !previousVideo || isMobile) return
-    hasTransitionedRef.current = true
-
-    const timeoutId = setTimeout(() => {
-      crossfadeTo(targetVideo)
-    }, 400)
-
-    return () => clearTimeout(timeoutId)
-  }, [isMobile, previousVideo, crossfadeTo, targetVideo])
-
-  // Mark ready after a short delay to allow initial render
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setIsReady(true)
-    }, 100)
-
+    const timeoutId = setTimeout(() => setIsReady(true), 100)
     return () => clearTimeout(timeoutId)
   }, [])
 
-  // Single animation trigger for BOTH desktop and mobile
+  // Trigger animation when ready
   useEffect(() => {
-    if (!isReady) return
-    if (hasAnimatedRef.current) return
-
-    // Desktop: wait for video ready
-    if (!isMobile && !videoReady) return
-
+    if (!isReady || hasAnimatedRef.current) return
     hasAnimatedRef.current = true
 
     if (isMobile) {
-      // Mobile: Simple immediate show - no animation for better performance
-      // GSAP stagger animations are heavy on mobile and cause glitches
-      const mobileItems = scrollContainerRef.current?.querySelectorAll('[data-mobile-reveal]')
-      if (mobileItems && mobileItems.length > 0) {
-        mobileItems.forEach((item) => {
-          const el = item as HTMLElement
-          el.style.opacity = '1'
-          el.style.transform = 'none'
-        })
-      }
-    } else {
-      // Desktop animation
-      requestAnimationFrame(() => {
-        start()
+      // Mobile: immediate show
+      const items = scrollContainerRef.current?.querySelectorAll('[data-mobile-reveal]')
+      items?.forEach((item) => {
+        const el = item as HTMLElement
+        el.style.opacity = '1'
+        el.style.transform = 'none'
       })
+    } else {
+      // Desktop: sequenced reveal
+      requestAnimationFrame(() => start())
     }
-  }, [isReady, isMobile, videoReady, start])
+  }, [isReady, isMobile, start])
 
-  // Mobile: Simple scroll detection - find centered item
+  // ─────────────────────────────────────────────────────────────
+  // MOBILE: Scroll detection for centered item
+  // ─────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!isMobile || !scrollContainerRef.current) return
 
@@ -184,119 +174,45 @@ export default function ProjectsLandingClient() {
         setActiveIndex(closestIndex)
         const project = visibleProjects[closestIndex]
         if (project) {
-          crossfadeTo({
-            id: project?.slug ?? closestIndex,
-            videoSrc: getPreview(project) || getVimeo(project),
-            previewUrl: getPreview(project),
-            mobilePreviewUrl: getMobilePreview(project),
-            vimeoUrl: getVimeo(project),
-            previewPoster: getPoster(project),
-            previewPosterLQIP: getPosterLQIP(project),
-            bgColor: getBgColor(project),
-          })
+          setBackground(projectToMedia(project, closestIndex))
         }
       }
     }
 
-    // Initial check
     findCenteredItem()
 
-    // Listen for scroll
-    const handleScroll = () => {
-      requestAnimationFrame(findCenteredItem)
-    }
-
+    const handleScroll = () => requestAnimationFrame(findCenteredItem)
     container.addEventListener('scroll', handleScroll, { passive: true })
 
-    return () => {
-      container.removeEventListener('scroll', handleScroll)
-    }
-  }, [isMobile, activeIndex, crossfadeTo, visibleProjects])
+    return () => container.removeEventListener('scroll', handleScroll)
+  }, [isMobile, activeIndex, setBackground, visibleProjects])
 
-  // Wrap the hook's fadeOutAndNavigate to pass slotMedia
-  const handleFadeOutAndNavigate = useCallback((url: string) => {
-    fadeOutAndNavigate(url, slotMedia)
-  }, [fadeOutAndNavigate, slotMedia])
-
-  // Handle project click (desktop only)
+  // ─────────────────────────────────────────────────────────────
+  // NAVIGATION HANDLERS
+  // ─────────────────────────────────────────────────────────────
   const handleProjectClick = useCallback((slug: string) => {
     if (isMobile || isNavigating) return
-    handleFadeOutAndNavigate(`/projects/${slug}`)
-  }, [isMobile, isNavigating, handleFadeOutAndNavigate])
+    fadeOutAndNavigate(`/projects/${slug}`)
+  }, [isMobile, isNavigating, fadeOutAndNavigate])
 
-  // Listen for navigation from header/other sources (desktop only)
-  useEffect(() => {
-    if (isMobile) return
-
-    const handleNavigationRequest = (e: CustomEvent) => {
-      const url = e.detail?.url
-      if (url && !isNavigating) {
-        handleFadeOutAndNavigate(url)
-      }
-    }
-
-    window.addEventListener('navigate-with-fade' as any, handleNavigationRequest as any)
-
-    return () => {
-      window.removeEventListener('navigate-with-fade' as any, handleNavigationRequest as any)
-    }
-  }, [isMobile, isNavigating, handleFadeOutAndNavigate])
-
-  // Expose fade-out function globally for header navigation (desktop only)
+  // Expose fade-out for header navigation
   useGSAP(() => {
     if (isMobile) return
-    (window as any).__projectsFadeOut = handleFadeOutAndNavigate
-    return () => {
-      delete (window as any).__projectsFadeOut
-    }
-  }, { dependencies: [isMobile, handleFadeOutAndNavigate] })
+    ;(window as any).__projectsFadeOut = fadeOutAndNavigate
+    return () => { delete (window as any).__projectsFadeOut }
+  }, { dependencies: [isMobile, fadeOutAndNavigate] })
 
-  // Hidden styles for initial render - applied via inline styles
+  // ─────────────────────────────────────────────────────────────
+  // RENDER
+  // ─────────────────────────────────────────────────────────────
   const hiddenStyle = { opacity: 0, transform: 'translateY(20px) scale(0.98)' }
   const hiddenStyleSimple = { opacity: 0, transform: 'translateY(20px)' }
 
-  // PERFORMANCE FIX: Only render the layout for current device
-  // Previously both desktop AND mobile components mounted simultaneously,
-  // causing doubled video loading and effects even when hidden with CSS
+  // MOBILE LAYOUT
   if (isMobile) {
-    // Mobile Layout - optimized for touch scrolling
     return (
       <main className="fixed inset-0">
-        {/* Background video - crossfade slots */}
-        <div className="fixed inset-0 z-0 bg-black">
-          <div
-            ref={(el) => { setSlotRef(0)(el) }}
-            className="absolute inset-0"
-          >
-            {slotMedia[0] && (
-              <BackgroundMedia
-                variant="preview"
-                previewUrl={slotMedia[0].previewUrl}
-                mobilePreviewUrl={slotMedia[0].mobilePreviewUrl}
-                vimeoUrl={slotMedia[0].vimeoUrl}
-                previewPoster={slotMedia[0].previewPoster}
-                previewPosterLQIP={slotMedia[0].previewPosterLQIP}
-                bgColor={slotMedia[0].bgColor}
-              />
-            )}
-          </div>
-          <div
-            ref={(el) => { setSlotRef(1)(el) }}
-            className="absolute inset-0"
-          >
-            {slotMedia[1] && (
-              <BackgroundMedia
-                variant="preview"
-                previewUrl={slotMedia[1].previewUrl}
-                mobilePreviewUrl={slotMedia[1].mobilePreviewUrl}
-                vimeoUrl={slotMedia[1].vimeoUrl}
-                previewPoster={slotMedia[1].previewPoster}
-                previewPosterLQIP={slotMedia[1].previewPosterLQIP}
-                bgColor={slotMedia[1].bgColor}
-              />
-            )}
-          </div>
-        </div>
+        {/* NO local background - uses GlobalBackgroundMedia from layout */}
 
         {/* Scrollable list with snap */}
         <div
@@ -326,9 +242,7 @@ export default function ProjectsLandingClient() {
                       {title}
                     </h3>
                     {project?.director && (
-                      <p className="text-lg text-white/75">
-                        {project.director}
-                      </p>
+                      <p className="text-lg text-white/75">{project.director}</p>
                     )}
                   </a>
                 </li>
@@ -340,50 +254,10 @@ export default function ProjectsLandingClient() {
     )
   }
 
-  // Desktop Layout
+  // DESKTOP LAYOUT
   return (
-    <main
-      ref={mainRef}
-      className="relative w-full min-h-screen"
-    >
-      {/* Background - Fixed */}
-      <div className="fixed inset-0 z-0 bg-black">
-        <div
-          ref={(el) => { setSlotRef(0)(el) }}
-          className="absolute inset-0"
-          style={{ pointerEvents: 'none' }}
-        >
-          {slotMedia[0] && (
-            <BackgroundMedia
-              variant="preview"
-              previewUrl={slotMedia[0].previewUrl ?? slotMedia[0].videoSrc}
-              mobilePreviewUrl={slotMedia[0].mobilePreviewUrl}
-              vimeoUrl={slotMedia[0].vimeoUrl ?? slotMedia[0].videoSrc}
-              previewPoster={slotMedia[0].previewPoster}
-              previewPosterLQIP={slotMedia[0].previewPosterLQIP}
-              bgColor={slotMedia[0].bgColor}
-              onVideoReady={markReady}
-            />
-          )}
-        </div>
-        <div
-          ref={(el) => { setSlotRef(1)(el) }}
-          className="absolute inset-0"
-          style={{ pointerEvents: 'none' }}
-        >
-          {slotMedia[1] && (
-            <BackgroundMedia
-              variant="preview"
-              previewUrl={slotMedia[1].previewUrl ?? slotMedia[1].videoSrc}
-              mobilePreviewUrl={slotMedia[1].mobilePreviewUrl}
-              vimeoUrl={slotMedia[1].vimeoUrl ?? slotMedia[1].videoSrc}
-              previewPoster={slotMedia[1].previewPoster}
-              previewPosterLQIP={slotMedia[1].previewPosterLQIP}
-              bgColor={slotMedia[1].bgColor}
-            />
-          )}
-        </div>
-      </div>
+    <main ref={mainRef} className="relative w-full min-h-screen">
+      {/* NO local background - uses GlobalBackgroundMedia from layout */}
 
       {/* Desktop Grid */}
       <section className="relative z-10 flex min-h-screen w-full md:px-12 px-4 items-center justify-center">

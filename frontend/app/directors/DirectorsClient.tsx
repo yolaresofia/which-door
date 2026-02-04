@@ -1,74 +1,86 @@
 'use client'
+
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { directors } from '../components/constants'
-import { useCrossfadeMedia } from '../utils/useCrossfadeMedia'
+import { useBackgroundMedia, type Media } from '../context/BackgroundMediaContext'
 import { useSequencedReveal } from '../utils/useSequencedReveal'
-import { usePageTransitionVideo } from '../utils/usePageTransitionVideo'
 import { useFadeOutNavigation } from '../utils/useFadeOutNavigation'
-import { useVideoReady } from '../utils/useVideoReady'
 import { REVEAL_HIDDEN_STYLE, REVEAL_HIDDEN_STYLE_SIMPLE } from '../utils/useRevealAnimation'
-import BackgroundMedia from '../components/BackgroundMedia/BackgroundMedia'
 import { useGSAP } from '@gsap/react'
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
 
 const DEFAULT_INDEX = 3
 
-const getMedia = (d: any, i: number) => ({
-  id: d?.slug ?? i,
-  videoSrc: d?.previewUrl ?? d?.vimeoUrl ?? '',
-  previewUrl: d?.previewUrl ?? '',
-  mobilePreviewUrl: d?.mobilePreviewUrl ?? '',
-  vimeoUrl: d?.vimeoUrl ?? '',
-  previewPoster: d?.previewPoster ?? '',
-  previewPosterLQIP: d?.previewPosterLQIP ?? '',
-  bgColor: d?.bgColor ?? '#477AA1',
-})
+/** Convert a director to Media format for the global background */
+function directorToMedia(d: any, i: number): Media {
+  return {
+    id: d?.slug ?? i,
+    videoSrc: d?.previewUrl ?? d?.vimeoUrl ?? '',
+    previewUrl: d?.previewUrl ?? '',
+    mobilePreviewUrl: d?.mobilePreviewUrl ?? '',
+    vimeoUrl: d?.vimeoUrl ?? '',
+    previewPoster: d?.previewPoster ?? '',
+    previewPosterLQIP: d?.previewPosterLQIP ?? '',
+    bgColor: d?.bgColor ?? '#477AA1',
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COMPONENT
+// ─────────────────────────────────────────────────────────────────────────────
 
 export default function DirectorsClient() {
-  const { getPreviousVideoState } = usePageTransitionVideo()
+  const { setBackground } = useBackgroundMedia()
 
+  // ─────────────────────────────────────────────────────────────
+  // STATE
+  // ─────────────────────────────────────────────────────────────
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
-  const [activeIndex, setActiveIndex] = useState(0) // For mobile - which director is centered
-  const [isReady, setIsReady] = useState(false) // Single ready state for animations
+  const [activeIndex, setActiveIndex] = useState(0) // Mobile: which director is centered
+  const [isReady, setIsReady] = useState(false)
 
-  // CSR-only: We can detect mobile immediately since we're only on client
+  // Device detection (CSR-only)
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024
 
-  // Track video ready state for smoother content reveal
-  // Short timeout (800ms) - we don't want to wait too long for the video
-  // Better UX to show content slightly before video than wait 4 seconds
-  const { isReady: videoReady, markReady } = useVideoReady({
-    skip: isMobile, // Skip waiting on mobile (simpler experience)
-    timeout: 800,
-  })
-
+  // ─────────────────────────────────────────────────────────────
+  // REFS
+  // ─────────────────────────────────────────────────────────────
   const listRef = useRef<HTMLUListElement | null>(null)
   const mainRef = useRef<HTMLElement | null>(null)
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
-  const hasTransitionedRef = useRef(false)
+  const hasSetInitialBgRef = useRef(false)
   const hasAnimatedRef = useRef(false)
 
-  // Use the reusable fade-out navigation hook
+  // Default director index
+  const initialIdx = Number.isInteger(DEFAULT_INDEX) && directors[DEFAULT_INDEX] ? DEFAULT_INDEX : 0
+  const desktopActiveIndex = hoveredIndex ?? initialIdx
+
+  // ─────────────────────────────────────────────────────────────
+  // FADE-OUT NAVIGATION
+  // ─────────────────────────────────────────────────────────────
   const { fadeOutAndNavigate, isNavigating } = useFadeOutNavigation(mainRef, {
     selector: '[data-reveal]',
     isMobile,
-    saveVideo: true,
+    saveVideo: false, // No longer needed - global background persists
   })
 
-  const initialIdx =
-    Number.isInteger(DEFAULT_INDEX) && directors[DEFAULT_INDEX] ? DEFAULT_INDEX : 0
-  const targetMedia = getMedia(directors[initialIdx], initialIdx)
+  // ─────────────────────────────────────────────────────────────
+  // SET INITIAL BACKGROUND ON MOUNT
+  // ─────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (hasSetInitialBgRef.current) return
+    hasSetInitialBgRef.current = true
 
-  // Check for previous video state to determine initial state
-  const previousVideo = getPreviousVideoState()
-  const initialMedia = previousVideo || targetMedia
+    // Set the default director's video as background
+    setBackground(directorToMedia(directors[initialIdx], initialIdx))
+  }, [initialIdx, setBackground])
 
-  const { setSlotRef, slotMedia, crossfadeTo } = useCrossfadeMedia(initialMedia, {
-    duration: 0.45,
-  })
-
-  const desktopActiveIndex = hoveredIndex ?? initialIdx
-
-  // Enter animation for desktop
+  // ─────────────────────────────────────────────────────────────
+  // DESKTOP REVEAL ANIMATION
+  // ─────────────────────────────────────────────────────────────
   const { start } = useSequencedReveal(listRef, {
     target: '[data-reveal]',
     duration: 0.8,
@@ -83,58 +95,34 @@ export default function DirectorsClient() {
     },
   })
 
-  // Handle incoming page transition video (desktop only)
+  // Mark ready after short delay
   useEffect(() => {
-    if (hasTransitionedRef.current || !previousVideo || isMobile) return
-    hasTransitionedRef.current = true
-
-    const timeoutId = setTimeout(() => {
-      crossfadeTo(targetMedia)
-    }, 400)
-
-    return () => clearTimeout(timeoutId)
-  }, [isMobile, previousVideo, crossfadeTo, targetMedia])
-
-  // Mark ready after a short delay to allow initial render
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setIsReady(true)
-    }, 100)
-
+    const timeoutId = setTimeout(() => setIsReady(true), 100)
     return () => clearTimeout(timeoutId)
   }, [])
 
-  // Single animation trigger for BOTH desktop and mobile
+  // Trigger animation when ready
   useEffect(() => {
-    if (!isReady) return
-    if (hasAnimatedRef.current) return
-
-    // Desktop: wait for video ready
-    if (!isMobile && !videoReady) return
-
+    if (!isReady || hasAnimatedRef.current) return
     hasAnimatedRef.current = true
 
     if (isMobile) {
-      // Mobile: Simple immediate show - no animation for better performance
-      // GSAP stagger animations are heavy on mobile and cause glitches
-      const mobileItems = scrollContainerRef.current?.querySelectorAll('[data-mobile-reveal]')
-      if (mobileItems && mobileItems.length > 0) {
-        mobileItems.forEach((item) => {
-          const el = item as HTMLElement
-          el.style.opacity = '1'
-          el.style.transform = 'none'
-        })
-      }
-    } else {
-      // Desktop animation
-      requestAnimationFrame(() => {
-        start()
+      // Mobile: immediate show
+      const items = scrollContainerRef.current?.querySelectorAll('[data-mobile-reveal]')
+      items?.forEach((item) => {
+        const el = item as HTMLElement
+        el.style.opacity = '1'
+        el.style.transform = 'none'
       })
+    } else {
+      // Desktop: sequenced reveal
+      requestAnimationFrame(() => start())
     }
-  }, [isReady, isMobile, videoReady, start])
+  }, [isReady, isMobile, start])
 
-  // Mobile: Simple scroll detection - find centered item
-  // Uses getBoundingClientRect which works reliably across all browsers
+  // ─────────────────────────────────────────────────────────────
+  // MOBILE: Scroll detection for centered item
+  // ─────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!isMobile || !scrollContainerRef.current) return
 
@@ -164,102 +152,61 @@ export default function DirectorsClient() {
         setActiveIndex(closestIndex)
         const d = directors[closestIndex]
         if (d) {
-          crossfadeTo(getMedia(d, closestIndex))
+          setBackground(directorToMedia(d, closestIndex))
         }
       }
     }
 
-    // Initial check
     findCenteredItem()
 
-    // Listen for scroll
-    const handleScroll = () => {
-      requestAnimationFrame(findCenteredItem)
-    }
-
+    const handleScroll = () => requestAnimationFrame(findCenteredItem)
     container.addEventListener('scroll', handleScroll, { passive: true })
 
-    return () => {
-      container.removeEventListener('scroll', handleScroll)
-    }
-  }, [isMobile, activeIndex, crossfadeTo])
+    return () => container.removeEventListener('scroll', handleScroll)
+  }, [isMobile, activeIndex, setBackground])
 
-  // Desktop handlers
-  const select = (i: number) => {
+  // ─────────────────────────────────────────────────────────────
+  // HOVER HANDLERS (desktop)
+  // ─────────────────────────────────────────────────────────────
+  const select = useCallback((i: number) => {
     if (isNavigating || isMobile) return
     const d = directors[i]
     if (!d) return
     setHoveredIndex(i)
-    crossfadeTo(getMedia(d, i))
-  }
+    setBackground(directorToMedia(d, i))
+  }, [isNavigating, isMobile, setBackground])
 
-  const resetToDefault = () => {
+  const resetToDefault = useCallback(() => {
     if (isNavigating || isMobile) return
     setHoveredIndex(null)
-    crossfadeTo(targetMedia)
-  }
+    setBackground(directorToMedia(directors[initialIdx], initialIdx))
+  }, [isNavigating, isMobile, initialIdx, setBackground])
 
-  const handleFadeOutAndNavigate = useCallback((url: string) => {
-    fadeOutAndNavigate(url, slotMedia)
-  }, [fadeOutAndNavigate, slotMedia])
-
+  // ─────────────────────────────────────────────────────────────
+  // NAVIGATION HANDLERS
+  // ─────────────────────────────────────────────────────────────
   const handleDirectorClick = useCallback((e: React.MouseEvent, slug: string) => {
     if (isMobile || isNavigating) return
     e.preventDefault()
-    handleFadeOutAndNavigate(`/directors/${slug}`)
-  }, [isMobile, isNavigating, handleFadeOutAndNavigate])
+    fadeOutAndNavigate(`/directors/${slug}`)
+  }, [isMobile, isNavigating, fadeOutAndNavigate])
 
-  // Expose fade-out function globally for header navigation (desktop only)
+  // Expose fade-out for header navigation
   useGSAP(() => {
     if (isMobile) return
-    (window as any).__directorsFadeOut = handleFadeOutAndNavigate
-    return () => {
-      delete (window as any).__directorsFadeOut
-    }
-  }, { dependencies: [isMobile, handleFadeOutAndNavigate] })
+    ;(window as any).__directorsFadeOut = fadeOutAndNavigate
+    return () => { delete (window as any).__directorsFadeOut }
+  }, { dependencies: [isMobile, fadeOutAndNavigate] })
 
-  // PERFORMANCE FIX: Only render the layout for current device
-  // Previously both desktop AND mobile components mounted simultaneously,
-  // causing doubled video loading and effects even when hidden with CSS
+  // ─────────────────────────────────────────────────────────────
+  // RENDER
+  // ─────────────────────────────────────────────────────────────
+
+  // MOBILE LAYOUT
   if (isMobile) {
-    // Mobile Layout
     return (
       <main className="fixed inset-0">
-        {/* Background video - crossfade slots */}
-        <div className="fixed inset-0 z-0 bg-black">
-          <div
-            ref={(el) => { setSlotRef(0)(el) }}
-            className="absolute inset-0"
-          >
-            {slotMedia[0] && (
-              <BackgroundMedia
-                variant="preview"
-                previewUrl={slotMedia[0].previewUrl}
-                mobilePreviewUrl={slotMedia[0].mobilePreviewUrl}
-                vimeoUrl={slotMedia[0].vimeoUrl}
-                previewPoster={slotMedia[0].previewPoster}
-                previewPosterLQIP={slotMedia[0].previewPosterLQIP}
-                bgColor={slotMedia[0].bgColor}
-              />
-            )}
-          </div>
-          <div
-            ref={(el) => { setSlotRef(1)(el) }}
-            className="absolute inset-0"
-          >
-            {slotMedia[1] && (
-              <BackgroundMedia
-                variant="preview"
-                previewUrl={slotMedia[1].previewUrl}
-                mobilePreviewUrl={slotMedia[1].mobilePreviewUrl}
-                vimeoUrl={slotMedia[1].vimeoUrl}
-                previewPoster={slotMedia[1].previewPoster}
-                previewPosterLQIP={slotMedia[1].previewPosterLQIP}
-                bgColor={slotMedia[1].bgColor}
-              />
-            )}
-          </div>
-        </div>
+        {/* NO local background - uses GlobalBackgroundMedia from layout */}
 
         {/* Scrollable list with snap */}
         <div
@@ -297,50 +244,13 @@ export default function DirectorsClient() {
     )
   }
 
-  // Desktop Layout
+  // DESKTOP LAYOUT
   return (
     <main
       ref={mainRef}
       className="relative min-h-dvh w-full overflow-hidden text-white"
     >
-      {/* BACKGROUND (preview variant) */}
-      <div className="absolute inset-0 z-0 bg-black">
-        <div
-          ref={el => { setSlotRef(0)(el) }}
-          className="absolute inset-0"
-          style={{ pointerEvents: 'none' }}
-        >
-          {slotMedia[0] && (
-            <BackgroundMedia
-              variant="preview"
-              previewUrl={slotMedia[0].previewUrl ?? slotMedia[0].videoSrc}
-              mobilePreviewUrl={slotMedia[0].mobilePreviewUrl}
-              vimeoUrl={slotMedia[0].vimeoUrl ?? slotMedia[0].videoSrc}
-              previewPoster={slotMedia[0].previewPoster}
-              previewPosterLQIP={slotMedia[0].previewPosterLQIP}
-              bgColor={slotMedia[0].bgColor}
-              onVideoReady={markReady}
-            />
-          )}
-        </div>
-        <div
-          ref={el => { setSlotRef(1)(el) }}
-          className="absolute inset-0"
-          style={{ pointerEvents: 'none' }}
-        >
-          {slotMedia[1] && (
-            <BackgroundMedia
-              variant="preview"
-              previewUrl={slotMedia[1].previewUrl ?? slotMedia[1].videoSrc}
-              mobilePreviewUrl={slotMedia[1].mobilePreviewUrl}
-              vimeoUrl={slotMedia[1].vimeoUrl ?? slotMedia[1].videoSrc}
-              previewPoster={slotMedia[1].previewPoster}
-              previewPosterLQIP={slotMedia[1].previewPosterLQIP}
-              bgColor={slotMedia[1].bgColor}
-            />
-          )}
-        </div>
-      </div>
+      {/* NO local background - uses GlobalBackgroundMedia from layout */}
 
       {/* FOREGROUND LIST */}
       <section className="relative min-h-dvh w-full pt-32">
@@ -351,42 +261,39 @@ export default function DirectorsClient() {
             onMouseLeave={resetToDefault}
             onTouchEnd={resetToDefault}
           >
-          {directors.map((d, i) => {
-            const isActive = i === desktopActiveIndex
-            return (
-              <li
-                key={d.slug}
-                className={`transition-opacity duration-200 ${
-                  isActive ? 'opacity-100' : 'opacity-70'
-                }`}
-              >
-                <div
-                  data-reveal
-                  style={REVEAL_HIDDEN_STYLE}
+            {directors.map((d, i) => {
+              const isActive = i === desktopActiveIndex
+              return (
+                <li
+                  key={d.slug}
+                  className={`transition-opacity duration-200 ${
+                    isActive ? 'opacity-100' : 'opacity-70'
+                  }`}
                 >
-                  <a
-                    href={`/directors/${d.slug}`}
-                    onClick={(e) => handleDirectorClick(e, d.slug)}
-                    aria-current={isActive ? 'page' : undefined}
-                    className="block outline-none"
-                    onMouseEnter={() => select(i)}
-                    onFocus={() => select(i)}
-                    onTouchStart={() => select(i)}
-                  >
-                    <span
-                      className={[
-                        'block leading-[1.05] tracking-tight transition-all duration-200',
-                        'md:text-6xl text-3xl',
-                        isActive ? 'text-white' : 'text-white/80',
-                      ].join(' ')}
+                  <div data-reveal style={REVEAL_HIDDEN_STYLE}>
+                    <a
+                      href={`/directors/${d.slug}`}
+                      onClick={(e) => handleDirectorClick(e, d.slug)}
+                      aria-current={isActive ? 'page' : undefined}
+                      className="block outline-none"
+                      onMouseEnter={() => select(i)}
+                      onFocus={() => select(i)}
+                      onTouchStart={() => select(i)}
                     >
-                      {d.name}
-                    </span>
-                  </a>
-                </div>
-              </li>
-            )
-          })}
+                      <span
+                        className={[
+                          'block leading-[1.05] tracking-tight transition-all duration-200',
+                          'md:text-6xl text-3xl',
+                          isActive ? 'text-white' : 'text-white/80',
+                        ].join(' ')}
+                      >
+                        {d.name}
+                      </span>
+                    </a>
+                  </div>
+                </li>
+              )
+            })}
           </ul>
         </div>
       </section>

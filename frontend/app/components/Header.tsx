@@ -2,13 +2,15 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import MobileMenu from './MobileMenu'
+import { usePageTransitionOptional } from './PageTransitionProvider'
 
 export default function Header() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
-  
+  const pageTransition = usePageTransitionOptional()
+
   const navItems = [
     { href: '/', label: 'Projects' },
     { href: '/directors', label: 'Directors' },
@@ -16,74 +18,54 @@ export default function Header() {
     { href: '/contact', label: 'Contact' },
   ]
 
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, url: string) => {
-    // Don't fade-out if we're already on that page
+  const handleClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>, url: string) => {
+    // Don't navigate if we're already on that page
     if (pathname === url) return
 
+    // Desktop: use page transition system
     if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
-      // Check if we're on projects page
-      const isProjectsPage = pathname === '/projects' || pathname === '/'
-      const fadeOutProjects = (window as any).__projectsFadeOut
-      
-      if (isProjectsPage && fadeOutProjects) {
-        e.preventDefault()
-        fadeOutProjects(url)
+      e.preventDefault()
+
+      // Try the new centralized transition system first
+      if (pageTransition) {
+        pageTransition.navigateWithTransition(url)
         return
       }
 
-      // Check if we're on about page
-      const isAboutPage = pathname === '/about'
-      const fadeOutAbout = (window as any).__aboutFadeOut
-      
-      if (isAboutPage && fadeOutAbout) {
-        e.preventDefault()
-        fadeOutAbout(url)
+      // Fallback to legacy window-based fade-out functions
+      // (for backwards compatibility during migration)
+      const fadeOutFunctions: Record<string, string> = {
+        '/': '__projectsFadeOut',
+        '/projects': '__projectsFadeOut',
+        '/about': '__aboutFadeOut',
+        '/directors': '__directorsFadeOut',
+        '/contact': '__contactFadeOut',
+      }
+
+      // Check exact path matches first
+      const exactFadeOut = fadeOutFunctions[pathname ?? '']
+      if (exactFadeOut && (window as any)[exactFadeOut]) {
+        (window as any)[exactFadeOut](url)
         return
       }
 
-      // Check if we're on directors page
-      const isDirectorsPage = pathname === '/directors'
-      const fadeOutDirectors = (window as any).__directorsFadeOut
-
-      if (isDirectorsPage && fadeOutDirectors) {
-        e.preventDefault()
-        fadeOutDirectors(url)
+      // Check prefix matches for detail pages
+      if (pathname?.startsWith('/directors/') && (window as any).__directorDetailFadeOut) {
+        (window as any).__directorDetailFadeOut(url)
         return
       }
 
-      // Check if we're on a director detail page
-      const isDirectorDetailPage = pathname?.startsWith('/directors/') && pathname !== '/directors'
-      const fadeOutDirectorDetail = (window as any).__directorDetailFadeOut
-
-      if (isDirectorDetailPage && fadeOutDirectorDetail) {
-        e.preventDefault()
-        fadeOutDirectorDetail(url)
+      if (pathname?.startsWith('/projects/') && (window as any).__projectDetailFadeOut) {
+        (window as any).__projectDetailFadeOut(url)
         return
       }
 
-      // Check if we're on a project detail page
-      const isProjectDetailPage = pathname?.startsWith('/projects/')
-      const fadeOutProjectDetail = (window as any).__projectDetailFadeOut
-
-      if (isProjectDetailPage && fadeOutProjectDetail) {
-        e.preventDefault()
-        fadeOutProjectDetail(url)
-        return
-      }
-
-      // Check if we're on contact page
-      const isContactPage = pathname === '/contact'
-      const fadeOutContact = (window as any).__contactFadeOut
-
-      if (isContactPage && fadeOutContact) {
-        e.preventDefault()
-        fadeOutContact(url)
-        return
-      }
+      // No legacy fade-out available - navigation will happen via default Link behavior
+      // (pageTransition.navigateWithTransition was already called above if available)
     }
-    
-    // Otherwise: normal Next.js navigation
-  }
+
+    // Mobile: allow default Link behavior (instant navigation)
+  }, [pathname, pageTransition])
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 h-28">
@@ -91,8 +73,8 @@ export default function Header() {
         <div className="h-full flex items-center justify-between lg:grid lg:grid-cols-3">
           {/* Logo */}
           <div className="lg:justify-self-start">
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="flex items-center group lg:h-[35px] h-[30px]"
               onClick={(e) => handleClick(e, '/')}
             >
@@ -102,6 +84,7 @@ export default function Header() {
                 width={39}
                 height={46}
                 priority
+                unoptimized
                 className="h-full w-auto"
               />
               <Image
@@ -109,6 +92,7 @@ export default function Header() {
                 alt="Which Door wordmark"
                 width={120}
                 height={44}
+                unoptimized
                 className="h-full w-auto ml-2 opacity-100 transition-opacity duration-300 lg:opacity-0 lg:group-hover:opacity-100"
               />
             </Link>
