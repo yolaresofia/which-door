@@ -44,7 +44,7 @@ export default function ContactPage() {
   }, [contactMedia, setBackground])
 
   return (
-    <div className="min-h-dvh bg-black">
+    <div className="min-h-dvh">
       {/* ContactSection now uses global background - pass useGlobalBackground to skip local bg */}
       <ContactSection useGlobalBackground />
     </div>
