@@ -11,6 +11,7 @@ export type Media = {
   videoSrc?: string;
   previewUrl?: string;
   mobilePreviewUrl?: string;
+  vimeoUrl?: string;
   bgColor?: string;
   previewPoster?: string;
   previewPosterLQIP?: string; // Low Quality Image Placeholder
