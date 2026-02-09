@@ -10,8 +10,7 @@ export type Media = {
   imageSrc?: string;
   videoSrc?: string;
   previewUrl?: string;
-  mobilePreviewUrl?: string; // Lower quality video for tablet and smaller
-  vimeoUrl?: string;
+  mobilePreviewUrl?: string;
   bgColor?: string;
   previewPoster?: string;
   previewPosterLQIP?: string; // Low Quality Image Placeholder
