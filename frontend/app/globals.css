@@ -75,3 +75,13 @@ body {
     transform: translateX(100%);
   }
 }
+
+/* Pulsing brightness for blurred poster while video loads */
+@keyframes pulse-brightness {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}

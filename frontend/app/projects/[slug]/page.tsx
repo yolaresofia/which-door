@@ -134,9 +134,8 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
         ease: 'power2.inOut'
       },
       onComplete: () => {
-        // Clean up will-change for performance
-        gsap.set(allRevealItems, { willChange: 'auto', clearProps: 'backfaceVisibility' })
-        // Navigate immediately - animation is complete
+        // Navigate immediately — do NOT clearProps, as that flashes
+        // elements back to visible before the page unmounts them
         router.push(url)
       }
     })
@@ -159,6 +158,8 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
       <section className="relative h-dvh w-screen overflow-hidden isolate">
         <BackgroundMedia
           vimeoUrl={videoSrc}
+          previewUrl={(project as any).previewUrl}
+          mobilePreviewUrl={(project as any).mobilePreviewUrl}
           previewPoster={(project as any).previewPoster}
           controls
           title={(project as any).name}

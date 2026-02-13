@@ -1,43 +1,30 @@
 'use client'
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { directors } from '../components/constants'
+import { CrossfadeBackground } from '../components/BackgroundMedia'
 import { useCrossfadeMedia } from '../utils/useCrossfadeMedia'
 import { useSequencedReveal } from '../utils/useSequencedReveal'
 import { usePageTransitionVideo } from '../utils/usePageTransitionVideo'
 import { useFadeOutNavigation } from '../utils/useFadeOutNavigation'
 import { useVideoReady } from '../utils/useVideoReady'
+import { useCenteredItemDetection } from '../utils/useCenteredItemDetection'
 import { REVEAL_HIDDEN_STYLE, REVEAL_HIDDEN_STYLE_SIMPLE } from '../utils/useRevealAnimation'
-import BackgroundMedia from '../components/BackgroundMedia/BackgroundMedia'
+import { toMediaObject } from '../utils/mediaHelpers'
 import { useGSAP } from '@gsap/react'
 
 const DEFAULT_INDEX = 3
-
-const getMedia = (d: any, i: number) => ({
-  id: d?.slug ?? i,
-  videoSrc: d?.previewUrl ?? d?.vimeoUrl ?? '',
-  previewUrl: d?.previewUrl ?? '',
-  mobilePreviewUrl: d?.mobilePreviewUrl ?? '',
-  vimeoUrl: d?.vimeoUrl ?? '',
-  previewPoster: d?.previewPoster ?? '',
-  previewPosterLQIP: d?.previewPosterLQIP ?? '',
-  bgColor: d?.bgColor ?? '#477AA1',
-})
 
 export default function DirectorsClient() {
   const { getPreviousVideoState } = usePageTransitionVideo()
 
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
-  const [activeIndex, setActiveIndex] = useState(0) // For mobile - which director is centered
-  const [isReady, setIsReady] = useState(false) // Single ready state for animations
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [isReady, setIsReady] = useState(false)
 
-  // CSR-only: We can detect mobile immediately since we're only on client
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024
 
-  // Track video ready state for smoother content reveal
-  // Short timeout (800ms) - we don't want to wait too long for the video
-  // Better UX to show content slightly before video than wait 4 seconds
   const { isReady: videoReady, markReady } = useVideoReady({
-    skip: isMobile, // Skip waiting on mobile (simpler experience)
+    skip: isMobile,
     timeout: 800,
   })
 
@@ -47,7 +34,6 @@ export default function DirectorsClient() {
   const hasTransitionedRef = useRef(false)
   const hasAnimatedRef = useRef(false)
 
-  // Use the reusable fade-out navigation hook
   const { fadeOutAndNavigate, isNavigating } = useFadeOutNavigation(mainRef, {
     selector: '[data-reveal]',
     isMobile,
@@ -56,9 +42,8 @@ export default function DirectorsClient() {
 
   const initialIdx =
     Number.isInteger(DEFAULT_INDEX) && directors[DEFAULT_INDEX] ? DEFAULT_INDEX : 0
-  const targetMedia = getMedia(directors[initialIdx], initialIdx)
+  const targetMedia = toMediaObject(directors[initialIdx], initialIdx, '#477AA1')
 
-  // Check for previous video state to determine initial state
   const previousVideo = getPreviousVideoState()
   const initialMedia = previousVideo || targetMedia
 
@@ -115,8 +100,6 @@ export default function DirectorsClient() {
     hasAnimatedRef.current = true
 
     if (isMobile) {
-      // Mobile: Simple immediate show - no animation for better performance
-      // GSAP stagger animations are heavy on mobile and cause glitches
       const mobileItems = scrollContainerRef.current?.querySelectorAll('[data-mobile-reveal]')
       if (mobileItems && mobileItems.length > 0) {
         mobileItems.forEach((item) => {
@@ -126,63 +109,24 @@ export default function DirectorsClient() {
         })
       }
     } else {
-      // Desktop animation
       requestAnimationFrame(() => {
         start()
       })
     }
   }, [isReady, isMobile, videoReady, start])
 
-  // Mobile: Simple scroll detection - find centered item
-  // Uses getBoundingClientRect which works reliably across all browsers
-  useEffect(() => {
-    if (!isMobile || !scrollContainerRef.current) return
-
-    const container = scrollContainerRef.current
-    const items = container.querySelectorAll('[data-index]')
-    if (items.length === 0) return
-
-    const findCenteredItem = () => {
-      const containerRect = container.getBoundingClientRect()
-      const centerY = containerRect.top + containerRect.height / 2
-
-      let closestIndex = 0
-      let closestDistance = Infinity
-
-      items.forEach((item, index) => {
-        const rect = item.getBoundingClientRect()
-        const itemCenterY = rect.top + rect.height / 2
-        const distance = Math.abs(itemCenterY - centerY)
-
-        if (distance < closestDistance) {
-          closestDistance = distance
-          closestIndex = index
-        }
-      })
-
-      if (closestIndex !== activeIndex) {
-        setActiveIndex(closestIndex)
-        const d = directors[closestIndex]
-        if (d) {
-          crossfadeTo(getMedia(d, closestIndex))
-        }
-      }
+  // Mobile: detect centered item via IntersectionObserver and crossfade video
+  const handleMobileActiveChange = useCallback((index: number) => {
+    setActiveIndex(index)
+    const d = directors[index]
+    if (d) {
+      crossfadeTo(toMediaObject(d, index, '#477AA1'))
     }
+  }, [crossfadeTo])
 
-    // Initial check
-    findCenteredItem()
-
-    // Listen for scroll
-    const handleScroll = () => {
-      requestAnimationFrame(findCenteredItem)
-    }
-
-    container.addEventListener('scroll', handleScroll, { passive: true })
-
-    return () => {
-      container.removeEventListener('scroll', handleScroll)
-    }
-  }, [isMobile, activeIndex, crossfadeTo])
+  useCenteredItemDetection(scrollContainerRef, '[data-index]', handleMobileActiveChange, {
+    enabled: isMobile,
+  })
 
   // Desktop handlers
   const select = (i: number) => {
@@ -190,7 +134,7 @@ export default function DirectorsClient() {
     const d = directors[i]
     if (!d) return
     setHoveredIndex(i)
-    crossfadeTo(getMedia(d, i))
+    crossfadeTo(toMediaObject(d, i, '#477AA1'))
   }
 
   const resetToDefault = () => {
@@ -218,48 +162,10 @@ export default function DirectorsClient() {
     }
   }, { dependencies: [isMobile, handleFadeOutAndNavigate] })
 
-  // PERFORMANCE FIX: Only render the layout for current device
-  // Previously both desktop AND mobile components mounted simultaneously,
-  // causing doubled video loading and effects even when hidden with CSS
   if (isMobile) {
-    // Mobile Layout
     return (
       <main className="fixed inset-0">
-        {/* Background video - crossfade slots */}
-        <div className="fixed inset-0 z-0 bg-black">
-          <div
-            ref={(el) => { setSlotRef(0)(el) }}
-            className="absolute inset-0"
-          >
-            {slotMedia[0] && (
-              <BackgroundMedia
-                variant="preview"
-                previewUrl={slotMedia[0].previewUrl}
-                mobilePreviewUrl={slotMedia[0].mobilePreviewUrl}
-                vimeoUrl={slotMedia[0].vimeoUrl}
-                previewPoster={slotMedia[0].previewPoster}
-                previewPosterLQIP={slotMedia[0].previewPosterLQIP}
-                bgColor={slotMedia[0].bgColor}
-              />
-            )}
-          </div>
-          <div
-            ref={(el) => { setSlotRef(1)(el) }}
-            className="absolute inset-0"
-          >
-            {slotMedia[1] && (
-              <BackgroundMedia
-                variant="preview"
-                previewUrl={slotMedia[1].previewUrl}
-                mobilePreviewUrl={slotMedia[1].mobilePreviewUrl}
-                vimeoUrl={slotMedia[1].vimeoUrl}
-                previewPoster={slotMedia[1].previewPoster}
-                previewPosterLQIP={slotMedia[1].previewPosterLQIP}
-                bgColor={slotMedia[1].bgColor}
-              />
-            )}
-          </div>
-        </div>
+        <CrossfadeBackground slotMedia={slotMedia} setSlotRef={setSlotRef} />
 
         {/* Scrollable list with snap */}
         <div
@@ -303,44 +209,13 @@ export default function DirectorsClient() {
       ref={mainRef}
       className="relative min-h-dvh w-full overflow-hidden text-white"
     >
-      {/* BACKGROUND (preview variant) */}
-      <div className="absolute inset-0 z-0 bg-black">
-        <div
-          ref={el => { setSlotRef(0)(el) }}
-          className="absolute inset-0"
-          style={{ pointerEvents: 'none' }}
-        >
-          {slotMedia[0] && (
-            <BackgroundMedia
-              variant="preview"
-              previewUrl={slotMedia[0].previewUrl ?? slotMedia[0].videoSrc}
-              mobilePreviewUrl={slotMedia[0].mobilePreviewUrl}
-              vimeoUrl={slotMedia[0].vimeoUrl ?? slotMedia[0].videoSrc}
-              previewPoster={slotMedia[0].previewPoster}
-              previewPosterLQIP={slotMedia[0].previewPosterLQIP}
-              bgColor={slotMedia[0].bgColor}
-              onVideoReady={markReady}
-            />
-          )}
-        </div>
-        <div
-          ref={el => { setSlotRef(1)(el) }}
-          className="absolute inset-0"
-          style={{ pointerEvents: 'none' }}
-        >
-          {slotMedia[1] && (
-            <BackgroundMedia
-              variant="preview"
-              previewUrl={slotMedia[1].previewUrl ?? slotMedia[1].videoSrc}
-              mobilePreviewUrl={slotMedia[1].mobilePreviewUrl}
-              vimeoUrl={slotMedia[1].vimeoUrl ?? slotMedia[1].videoSrc}
-              previewPoster={slotMedia[1].previewPoster}
-              previewPosterLQIP={slotMedia[1].previewPosterLQIP}
-              bgColor={slotMedia[1].bgColor}
-            />
-          )}
-        </div>
-      </div>
+      <CrossfadeBackground
+        slotMedia={slotMedia}
+        setSlotRef={setSlotRef}
+        onVideoReady={markReady}
+        disablePointerEvents
+        positioning="absolute"
+      />
 
       {/* FOREGROUND LIST */}
       <section className="relative min-h-dvh w-full pt-32">

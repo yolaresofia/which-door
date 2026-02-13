@@ -6,7 +6,7 @@ import { useSequencedReveal } from '../utils/useSequencedReveal'
 import { usePageTransitionVideo } from '../utils/usePageTransitionVideo'
 import { useCrossfadeMedia } from '../utils/useCrossfadeMedia'
 import { useFadeOutNavigation } from '../utils/useFadeOutNavigation'
-import { REVEAL_HIDDEN_STYLE } from '../utils/useRevealAnimation'
+import { useVideoReady } from '../utils/useVideoReady'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
 
@@ -19,12 +19,17 @@ const mobilePreviewUrl = 'https://cdn.sanity.io/files/xerhtqd5/production/fd6592
 export default function AboutPage() {
   const { getPreviousVideoState } = usePageTransitionVideo()
 
-  const [fontLoaded, setFontLoaded] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
   const contentRef = useRef<HTMLElement | null>(null)
   const mainRef = useRef<HTMLElement | null>(null)
   const hasTransitionedRef = useRef(false)
+  const hasAnimatedRef = useRef(false)
+
+  const { isReady: videoReady, markReady } = useVideoReady({
+    skip: isMobile,
+    timeout: 3000,
+  })
 
   // Use the reusable fade-out navigation hook
   const { fadeOutAndNavigate, isNavigating } = useFadeOutNavigation(mainRef, {
@@ -48,19 +53,15 @@ export default function AboutPage() {
 
   const { setSlotRef, slotMedia, crossfadeTo } = useCrossfadeMedia(initialVideo, { duration: 0.6 })
 
-  // Desktop animation - EXACT SAME as ProjectsLanding
+  // Desktop animation - simple opacity fade (no slide)
   const { start } = useSequencedReveal(contentRef, {
     target: '[data-reveal]',
-    duration: 0.8,
+    duration: 1,
     ease: 'power2.out',
-    from: { opacity: 0, y: 20, scale: 0.98 },
-    to: { opacity: 1, y: 0, scale: 1 },
+    from: { opacity: 0 },
+    to: { opacity: 1 },
     autoStart: false,
-    stagger: { 
-      each: 0.08,
-      from: 'start',
-      ease: 'power2.inOut'
-    },
+    stagger: 0,
   })
 
   // Handle incoming page transition video
@@ -91,88 +92,35 @@ export default function AboutPage() {
   useLayoutEffect(() => {
     if (!contentRef.current) return
     const items = contentRef.current.querySelectorAll('[data-reveal]')
-    gsap.set(items, { opacity: 0, y: 20, scale: 0.98 })
+    gsap.set(items, { opacity: 0 })
   }, []) // Empty deps - run once on mount
 
-  // Start mobile animation after a short delay (no video/font dependency)
+  // Single animation trigger — waits for video on desktop, immediate on mobile
   useEffect(() => {
-    if (!isMobile) return
+    if (hasAnimatedRef.current) return
     if (!contentRef.current) return
 
-    const timeoutId = setTimeout(() => {
-      const items = contentRef.current?.querySelectorAll('[data-reveal]')
-      if (items && items.length > 0) {
-        gsap.set(items, { opacity: 0, y: 20 })
+    // Desktop: wait for video ready
+    if (!isMobile && !videoReady) return
+
+    hasAnimatedRef.current = true
+
+    if (isMobile) {
+      const items = contentRef.current.querySelectorAll('[data-reveal]')
+      if (items.length > 0) {
+        gsap.set(items, { opacity: 0 })
         gsap.to(items, {
           opacity: 1,
-          y: 0,
-          duration: 0.6,
+          duration: 0.8,
           ease: 'power2.out',
-          stagger: {
-            each: 0.08,
-            from: 'start',
-          },
         })
       }
-    }, 50)
-
-    return () => clearTimeout(timeoutId)
-  }, [isMobile])
-
-  // Font loading - EXACT SAME as ProjectsLanding
-  useEffect(() => {
-    // Only run on desktop
-    if (isMobile) return
-    if (fontLoaded) return // Prevent re-running
-
-    let cancelled = false
-    let timeoutId: NodeJS.Timeout
-
-    const triggerAnimation = () => {
-      if (cancelled) return
-      setFontLoaded(true)
-      // Start with RAF to ensure DOM is ready
+    } else {
       requestAnimationFrame(() => {
         start()
       })
     }
-
-    // Simplified font loading that works in production
-    if (typeof window !== 'undefined' && 'fonts' in document) {
-      const fonts = (document as any).fonts
-      if (fonts?.ready) {
-        fonts.ready.then(() => {
-          // Try to load the font, but don't wait forever
-          Promise.race([
-            fonts.load('normal 1em Neue').catch(() => null),
-            new Promise(resolve => setTimeout(resolve, 500))
-          ]).then(() => {
-            if (!cancelled) triggerAnimation()
-          })
-        }).catch(() => {
-          // If fonts.ready fails, fallback to timeout
-          if (!cancelled) timeoutId = setTimeout(triggerAnimation, 100)
-        })
-      } else {
-        timeoutId = setTimeout(triggerAnimation, 100)
-      }
-    } else {
-      timeoutId = setTimeout(triggerAnimation, 100)
-    }
-
-    // Safety timeout to ensure animation always runs
-    const safetyTimeout = setTimeout(() => {
-      if (!cancelled && !fontLoaded) {
-        triggerAnimation()
-      }
-    }, 1000)
-
-    return () => {
-      cancelled = true
-      if (timeoutId) clearTimeout(timeoutId)
-      clearTimeout(safetyTimeout)
-    }
-  }, [start, fontLoaded, isMobile])
+  }, [isMobile, videoReady, start])
 
   // Expose fade-out function globally for header navigation
   useGSAP(() => {
@@ -212,6 +160,7 @@ export default function AboutPage() {
               vimeoUrl={slotMedia[0].vimeoUrl}
               previewPoster={slotMedia[0].previewPoster}
               bgColor={slotMedia[0].bgColor}
+              onVideoReady={markReady}
             />
           )}
         </div>
@@ -242,7 +191,7 @@ export default function AboutPage() {
       >
         <div
           data-reveal
-          style={REVEAL_HIDDEN_STYLE}
+          style={{ opacity: 0 }}
         >
           <p
             className="text-lg md:text-2xl leading-5 md:leading-7 md:text-left"

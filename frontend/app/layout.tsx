@@ -75,9 +75,15 @@ export default async function RootLayout({children}: {children: React.ReactNode}
         {/* Preconnect to Sanity CDN for faster resource loading */}
         <link rel="preconnect" href="https://cdn.sanity.io" />
         <link rel="dns-prefetch" href="https://cdn.sanity.io" />
-        {/* Preconnect to Vimeo for video loading */}
+        {/* Preconnect to Vimeo domains for faster video loading */}
         <link rel="preconnect" href="https://player.vimeo.com" />
+        <link rel="preconnect" href="https://i.vimeocdn.com" />
+        <link rel="preconnect" href="https://f.vimeocdn.com" />
+        <link rel="preconnect" href="https://vod-adaptive-ak.vimeocdn.com" />
         <link rel="dns-prefetch" href="https://player.vimeo.com" />
+        <link rel="dns-prefetch" href="https://i.vimeocdn.com" />
+        <link rel="dns-prefetch" href="https://f.vimeocdn.com" />
+        <link rel="dns-prefetch" href="https://vod-adaptive-ak.vimeocdn.com" />
       </head>
       <body>
         <LenisProvider>

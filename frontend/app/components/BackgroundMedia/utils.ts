@@ -35,6 +35,10 @@ export function buildVimeoEmbedUrl(input?: string, flags?: VimeoFlags): string |
   u.searchParams.set("byline", "0");
   u.searchParams.set("playsinline", "1");
   u.searchParams.set("dnt", "1");
+  // Faster loading: auto quality, disable transparency/pip overhead
+  u.searchParams.set("quality", "auto");
+  u.searchParams.set("transparent", "0");
+  u.searchParams.set("pip", "0");
 
   return u.toString();
 }

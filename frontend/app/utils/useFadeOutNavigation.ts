@@ -30,13 +30,8 @@ export function useFadeOutNavigation(
 
   const fadeOutAndNavigate = useCallback(
     (url: string, slotMedia?: any[]) => {
-      // Prevent duplicate navigation
-      if (isNavigating) {
-        console.log('⚠️ Already navigating, ignoring request')
-        return
-      }
+      if (isNavigating) return
 
-      console.log(`🎬 Fading out and navigating to: ${url} (mobile: ${isMobile})`)
       setIsNavigating(true)
 
       try {
@@ -53,8 +48,8 @@ export function useFadeOutNavigation(
                 previewPoster: currentMedia.previewPoster,
                 bgColor: currentMedia.bgColor,
               })
-            } catch (error) {
-              console.warn('Failed to save video state:', error)
+            } catch {
+              // Ignore storage errors
             }
           }
         }
@@ -64,18 +59,16 @@ export function useFadeOutNavigation(
           containerRef.current.style.pointerEvents = 'none'
         }
 
-        // Optional callback
         try {
           onNavigate?.()
-        } catch (error) {
-          console.warn('Navigation callback error:', error)
+        } catch {
+          // Ignore callback errors
         }
 
         // Find and animate items
         const items = containerRef.current?.querySelectorAll(selector)
 
         if (!items || items.length === 0) {
-          console.warn(`⚠️ No items found with selector "${selector}", navigating immediately`)
           router.push(url)
           return
         }
@@ -99,18 +92,17 @@ export function useFadeOutNavigation(
           scale: 0.95,
           duration: config.duration,
           ease: config.ease,
-          stagger: 0, // NO stagger on mobile - all items fade together
+          stagger: 0,
         } : {
           opacity: 0,
           y: -20,
           scale: 0.95,
           duration: config.duration,
           ease: config.ease,
-          stagger: config.stagger, // Full stagger on desktop
+          stagger: config.stagger,
         }
 
         // SURGICAL GPU HINTS: Only apply on desktop, only right before animation
-        // Mobile: Skip entirely - GPU hints cause Safari performance issues
         if (!isMobile) {
           gsap.set(items, {
             ...GPU_HINTS.apply(items),
@@ -118,17 +110,13 @@ export function useFadeOutNavigation(
           })
         }
 
-        // Create the fade-out animation with error handling
+        // Create the fade-out animation
         try {
           animationRef.current = gsap.to(items, {
             ...animationConfig,
-            onStart: () => {
-              console.log('▶️ Fade-out animation started')
-            },
             onComplete: () => {
-              console.log('✅ Fade-out animation complete, navigating...')
-              // CRITICAL: Clean up GPU hints immediately after animation
-              gsap.set(items, GPU_HINTS.clearAll())
+              // Navigate immediately — do NOT clearProps, as that flashes
+              // elements back to visible before the page unmounts them
               router.push(url)
             },
           })
@@ -136,16 +124,12 @@ export function useFadeOutNavigation(
           // Safety fallback: navigate after maximum duration
           const maxDuration = (animationConfig.duration + 0.3) * 1000
           navigationTimeoutRef.current = setTimeout(() => {
-            console.log('⏰ Animation timeout, navigating now')
             router.push(url)
           }, maxDuration)
-        } catch (error) {
-          console.error('Animation error, navigating immediately:', error)
+        } catch {
           router.push(url)
         }
-      } catch (error) {
-        console.error('Fatal navigation error:', error)
-        // Fallback: navigate immediately on any error
+      } catch {
         router.push(url)
         setIsNavigating(false)
       }

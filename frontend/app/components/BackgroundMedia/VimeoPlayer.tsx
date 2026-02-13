@@ -17,6 +17,8 @@ const CONTROLS_IDLE_HIDE_MS = 900;
 
 export type VimeoPlayerProps = {
   vimeoUrl: string;
+  previewUrl?: string;
+  mobilePreviewUrl?: string;
   previewPoster?: string;
   previewPosterLQIP?: string;
   title?: string;
@@ -27,6 +29,8 @@ export type VimeoPlayerProps = {
 
 export default function VimeoPlayer({
   vimeoUrl,
+  previewUrl,
+  mobilePreviewUrl,
   previewPoster,
   previewPosterLQIP,
   title,
@@ -35,6 +39,12 @@ export default function VimeoPlayer({
   onShare,
 }: VimeoPlayerProps) {
   const containerEl = useRef<HTMLDivElement | null>(null);
+  const previewVideoRef = useRef<HTMLVideoElement | null>(null);
+  const [previewPlaying, setPreviewPlaying] = useState(false);
+
+  // Pick the right preview mp4 URL
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
+  const effectivePreviewUrl = isMobile && mobilePreviewUrl ? mobilePreviewUrl : previewUrl;
 
   // --- Vimeo controller ---
   const {
@@ -171,9 +181,65 @@ export default function VimeoPlayer({
       ref={containerEl}
       className={`absolute inset-0 ${className}`}
     >
-      {/* Vimeo video - always visible so it can load, poster covers it */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 flex items-center justify-center bg-black">
+      {/* Layer 1: Blurred pulsing poster — instant, no black screen ever */}
+      {posterVisible && (
+        <div
+          className="pointer-events-none absolute inset-0 z-[1] overflow-hidden"
+          style={{
+            opacity: posterOpacity,
+            transition: `opacity ${POSTER_FADE_MS}ms ease-in-out`,
+            willChange: posterPhase === "fading" ? "opacity" : "auto",
+          }}
+        >
+          <Image
+            src={previewPoster as string}
+            alt=""
+            fill
+            className="object-cover"
+            style={{
+              filter: "blur(20px)",
+              transform: "scale(1.1)",
+              animation: posterPhase === "shown" ? "pulse-brightness 2s ease-in-out infinite" : "none",
+            }}
+            sizes="100vw"
+            priority
+            fetchPriority="high"
+            placeholder={previewPosterLQIP ? "blur" : "empty"}
+            blurDataURL={previewPosterLQIP}
+          />
+        </div>
+      )}
+
+      {/* Layer 2: Fast-start mp4 preview — loads in <1s, fades in over poster */}
+      {effectivePreviewUrl && !videoHasStarted && (
+        <div className="absolute inset-0 z-[2]">
+          <video
+            ref={previewVideoRef}
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-out ${
+              previewPlaying ? "opacity-100" : "opacity-0"
+            }`}
+            src={effectivePreviewUrl}
+            muted
+            loop
+            playsInline
+            disablePictureInPicture
+            disableRemotePlayback
+            controls={false}
+            preload="auto"
+            autoPlay
+            onPlay={() => setPreviewPlaying(true)}
+            onPlaying={() => setPreviewPlaying(true)}
+          />
+        </div>
+      )}
+
+      {/* Layer 3: Vimeo video — loads in background, fades in when ready */}
+      <div className="absolute inset-0 z-[3]">
+        <div
+          className={`absolute inset-0 flex items-center justify-center transition-opacity duration-700 ease-out ${
+            videoHasStarted ? "opacity-100" : "opacity-0"
+          }`}
+        >
           <VimeoVideo
             iframeRef={iframeRef}
             vimeoSrc={vimeoUrl}
@@ -192,32 +258,6 @@ export default function VimeoPlayer({
           data-touch-toggle-ignore
         />
       </div>
-
-      {/* Poster overlay */}
-      {posterVisible && (
-        <div
-          className="pointer-events-none absolute inset-0 z-10 overflow-hidden bg-black"
-          style={{
-            opacity: posterOpacity,
-            transition: `opacity ${POSTER_FADE_MS}ms ease-in-out`,
-            willChange: posterPhase === "fading" ? "opacity" : "auto",
-          }}
-        >
-          <Image
-            src={previewPoster as string}
-            alt=""
-            fill
-            className="object-cover"
-            style={{ transform: "scale(1.05)" }}
-            sizes="100vw"
-            priority
-            fetchPriority="high"
-            placeholder={previewPosterLQIP ? "blur" : "empty"}
-            blurDataURL={previewPosterLQIP}
-          />
-          <div className="absolute inset-0 bg-black/10" />
-        </div>
-      )}
 
       {/* Controls */}
       <>

@@ -44,6 +44,8 @@ export default function BackgroundMedia({
     return (
       <VimeoPlayer
         vimeoUrl={vimeoUrl!}
+        previewUrl={previewUrl}
+        mobilePreviewUrl={mobilePreviewUrl}
         previewPoster={previewPoster}
         previewPosterLQIP={previewPosterLQIP}
         title={title}
@@ -59,6 +61,7 @@ export default function BackgroundMedia({
     <BackgroundVideo
       previewUrl={previewUrl}
       mobilePreviewUrl={mobilePreviewUrl}
+      previewPoster={previewPoster}
       bgColor={bgColor}
       className={className}
       onVideoReady={onVideoReady}

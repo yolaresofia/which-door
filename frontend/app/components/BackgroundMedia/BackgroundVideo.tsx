@@ -7,6 +7,7 @@ import { useRef, useEffect, useCallback, useState } from "react";
 export type BackgroundVideoProps = {
   previewUrl?: string;
   mobilePreviewUrl?: string;
+  previewPoster?: string;
   bgColor?: string;
   className?: string;
   onVideoReady?: () => void;
@@ -15,6 +16,7 @@ export type BackgroundVideoProps = {
 export default function BackgroundVideo({
   previewUrl,
   mobilePreviewUrl,
+  previewPoster,
   bgColor,
   className = "",
   onVideoReady,
@@ -22,6 +24,7 @@ export default function BackgroundVideo({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const isMountedRef = useRef(true);
   const hasFiredReadyRef = useRef(false);
+  const [videoPlaying, setVideoPlaying] = useState(false);
 
   // Detect mobile once on first client render (< 1024px)
   const isMobileRef = useRef<boolean | null>(null);
@@ -78,6 +81,7 @@ export default function BackgroundVideo({
   // --- Autoplay fix for iOS first-load ---
   // iOS Safari can block autoplay even on muted videos on the very first page load.
   // IntersectionObserver retries play() when visible, plus a timed retry as fallback.
+  // If all attempts fail (e.g. Low Power Mode), poster stays visible via !videoPlaying.
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !effectiveUrl) return;
@@ -99,18 +103,21 @@ export default function BackgroundVideo({
     // Timed retry fallback
     const retryId = window.setTimeout(tryPlay, 1000);
 
+    // Final check — if video still hasn't played after 2.5s, fire ready
+    // so the UI isn't blocked waiting for a video that won't play.
+    // The poster stays visible via !videoPlaying state.
+    const finalCheckId = window.setTimeout(() => {
+      if (video.paused && isMountedRef.current) {
+        fireReady();
+      }
+    }, 2500);
+
     return () => {
       observer.disconnect();
       window.clearTimeout(retryId);
+      window.clearTimeout(finalCheckId);
     };
-  }, [effectiveUrl]);
-
-  // --- Fallback: fire onVideoReady after 500ms even if events don't fire ---
-  useEffect(() => {
-    if (hasFiredReadyRef.current) return;
-    const id = window.setTimeout(fireReady, 500);
-    return () => window.clearTimeout(id);
-  }, [fireReady]);
+  }, [effectiveUrl, fireReady]);
 
   // --- Event handlers ---
   const handleCanPlay = useCallback(() => {
@@ -120,21 +127,37 @@ export default function BackgroundVideo({
   }, []);
 
   const handlePlaybackStart = useCallback(() => {
+    setVideoPlaying(true);
     fireReady();
   }, [fireReady]);
 
   if (!effectiveUrl) return null;
 
+  // Only use poster if it's a real URL (not empty string)
+  const posterSrc = previewPoster && previewPoster.length > 1 ? previewPoster : null;
+
   return (
     <div
       className={`absolute inset-0 ${className}`}
-      style={bgColor ? { backgroundColor: bgColor } : undefined}
+      style={{ backgroundColor: bgColor || "#000" }}
     >
-      <div className="absolute inset-0 flex items-center justify-center bg-black">
+      <div className="absolute inset-0">
+        {/* Blurred poster: always rendered behind the video. No black screen ever. */}
+        {posterSrc && (
+          <img
+            src={posterSrc}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+            style={{ filter: "blur(20px)", transform: "scale(1.1)" }}
+          />
+        )}
+        {/* Video: renders on top, invisible until playing */}
         <video
           key={effectiveUrl}
           ref={videoRef}
-          className="h-full w-full object-cover"
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-out ${
+            videoPlaying ? "opacity-100" : "opacity-0"
+          }`}
           src={effectiveUrl}
           muted
           loop
