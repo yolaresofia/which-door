@@ -10,8 +10,6 @@
 
 import {PortableText, type PortableTextComponents, type PortableTextBlock} from 'next-sanity'
 
-import ResolvedLink from '@/app/components/ResolvedLink'
-
 export default function CustomPortableText({
   className,
   value,
@@ -72,11 +70,6 @@ export default function CustomPortableText({
             </a>
           </h2>
         )
-      },
-    },
-    marks: {
-      link: ({children, value: link}) => {
-        return <ResolvedLink link={link}>{children}</ResolvedLink>
       },
     },
   }
