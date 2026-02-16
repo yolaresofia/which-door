@@ -5,14 +5,12 @@ import { notFound } from 'next/navigation'
 import DetailView from '@/app/components/DetailView'
 import { directors, projects } from '@/app/components/constants'
 import { useSequencedReveal } from '@/app/utils/useSequencedReveal'
-import { usePageTransitionVideo } from '@/app/utils/usePageTransitionVideo'
-import { useCrossfadeMedia } from '@/app/utils/useCrossfadeMedia'
 import { useFadeOutNavigation } from '@/app/utils/useFadeOutNavigation'
-import BackgroundMedia from '@/app/components/BackgroundMedia/BackgroundMedia'
+import { useGlobalVideo } from '@/app/utils/GlobalVideoContext'
 import { useGSAP } from '@gsap/react'
 
 export default function DirectorDetailClient({ slug }: { slug: string }) {
-  const { getPreviousVideoState } = usePageTransitionVideo()
+  const { setVideo, crossfadeTo, setMode } = useGlobalVideo()
 
   const [fontLoaded, setFontLoaded] = useState(false)
 
@@ -21,13 +19,11 @@ export default function DirectorDetailClient({ slug }: { slug: string }) {
 
   const contentRef = useRef<HTMLElement | null>(null)
   const mainRef = useRef<HTMLElement | null>(null)
-  const hasTransitionedRef = useRef(false)
 
   // Use the reusable fade-out navigation hook
   const { fadeOutAndNavigate, isNavigating } = useFadeOutNavigation(mainRef, {
     selector: '[data-reveal]',
     isMobile,
-    saveVideo: true,
   })
 
   const item = useMemo(() => directors.find((d) => d.slug === slug), [slug])
@@ -65,11 +61,11 @@ export default function DirectorDetailClient({ slug }: { slug: string }) {
     bgColor: '#477AA1',
   }), [itemWithLinks, slug])
 
-  // Check for previous video state to determine initial state
-  const previousVideo = getPreviousVideoState()
-  const initialVideo = previousVideo || targetVideo
-
-  const { setSlotRef, slotMedia, crossfadeTo } = useCrossfadeMedia(initialVideo, { duration: 0.6 })
+  // Tell the global video layer what to show
+  useEffect(() => {
+    setMode('background')
+    setVideo(targetVideo)
+  }, [setMode, setVideo, targetVideo])
 
   // Handle hover on other projects - crossfade to show their preview with poster
   const handleHoverProject = useCallback((project: { previewUrl?: string; mobilePreviewUrl?: string; previewPoster?: string; title?: string } | null) => {
@@ -104,20 +100,6 @@ export default function DirectorDetailClient({ slug }: { slug: string }) {
       ease: 'power2.inOut'
     },
   })
-
-  // Handle incoming page transition video
-  useEffect(() => {
-    if (hasTransitionedRef.current || !previousVideo || isMobile) return
-
-    hasTransitionedRef.current = true
-
-    // Crossfade from previous video to director video after a brief delay
-    const timeoutId = setTimeout(() => {
-      crossfadeTo(targetVideo)
-    }, 400)
-
-    return () => clearTimeout(timeoutId)
-  }, [isMobile, previousVideo, crossfadeTo, targetVideo])
 
   // Start mobile content reveal - simple immediate show for performance
   useEffect(() => {
@@ -195,15 +177,10 @@ export default function DirectorDetailClient({ slug }: { slug: string }) {
   useEffect(() => {
     if (isMobile) return
 
-    const handleFadeOutAndNavigate = (url: string) => {
-      fadeOutAndNavigate(url, slotMedia)
-    }
-
-    // Custom event listener for navigation from anywhere
     const handleNavigationRequest = (e: CustomEvent) => {
       const url = e.detail?.url
       if (url && !isNavigating) {
-        handleFadeOutAndNavigate(url)
+        fadeOutAndNavigate(url)
       }
     }
 
@@ -212,23 +189,19 @@ export default function DirectorDetailClient({ slug }: { slug: string }) {
     return () => {
       window.removeEventListener('navigate-with-fade' as any, handleNavigationRequest as any)
     }
-  }, [isMobile, isNavigating, slotMedia, fadeOutAndNavigate])
+  }, [isMobile, isNavigating, fadeOutAndNavigate])
 
   // Expose fade-out function globally for header navigation
   useGSAP(() => {
     if (isMobile) return
 
-    const handleFadeOutAndNavigate = (url: string) => {
-      fadeOutAndNavigate(url, slotMedia)
-    }
-
     // Make fade-out function available globally
-    (window as any).__directorDetailFadeOut = handleFadeOutAndNavigate
+    ;(window as any).__directorDetailFadeOut = fadeOutAndNavigate
 
     return () => {
       delete (window as any).__directorDetailFadeOut
     }
-  }, { dependencies: [isMobile, slotMedia, fadeOutAndNavigate] })
+  }, { dependencies: [isMobile, fadeOutAndNavigate] })
 
   // Check if item exists after all hooks have been called
   if (!itemWithLinks) {
@@ -240,53 +213,13 @@ export default function DirectorDetailClient({ slug }: { slug: string }) {
       ref={mainRef}
       className="relative min-h-screen w-full overflow-hidden text-white"
     >
-      {/* Background Video - Dual slot system for crossfade */}
-      <div className="fixed inset-0 z-0 bg-black">
-        <div
-          ref={(el) => {
-            setSlotRef(0)(el)
-          }}
-          className="absolute inset-0"
-          style={{ pointerEvents: 'none' }}
-        >
-          {slotMedia[0] && (
-            <BackgroundMedia
-              variant="preview"
-              previewUrl={slotMedia[0].previewUrl ?? slotMedia[0].videoSrc}
-              mobilePreviewUrl={slotMedia[0].mobilePreviewUrl}
-              vimeoUrl={slotMedia[0].vimeoUrl}
-              previewPoster={slotMedia[0].previewPoster}
-              bgColor={slotMedia[0].bgColor}
-            />
-          )}
-        </div>
-        <div
-          ref={(el) => {
-            setSlotRef(1)(el)
-          }}
-          className="absolute inset-0"
-          style={{ pointerEvents: 'none' }}
-        >
-          {slotMedia[1] && (
-            <BackgroundMedia
-              variant="preview"
-              previewUrl={slotMedia[1].previewUrl ?? slotMedia[1].videoSrc}
-              mobilePreviewUrl={slotMedia[1].mobilePreviewUrl}
-              vimeoUrl={slotMedia[1].vimeoUrl}
-              previewPoster={slotMedia[1].previewPoster}
-              bgColor={slotMedia[1].bgColor}
-            />
-          )}
-        </div>
-      </div>
-
       {/* Content with animation */}
       <section
-      ref={contentRef}
-      className="relative z-10"
-    >
-      <DetailView item={itemWithLinks} enableAnimations={true} onHoverProject={handleHoverProject} />
-    </section>
-  </main>
-)
+        ref={contentRef}
+        className="relative z-10"
+      >
+        <DetailView item={itemWithLinks} enableAnimations={true} onHoverProject={handleHoverProject} />
+      </section>
+    </main>
+  )
 }

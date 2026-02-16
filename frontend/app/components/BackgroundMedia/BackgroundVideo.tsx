@@ -37,7 +37,14 @@ export default function BackgroundVideo({
   const effectiveUrl =
     isMobile && mobilePreviewUrl ? mobilePreviewUrl : previewUrl;
 
-  // --- onVideoReady callback (fire once) ---
+  // Reset hasFiredReady when the video source changes (new media crossfaded in)
+  const prevUrlRef = useRef(effectiveUrl);
+  if (prevUrlRef.current !== effectiveUrl) {
+    prevUrlRef.current = effectiveUrl;
+    hasFiredReadyRef.current = false;
+  }
+
+  // --- onVideoReady callback (fire once per video source) ---
   const fireReady = useCallback(() => {
     if (hasFiredReadyRef.current || !isMountedRef.current) return;
     hasFiredReadyRef.current = true;

@@ -36,7 +36,7 @@ export default function CrossfadeBackground({
               previewPoster={slotMedia[i]!.previewPoster}
               previewPosterLQIP={slotMedia[i]!.previewPosterLQIP}
               bgColor={slotMedia[i]!.bgColor}
-              onVideoReady={i === 0 ? onVideoReady : undefined}
+              onVideoReady={onVideoReady}
             />
           )}
         </div>

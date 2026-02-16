@@ -1,12 +1,9 @@
 'use client'
 
 import { useEffect, useLayoutEffect, useRef, useState, useMemo } from 'react'
-import BackgroundMedia from '../components/BackgroundMedia/BackgroundMedia'
 import { useSequencedReveal } from '../utils/useSequencedReveal'
-import { usePageTransitionVideo } from '../utils/usePageTransitionVideo'
-import { useCrossfadeMedia } from '../utils/useCrossfadeMedia'
 import { useFadeOutNavigation } from '../utils/useFadeOutNavigation'
-import { useVideoReady } from '../utils/useVideoReady'
+import { useGlobalVideo } from '../utils/GlobalVideoContext'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
 
@@ -17,25 +14,18 @@ const previewPoster =
 const mobilePreviewUrl = 'https://cdn.sanity.io/files/xerhtqd5/production/fd65929092659391a7ab01598986142c310343da.mp4'
 
 export default function AboutPage() {
-  const { getPreviousVideoState } = usePageTransitionVideo()
+  const { setVideo, videoReady, setMode } = useGlobalVideo()
 
   const [isMobile, setIsMobile] = useState(false)
 
   const contentRef = useRef<HTMLElement | null>(null)
   const mainRef = useRef<HTMLElement | null>(null)
-  const hasTransitionedRef = useRef(false)
   const hasAnimatedRef = useRef(false)
 
-  const { isReady: videoReady, markReady } = useVideoReady({
-    skip: isMobile,
-    timeout: 3000,
-  })
-
   // Use the reusable fade-out navigation hook
-  const { fadeOutAndNavigate, isNavigating } = useFadeOutNavigation(mainRef, {
+  const { fadeOutAndNavigate } = useFadeOutNavigation(mainRef, {
     selector: '[data-reveal]',
     isMobile,
-    saveVideo: true,
   })
 
   const targetVideo = useMemo(() => ({
@@ -47,11 +37,11 @@ export default function AboutPage() {
     bgColor: '#000',
   }), [])
 
-  // Check for previous video state to determine initial state
-  const previousVideo = getPreviousVideoState()
-  const initialVideo = previousVideo || targetVideo
-
-  const { setSlotRef, slotMedia, crossfadeTo } = useCrossfadeMedia(initialVideo, { duration: 0.6 })
+  // Tell the global video layer what to show
+  useEffect(() => {
+    setMode('background')
+    setVideo(targetVideo)
+  }, [setMode, setVideo, targetVideo])
 
   // Desktop animation - simple opacity fade (no slide)
   const { start } = useSequencedReveal(contentRef, {
@@ -64,20 +54,7 @@ export default function AboutPage() {
     stagger: 0,
   })
 
-  // Handle incoming page transition video
-  useEffect(() => {
-    if (hasTransitionedRef.current || !previousVideo || isMobile) return
-    hasTransitionedRef.current = true
-
-    // Crossfade from previous video to about page video after a brief delay
-    const timeoutId = setTimeout(() => {
-      crossfadeTo(targetVideo)
-    }, 400)
-
-    return () => clearTimeout(timeoutId)
-  }, [isMobile, previousVideo, crossfadeTo, targetVideo])
-
-  // Detect mobile - EXACT SAME as ProjectsLanding
+  // Detect mobile
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 1024)
@@ -127,64 +104,23 @@ export default function AboutPage() {
     if (isMobile) return
 
     const handleFadeOutAndNavigate = (url: string) => {
-      fadeOutAndNavigate(url, slotMedia)
+      fadeOutAndNavigate(url)
     }
 
     // Make fade-out function available globally
-    (window as any).__aboutFadeOut = handleFadeOutAndNavigate
+    ;(window as any).__aboutFadeOut = handleFadeOutAndNavigate
 
     return () => {
       delete (window as any).__aboutFadeOut
     }
-  }, { dependencies: [isMobile, slotMedia, fadeOutAndNavigate] })
+  }, { dependencies: [isMobile, fadeOutAndNavigate] })
 
   return (
     <main
       ref={mainRef}
       className="relative min-h-screen w-full overflow-hidden text-white flex items-center justify-center md:block"
     >
-      {/* Background Video - Dual slot system for crossfade */}
-      <div className="fixed inset-0 z-0 bg-black">
-        <div
-          ref={(el) => {
-            setSlotRef(0)(el)
-          }}
-          className="absolute inset-0"
-          style={{ pointerEvents: 'none' }}
-        >
-          {slotMedia[0] && (
-            <BackgroundMedia
-              variant="preview"
-              previewUrl={slotMedia[0].previewUrl ?? slotMedia[0].videoSrc}
-              mobilePreviewUrl={slotMedia[0].mobilePreviewUrl}
-              vimeoUrl={slotMedia[0].vimeoUrl}
-              previewPoster={slotMedia[0].previewPoster}
-              bgColor={slotMedia[0].bgColor}
-              onVideoReady={markReady}
-            />
-          )}
-        </div>
-        <div
-          ref={(el) => {
-            setSlotRef(1)(el)
-          }}
-          className="absolute inset-0"
-          style={{ pointerEvents: 'none' }}
-        >
-          {slotMedia[1] && (
-            <BackgroundMedia
-              variant="preview"
-              previewUrl={slotMedia[1].previewUrl ?? slotMedia[1].videoSrc}
-              mobilePreviewUrl={slotMedia[1].mobilePreviewUrl}
-              vimeoUrl={slotMedia[1].vimeoUrl}
-              previewPoster={slotMedia[1].previewPoster}
-              bgColor={slotMedia[1].bgColor}
-            />
-          )}
-        </div>
-      </div>
-      
-      {/* Content with animation - EXACT SAME structure as ProjectsLanding */}
+      {/* Content with animation */}
       <section
         ref={contentRef}
         className="relative z-10 mx-auto w-full px-6 md:px-12 pt-0 md:pt-32"

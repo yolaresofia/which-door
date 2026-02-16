@@ -9,6 +9,7 @@ import GalleryGrid from '@/app/components/GalleryGrid'
 import ImageLightbox from '@/app/components/ImageLightbox'
 import ContactSection from '@/app/components/ContactSection'
 import BackgroundMedia from '@/app/components/BackgroundMedia/BackgroundMedia'
+import { useGlobalVideo } from '@/app/utils/GlobalVideoContext'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
 
@@ -24,6 +25,14 @@ export default function ProjectPage({params}: {params: Promise<{slug: string}>})
   const [isMobile, setIsMobile] = useState(false)
 
   const mainRef = useRef<HTMLElement | null>(null)
+
+  const { setMode } = useGlobalVideo()
+
+  // Hide global video layer — this page has its own VimeoPlayer
+  useEffect(() => {
+    setMode('hidden')
+    return () => setMode('background')
+  }, [setMode])
 
   // Derive project after hooks
   const project = useMemo(() => projects.find((p) => p.slug === slug), [slug])

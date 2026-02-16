@@ -1,21 +1,18 @@
 'use client'
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { directors } from '../components/constants'
-import { CrossfadeBackground } from '../components/BackgroundMedia'
-import { useCrossfadeMedia } from '../utils/useCrossfadeMedia'
 import { useSequencedReveal } from '../utils/useSequencedReveal'
-import { usePageTransitionVideo } from '../utils/usePageTransitionVideo'
 import { useFadeOutNavigation } from '../utils/useFadeOutNavigation'
-import { useVideoReady } from '../utils/useVideoReady'
 import { useCenteredItemDetection } from '../utils/useCenteredItemDetection'
 import { REVEAL_HIDDEN_STYLE, REVEAL_HIDDEN_STYLE_SIMPLE } from '../utils/useRevealAnimation'
 import { toMediaObject } from '../utils/mediaHelpers'
+import { useGlobalVideo } from '../utils/GlobalVideoContext'
 import { useGSAP } from '@gsap/react'
 
 const DEFAULT_INDEX = 3
 
 export default function DirectorsClient() {
-  const { getPreviousVideoState } = usePageTransitionVideo()
+  const { setVideo, crossfadeTo, videoReady, setMode } = useGlobalVideo()
 
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [activeIndex, setActiveIndex] = useState(0)
@@ -23,35 +20,27 @@ export default function DirectorsClient() {
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024
 
-  const { isReady: videoReady, markReady } = useVideoReady({
-    skip: isMobile,
-    timeout: 800,
-  })
-
   const listRef = useRef<HTMLUListElement | null>(null)
   const mainRef = useRef<HTMLElement | null>(null)
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
-  const hasTransitionedRef = useRef(false)
   const hasAnimatedRef = useRef(false)
 
   const { fadeOutAndNavigate, isNavigating } = useFadeOutNavigation(mainRef, {
     selector: '[data-reveal]',
     isMobile,
-    saveVideo: true,
   })
 
   const initialIdx =
     Number.isInteger(DEFAULT_INDEX) && directors[DEFAULT_INDEX] ? DEFAULT_INDEX : 0
   const targetMedia = toMediaObject(directors[initialIdx], initialIdx, '#477AA1')
 
-  const previousVideo = getPreviousVideoState()
-  const initialMedia = previousVideo || targetMedia
-
-  const { setSlotRef, slotMedia, crossfadeTo } = useCrossfadeMedia(initialMedia, {
-    duration: 0.45,
-  })
-
   const desktopActiveIndex = hoveredIndex ?? initialIdx
+
+  // Tell the global video layer what to show
+  useEffect(() => {
+    setMode('background')
+    setVideo(targetMedia)
+  }, [setMode, setVideo, targetMedia])
 
   // Enter animation for desktop
   const { start } = useSequencedReveal(listRef, {
@@ -67,18 +56,6 @@ export default function DirectorsClient() {
       ease: 'power2.inOut'
     },
   })
-
-  // Handle incoming page transition video (desktop only)
-  useEffect(() => {
-    if (hasTransitionedRef.current || !previousVideo || isMobile) return
-    hasTransitionedRef.current = true
-
-    const timeoutId = setTimeout(() => {
-      crossfadeTo(targetMedia)
-    }, 400)
-
-    return () => clearTimeout(timeoutId)
-  }, [isMobile, previousVideo, crossfadeTo, targetMedia])
 
   // Mark ready after a short delay to allow initial render
   useEffect(() => {
@@ -144,8 +121,8 @@ export default function DirectorsClient() {
   }
 
   const handleFadeOutAndNavigate = useCallback((url: string) => {
-    fadeOutAndNavigate(url, slotMedia)
-  }, [fadeOutAndNavigate, slotMedia])
+    fadeOutAndNavigate(url)
+  }, [fadeOutAndNavigate])
 
   const handleDirectorClick = useCallback((e: React.MouseEvent, slug: string) => {
     if (isMobile || isNavigating) return
@@ -165,8 +142,6 @@ export default function DirectorsClient() {
   if (isMobile) {
     return (
       <main className="fixed inset-0">
-        <CrossfadeBackground slotMedia={slotMedia} setSlotRef={setSlotRef} />
-
         {/* Scrollable list with snap */}
         <div
           ref={scrollContainerRef}
@@ -209,14 +184,6 @@ export default function DirectorsClient() {
       ref={mainRef}
       className="relative min-h-dvh w-full overflow-hidden text-white"
     >
-      <CrossfadeBackground
-        slotMedia={slotMedia}
-        setSlotRef={setSlotRef}
-        onVideoReady={markReady}
-        disablePointerEvents
-        positioning="absolute"
-      />
-
       {/* FOREGROUND LIST */}
       <section className="relative min-h-dvh w-full pt-32">
         <div className="mx-auto px-6 md:px-12">

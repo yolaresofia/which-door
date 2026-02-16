@@ -25,6 +25,7 @@ export default function ContactSection({
   previewPoster,
 }: ContactSectionProps) {
   const useColorOnly = !!bgColor;
+  const hasLocalBackground = useColorOnly || !!previewUrl;
   const desktopLinkRef = useRef<HTMLAnchorElement | null>(null);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -53,10 +54,10 @@ export default function ContactSection({
     const items = contentRef.current.querySelectorAll('[data-reveal]');
     if (items.length === 0) return;
 
-    // On mobile or when using color only, animate immediately
-    // On desktop with video, wait for video ready
+    // On mobile, color-only, or no local background: animate immediately
+    // On desktop with local video, wait for video ready
     const isMobile = window.innerWidth < 1024;
-    const shouldWaitForVideo = !isMobile && !useColorOnly && !videoReady;
+    const shouldWaitForVideo = !isMobile && !useColorOnly && !!previewUrl && !videoReady;
 
     if (shouldWaitForVideo) {
       return;
@@ -132,26 +133,28 @@ export default function ContactSection({
 
   return (
     <main className="relative min-h-dvh w-full overflow-hidden text-white isolate">
-      {/* BACKGROUND LAYER */}
-      <div className="absolute inset-0 -z-10">
-        {useColorOnly ? (
-          <div className="h-full w-full" style={{ backgroundColor: bgColor }} />
-        ) : (
-          <BackgroundMedia
-            variant="preview"
-            previewUrl={previewUrl}
-            mobilePreviewUrl={mobilePreviewUrl}
-            previewPoster={previewPoster}
-            className="absolute inset-0"
-            onVideoReady={handleVideoReady}
-          />
-        )}
+      {/* BACKGROUND LAYER — only rendered when component has its own background */}
+      {hasLocalBackground && (
+        <div className="absolute inset-0 -z-10">
+          {useColorOnly ? (
+            <div className="h-full w-full" style={{ backgroundColor: bgColor }} />
+          ) : (
+            <BackgroundMedia
+              variant="preview"
+              previewUrl={previewUrl}
+              mobilePreviewUrl={mobilePreviewUrl}
+              previewPoster={previewPoster}
+              className="absolute inset-0"
+              onVideoReady={handleVideoReady}
+            />
+          )}
 
-        {showScrim && <div className="absolute inset-0 bg-black/30" />}
-        {showLeftGradient && (
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-black/40 to-transparent" />
-        )}
-      </div>
+          {showScrim && <div className="absolute inset-0 bg-black/30" />}
+          {showLeftGradient && (
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-black/40 to-transparent" />
+          )}
+        </div>
+      )}
 
       {/* FOREGROUND CONTENT */}
       <div ref={contentRef} className="relative min-h-dvh flex flex-col pt-20 mx-auto w-full">

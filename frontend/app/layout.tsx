@@ -9,6 +9,7 @@ import {Toaster} from 'sonner'
 import DraftModeToast from '@/app/components/DraftModeToast'
 import Header from '@/app/components/Header'
 import LenisProvider from '@/app/components/LenisProvider'
+import Providers from './Providers'
 import * as demo from '@/sanity/lib/demo'
 import {sanityFetch, SanityLive} from '@/sanity/lib/live'
 import {settingsQuery} from '@/sanity/lib/queries'
@@ -87,21 +88,23 @@ export default async function RootLayout({children}: {children: React.ReactNode}
       </head>
       <body>
         <LenisProvider>
-          <section className="min-h-screen">
-            {/* The <Toaster> component is responsible for rendering toast notifications used in /app/client-utils.ts and /app/components/DraftModeToast.tsx */}
-            <Toaster />
-            {isDraftMode && (
-              <>
-                <DraftModeToast />
-                {/*  Enable Visual Editing, only to be rendered when Draft Mode is enabled */}
-                <VisualEditing />
-              </>
-            )}
-            {/* The <SanityLive> component is responsible for making all sanityFetch calls in your application live, so should always be rendered. */}
-            <SanityLive onError={handleError} />
-            <Header />
-            <main className="">{children}</main>
-          </section>
+          <Providers>
+            <section className="min-h-screen">
+              {/* The <Toaster> component is responsible for rendering toast notifications used in /app/client-utils.ts and /app/components/DraftModeToast.tsx */}
+              <Toaster />
+              {isDraftMode && (
+                <>
+                  <DraftModeToast />
+                  {/*  Enable Visual Editing, only to be rendered when Draft Mode is enabled */}
+                  <VisualEditing />
+                </>
+              )}
+              {/* The <SanityLive> component is responsible for making all sanityFetch calls in your application live, so should always be rendered. */}
+              <SanityLive onError={handleError} />
+              <Header />
+              <main className="">{children}</main>
+            </section>
+          </Providers>
           <SpeedInsights />
         </LenisProvider>
       </body>

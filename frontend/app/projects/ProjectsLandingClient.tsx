@@ -1,20 +1,17 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
-import { CrossfadeBackground } from '../components/BackgroundMedia'
 import { projects } from '../components/constants'
-import { useCrossfadeMedia } from '../utils/useCrossfadeMedia'
 import { useSequencedReveal } from '../utils/useSequencedReveal'
-import { usePageTransitionVideo } from '../utils/usePageTransitionVideo'
 import { useFadeOutNavigation } from '../utils/useFadeOutNavigation'
-import { useVideoReady } from '../utils/useVideoReady'
 import { useCenteredItemDetection } from '../utils/useCenteredItemDetection'
 import { REVEAL_HIDDEN_STYLE, REVEAL_HIDDEN_STYLE_SIMPLE } from '../utils/useRevealAnimation'
 import { toMediaObject, getTitle } from '../utils/mediaHelpers'
+import { useGlobalVideo } from '../utils/GlobalVideoContext'
 import { useGSAP } from '@gsap/react'
 
 export default function ProjectsLandingClient() {
-  const { getPreviousVideoState } = usePageTransitionVideo()
+  const { setVideo, crossfadeTo, videoReady, setMode } = useGlobalVideo()
 
   const homepageProjects = useMemo(
     () => projects.filter((project) => project.isInHomePage),
@@ -25,33 +22,27 @@ export default function ProjectsLandingClient() {
   const first = visibleProjects[0] ?? projects[0]
   const targetVideo = useMemo(() => toMediaObject(first, 0), [first])
 
-  const previousVideo = getPreviousVideoState()
-  const initialVideo = previousVideo || targetVideo
-
-  const { setSlotRef, slotMedia, crossfadeTo } = useCrossfadeMedia(initialVideo, { duration: 0.45 })
-
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [activeIndex, setActiveIndex] = useState(0)
   const [isReady, setIsReady] = useState(false)
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024
 
-  const { isReady: videoReady, markReady } = useVideoReady({
-    skip: isMobile,
-    timeout: 800,
-  })
-
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const listRef = useRef<HTMLUListElement | null>(null)
   const mainRef = useRef<HTMLElement | null>(null)
-  const hasTransitionedRef = useRef(false)
   const hasAnimatedRef = useRef(false)
 
   const { fadeOutAndNavigate, isNavigating } = useFadeOutNavigation(mainRef, {
     selector: '[data-reveal]',
     isMobile,
-    saveVideo: true,
   })
+
+  // Tell the global video layer what to show
+  useEffect(() => {
+    setMode('background')
+    setVideo(targetVideo)
+  }, [setMode, setVideo, targetVideo])
 
   const select = useCallback((i: number) => {
     setSelectedIndex(i)
@@ -74,18 +65,6 @@ export default function ProjectsLandingClient() {
       ease: 'power2.inOut'
     },
   })
-
-  // Handle incoming page transition video (desktop only)
-  useEffect(() => {
-    if (hasTransitionedRef.current || !previousVideo || isMobile) return
-    hasTransitionedRef.current = true
-
-    const timeoutId = setTimeout(() => {
-      crossfadeTo(targetVideo)
-    }, 400)
-
-    return () => clearTimeout(timeoutId)
-  }, [isMobile, previousVideo, crossfadeTo, targetVideo])
 
   // Mark ready after a short delay to allow initial render
   useEffect(() => {
@@ -136,8 +115,8 @@ export default function ProjectsLandingClient() {
   })
 
   const handleFadeOutAndNavigate = useCallback((url: string) => {
-    fadeOutAndNavigate(url, slotMedia)
-  }, [fadeOutAndNavigate, slotMedia])
+    fadeOutAndNavigate(url)
+  }, [fadeOutAndNavigate])
 
   const handleProjectClick = useCallback((slug: string) => {
     if (isMobile || isNavigating) return
@@ -174,8 +153,6 @@ export default function ProjectsLandingClient() {
   if (isMobile) {
     return (
       <main className="fixed inset-0">
-        <CrossfadeBackground slotMedia={slotMedia} setSlotRef={setSlotRef} />
-
         {/* Scrollable list with snap */}
         <div
           ref={scrollContainerRef}
@@ -224,13 +201,6 @@ export default function ProjectsLandingClient() {
       ref={mainRef}
       className="relative w-full min-h-screen"
     >
-      <CrossfadeBackground
-        slotMedia={slotMedia}
-        setSlotRef={setSlotRef}
-        onVideoReady={markReady}
-        disablePointerEvents
-      />
-
       {/* Desktop Grid */}
       <section className="relative z-10 flex min-h-screen w-full md:px-12 px-4 items-center justify-center">
         <ul
