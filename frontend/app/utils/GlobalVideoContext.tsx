@@ -118,7 +118,7 @@ export function GlobalVideoProvider({ children }: { children: ReactNode }) {
         className="fixed inset-0 z-0"
         style={{
           opacity: mode === 'hidden' ? 0 : 1,
-          pointerEvents: mode === 'hidden' ? 'none' : 'auto',
+          pointerEvents: 'none',
           transition: 'opacity 0.4s ease-out',
         }}
       >
