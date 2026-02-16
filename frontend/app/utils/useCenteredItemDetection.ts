@@ -1,9 +1,9 @@
 import { useEffect, useRef, RefObject } from 'react'
 
 /**
- * Detects which item in a scrollable container is centered using IntersectionObserver.
- * This is MUCH more performant than using getBoundingClientRect() in a scroll loop
- * because IntersectionObserver runs on the compositor thread and doesn't cause layout thrashing.
+ * Detects which item in a snap-scroll container is centered.
+ * Uses scroll events + snap position calculation for reliable detection
+ * across all browsers and layout contexts (including fixed-position parents).
  *
  * @param containerRef - Ref to the scrollable container
  * @param itemSelector - CSS selector for the items to observe (e.g., '[data-index]')
@@ -16,11 +16,10 @@ export function useCenteredItemDetection(
   onActiveChange: (index: number) => void,
   options: {
     enabled?: boolean
-    // Threshold at which an item is considered "active" (0.5 = 50% visible)
     threshold?: number
   } = {}
 ) {
-  const { enabled = true, threshold = 0.5 } = options
+  const { enabled = true } = options
   const activeIndexRef = useRef(0)
   const onActiveChangeRef = useRef(onActiveChange)
 
@@ -38,50 +37,51 @@ export function useCenteredItemDetection(
     const items = container.querySelectorAll(itemSelector)
     if (!items.length) return
 
-    // Track intersection ratios for all items
-    const ratios = new Map<Element, number>()
+    const detect = () => {
+      const containerRect = container.getBoundingClientRect()
+      const containerCenter = containerRect.top + containerRect.height / 2
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        // Update ratios for changed entries
-        entries.forEach((entry) => {
-          ratios.set(entry.target, entry.intersectionRatio)
-        })
+      let closestIndex = activeIndexRef.current
+      let closestDist = Infinity
 
-        // Find the item with the highest intersection ratio
-        let maxRatio = 0
-        let newActiveIndex = activeIndexRef.current
-
-        items.forEach((item, index) => {
-          const ratio = ratios.get(item) ?? 0
-          if (ratio > maxRatio) {
-            maxRatio = ratio
-            newActiveIndex = index
-          }
-        })
-
-        // Only trigger callback if the active item changed and it's sufficiently visible
-        if (newActiveIndex !== activeIndexRef.current && maxRatio >= threshold) {
-          activeIndexRef.current = newActiveIndex
-          onActiveChangeRef.current(newActiveIndex)
+      items.forEach((item, index) => {
+        const rect = item.getBoundingClientRect()
+        const itemCenter = rect.top + rect.height / 2
+        const dist = Math.abs(itemCenter - containerCenter)
+        if (dist < closestDist) {
+          closestDist = dist
+          closestIndex = index
         }
-      },
-      {
-        root: container,
-        // rootMargin shrinks the intersection box to focus on the center
-        // -40% from top and bottom means only the center 20% of viewport triggers
-        rootMargin: '-40% 0px -40% 0px',
-        // Multiple thresholds for smoother detection
-        threshold: [0, 0.1, 0.25, 0.5, 0.75, 1],
-      }
-    )
+      })
 
-    // Observe all items
-    items.forEach((item) => observer.observe(item))
+      if (closestIndex !== activeIndexRef.current) {
+        activeIndexRef.current = closestIndex
+        onActiveChangeRef.current(closestIndex)
+      }
+    }
+
+    // Use scrollend for snap detection (fires after snap settles)
+    // Fall back to debounced scroll for browsers without scrollend
+    let scrollTimer: ReturnType<typeof setTimeout> | null = null
+    const supportsScrollEnd = 'onscrollend' in window
+
+    if (supportsScrollEnd) {
+      container.addEventListener('scrollend', detect, { passive: true })
+    }
+
+    // Also listen to scroll for faster feedback during active scrolling
+    const handleScroll = () => {
+      if (scrollTimer) clearTimeout(scrollTimer)
+      scrollTimer = setTimeout(detect, 80)
+    }
+    container.addEventListener('scroll', handleScroll, { passive: true })
 
     return () => {
-      observer.disconnect()
-      ratios.clear()
+      if (supportsScrollEnd) {
+        container.removeEventListener('scrollend', detect)
+      }
+      container.removeEventListener('scroll', handleScroll)
+      if (scrollTimer) clearTimeout(scrollTimer)
     }
-  }, [containerRef, itemSelector, enabled, threshold])
+  }, [containerRef, itemSelector, enabled])
 }
